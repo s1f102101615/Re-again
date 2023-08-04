@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>約束アプリの作成</Text>
+      <Text>約束アプの作成</Text>
       <StatusBar style="auto" />
     </View>
   );
