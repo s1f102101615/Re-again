@@ -1,12 +1,12 @@
-// SettingsScreen.js
+// TalkScreen.js
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const SettingsScreen = () => {
+const TalkScreen = () => {
   return (
     <View style={styles.container}>
-      <Text>Settings Screen</Text>
+      <Text>トーク画面</Text>
     </View>
   );
 };
@@ -19,4 +19,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsScreen;
+export default TalkScreen;
