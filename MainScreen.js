@@ -9,7 +9,12 @@ import TalkScreen from './page/TalkScreen';
 
 const Tab = createBottomTabNavigator();
 
-const MainScreen = () => {
+const MainScreen = ({ navigation }) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: null,
+    });
+  }, [navigation]);
   return (
     <Tab.Navigator>
       <Tab.Screen name="ホーム" component={HomeScreen} />

@@ -12,7 +12,7 @@ const LoginScreen = ({ navigation }) => {
     // 例えば、ログイン成功時に以下のようにメイン画面に遷移する
     //　今はとりあえずどちらもa
     if (email === 'a' && password === 'a') {
-      navigation.navigate('Main');
+      navigation.navigate('Register');
     } else {
       alert('Invalid credentials. Please try again.');
     }
