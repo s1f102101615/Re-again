@@ -22,6 +22,9 @@ const LoginScreen = () => {
       console.log(error.message);
     }
   };
+  const handleRegister = () => {
+    navigation.navigate('Register');
+  }
 
   return (
     <View style={styles.container}>
@@ -42,6 +45,9 @@ const LoginScreen = () => {
       />
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.RegisterButton} onPress={handleRegister}>
+        <Text style={styles.RegisterButtonText}>新規登録はこちらから</Text>
       </TouchableOpacity>
     </View>
   );
@@ -78,6 +84,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  RegisterButton: {
+    marginTop:15,
+  },
+  RegisterButtonText: {
+    color: 'blue',
+    fontSize: 15,
+    fontWeight: 'bold'
   },
 });
 
