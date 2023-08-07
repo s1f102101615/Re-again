@@ -2,19 +2,24 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebase';
+import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigation = useNavigation();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // ここでログイン処理を実行し、ログインが成功した場合にメイン画面に遷移する処理を追加する
     // 例えば、ログイン成功時に以下のようにメイン画面に遷移する
     //　今はとりあえずどちらもa
-    if (email === 'a' && password === 'a') {
-      navigation.navigate('Register');
-    } else {
-      alert('Invalid credentials. Please try again.');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('Main');
+    } catch (error) {
+      console.log(error.message);
     }
   };
 

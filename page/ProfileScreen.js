@@ -1,12 +1,24 @@
 // ProfileScreen.js
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { auth, onAuthStateChanged, signOut } from '../firebase';
+import { auth } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
+  const [user, setUser] = useState('');
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user.email);
+      } else {
+        setUser('');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   
   const handleLogout = () => {
     auth.signOut(auth)
@@ -18,9 +30,12 @@ const ProfileScreen = () => {
         console.log(error.message);
       });
   };
+  const displayName = user || '未定義';
   return (
     <View>
     <Text>ホーム画面</Text>
+    <Text>a{displayName}</Text>
+    
     <TouchableOpacity
       onPress={handleLogout}
       style={{
