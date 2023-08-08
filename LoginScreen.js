@@ -17,7 +17,12 @@ const LoginScreen = () => {
     //　今はとりあえずどちらもa
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      const user = await auth.currentUser;
+      if (user.displayName === null) {
+      navigation.navigate('Setname');
+      } else {
       navigation.navigate('Main');
+      }
     } catch (error) {
       console.log(error.message);
     }

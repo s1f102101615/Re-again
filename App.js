@@ -15,7 +15,7 @@ const App = () => {
       <Stack.Navigator initialRouteName="Login" headerShown="false">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen}  />
-        <Stack.Screen name="Setname" component={SetnameScreen}  />
+        <Stack.Screen options={{gestureEnabled:false}} name="Setname" component={SetnameScreen}  />
         <Stack.Screen options={{gestureEnabled:false}} name="Main" component={MainScreen} />
       </Stack.Navigator>
     </NavigationContainer>
