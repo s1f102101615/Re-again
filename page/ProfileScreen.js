@@ -12,7 +12,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user.email);
+        setUser(user.displayName);
       } else {
         setUser('');
       }
