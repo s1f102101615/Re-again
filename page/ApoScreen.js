@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, where, orderBy, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
 
 const ApoScreen = () => {
   const [text, setText] = useState('');
   const [appointments, setAppointments] = useState([]);
   
   const handleSave = async () => {
+    //約束を保存する処理
     const user = auth.currentUser;
     try {
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
@@ -23,6 +24,7 @@ const ApoScreen = () => {
   };
 
   useEffect(() => {
+    //約束を取得する処理
     const user = auth.currentUser;
     const q = query(collection(firestore, 'newAppo'), where('name', '==', user.uid));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {

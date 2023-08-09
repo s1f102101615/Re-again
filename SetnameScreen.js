@@ -1,8 +1,10 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, Text, TextInput, Button, KeyboardAvoidingView, } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { auth } from './firebase';
+import { auth, firestore } from './firebase';
 import { updateProfile } from 'firebase/auth';
+import { collection, addDoc, getDocs, query, where, onSnapshot } from 'firebase/firestore';
+
 
 const SetnameScreen = () => {
   const navigation = useNavigation();
@@ -14,13 +16,29 @@ const SetnameScreen = () => {
     });
   }, [navigation]);
   
+  const saveUser = async (user) => {
+    const profileRef = collection(firestore, `users/${user.uid}/profile`);
+    const docRef = await addDoc(profileRef, {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL
+    });
+    console.log("Document written with ID: ", docRef.id);
+  };
+
   // ユーザー名を設定する処理
   const handleSave = async () => {
     const user = await auth.currentUser;
     await updateProfile(user, {
         displayName: displayName,
       });
+    try{
+      await saveUser(user);
       navigation.navigate('Main');
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
