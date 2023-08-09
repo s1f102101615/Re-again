@@ -17,7 +17,6 @@ const FriendScreen = () => {
       querySnapshot.forEach((doc) => {
         requests.push({ ...doc.data(), id: doc.id });
       });
-      console.log(requests,'kore');
       setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
     });
     return () => unsubscribe();
@@ -41,7 +40,6 @@ const FriendScreen = () => {
         const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
         sentRequestsSnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref);
-          console.log('Document deleted with ID: ', doc.id);
         });
       } catch (e) {
         console.error('Error adding document: ', e);
@@ -63,7 +61,6 @@ const FriendScreen = () => {
         const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
         sentRequestsSnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref);
-          console.log('Document deleted with ID: ', doc.id);
         });
       } catch (e) {
         console.error('Error adding document: ', e);
@@ -78,10 +75,8 @@ const getUserUidByDisplayName = async (displayName) => {
   const q = query(collectionGroup(firestore, 'profile'), where('displayName', '==', displayName.trim()));
   const querySnapshot = await getDocs(q);
   if (querySnapshot.empty) {
-    console.log('No matching documents found.');
     return null;
   } else {
-    console.log('No maents found.');
     const user = querySnapshot.docs[0].ref.parent.parent.id;
     return user;
   }
@@ -105,10 +100,8 @@ const handleSave = async () => {
         const doRef = await addDoc(collection(firestore, `users/${enemy}/gotRequests`), {
           gotRequest: user.displayName
         });
-        console.log('Document written with ID: ', docRef.id);
         setMessage(`${name} にフレンド申請を送りました!`);
       } catch (e) {
-        console.error('Error adding document: ', e);
         setMessage('フレンド申請に失敗しました。');
       }
     }
