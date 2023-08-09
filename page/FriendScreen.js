@@ -9,21 +9,18 @@ const FriendScreen = () => {
   const [friendRequests, setFriendRequests] = useState([]);
 
   useEffect(() => {
-    //gotRequest
     const user = auth.currentUser;
-    const q = query(collection(firestore, `users/${user.uid}/gotRequests`), where('gotRequest', '==', user.displayName));
+    const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const requests = [];
       querySnapshot.forEach((doc) => {
         requests.push({ ...doc.data(), id: doc.id });
       });
-      setFriendRequests(requests);
-    }
-    );
-    console.log(friendRequests);
+      console.log(requests,'kore');
+      setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
+    });
     return () => unsubscribe();
   }, []);
-
 
 
 const getUserUidByDisplayName = async (displayName) => {
@@ -40,28 +37,35 @@ const getUserUidByDisplayName = async (displayName) => {
   }
 };
 
-  const handleSave = async () => {
-    //フレンド申請を送る処理
-    const user = auth.currentUser;
-    const enemy = await getUserUidByDisplayName(name);
-    if (enemy !== null) {
-    try {
-      const docRef = await addDoc(collection(firestore, `users/${user.uid}/sentRequests`), {
-        sendRequest: name
-      });
-      const doRef = await addDoc(collection(firestore, `users/${enemy}/gotRequests`), {
-        gotRequest: user.displayName
-      });
-      console.log('Document written with ID: ', docRef.id);
-      setMessage('Friend request sent!');
-    } catch (e) {
-      console.error('Error adding document: ', e);
-      setMessage('Failed to send friend request.');
+const handleSave = async () => {
+  //フレンド申請を送る処理
+  const user = auth.currentUser;
+  const enemy = await getUserUidByDisplayName(name);
+  if (enemy !== null) {
+    const sentRequestsRef = collection(firestore, `users/${user.uid}/sentRequests`);
+    const sentRequestsQuery = query(sentRequestsRef, where('sendRequest', '==', name));
+    const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
+    if (sentRequestsSnapshot.size > 0) {
+      setMessage(`すでに ${name} にフレンド申請を送っています。`);
+    } else {
+      try {
+        const docRef = await addDoc(collection(firestore, `users/${user.uid}/sentRequests`), {
+          sendRequest: name
+        });
+        const doRef = await addDoc(collection(firestore, `users/${enemy}/gotRequests`), {
+          gotRequest: user.displayName
+        });
+        console.log('Document written with ID: ', docRef.id);
+        setMessage(`${name} にフレンド申請を送りました!`);
+      } catch (e) {
+        console.error('Error adding document: ', e);
+        setMessage('フレンド申請に失敗しました。');
+      }
     }
   } else {
-    console.log('そんな人いません。')
+    setMessage('ユーザーが見つかりませんでした。');
   }
-  };
+};
   
 
   return (
