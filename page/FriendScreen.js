@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
 
 const FriendScreen = () => {
   const [name, setName] = useState('');
@@ -9,6 +9,7 @@ const FriendScreen = () => {
   const [friendRequests, setFriendRequests] = useState([]);
 
   useEffect(() => {
+    // フレンド申請を受け取る処理 
     const user = auth.currentUser;
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -22,6 +23,55 @@ const FriendScreen = () => {
     return () => unsubscribe();
   }, []);
 
+  const handleAccept = async (request) => {
+    // フレンド申請を承認する処理
+    const user = auth.currentUser;
+    const enemy = await getUserUidByDisplayName(request.gotRequest);
+    if (enemy !== null) {
+      try {
+        const docRef = await addDoc(collection(firestore, `users/${user.uid}/friends`), {
+          friend: request.gotRequest
+        });
+        const doRef = await addDoc(collection(firestore, `users/${enemy}/friends`), {
+          friend: user.displayName
+        });
+        await deleteDoc(doc(firestore, `users/${user.uid}/gotRequests/${request.id}`));
+        const sentRequestsRef = collection(firestore, `users/${enemy}/sentRequests`);
+        const sentRequestsQuery = query(sentRequestsRef, where('sendRequest', '==', user.displayName));
+        const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
+        sentRequestsSnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+          console.log('Document deleted with ID: ', doc.id);
+        });
+      } catch (e) {
+        console.error('Error adding document: ', e);
+      }
+    } else {
+      console.log('ユーザーが見つかりませんでした。');
+    }
+  };
+
+  const handleReject = async (request) => {
+    // フレンド申請を拒否する処理
+    const user = auth.currentUser;
+    const enemy = await getUserUidByDisplayName(request.gotRequest);
+    if (enemy !== null) {
+      try {
+        await deleteDoc(doc(firestore, `users/${user.uid}/gotRequests/${request.id}`));
+        const sentRequestsRef = collection(firestore, `users/${enemy}/sentRequests`);
+        const sentRequestsQuery = query(sentRequestsRef, where('sendRequest', '==', user.displayName));
+        const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
+        sentRequestsSnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+          console.log('Document deleted with ID: ', doc.id);
+        });
+      } catch (e) {
+        console.error('Error adding document: ', e);
+      } 
+    } else {
+      console.log('ユーザーが見つかりませんでした。');
+    }
+  };
 
 const getUserUidByDisplayName = async (displayName) => {
   //displayNameからuserのuidを取得する処理
@@ -38,7 +88,7 @@ const getUserUidByDisplayName = async (displayName) => {
 };
 
 const handleSave = async () => {
-  //フレンド申請を送る処理
+  //フレンド申請を送る処理 
   const user = auth.currentUser;
   const enemy = await getUserUidByDisplayName(name);
   if (enemy !== null) {
