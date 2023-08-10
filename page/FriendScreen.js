@@ -7,6 +7,7 @@ const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [friendRequests, setFriendRequests] = useState([]);
+  const [friends, setFriends] = useState([]);
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
@@ -20,6 +21,22 @@ const FriendScreen = () => {
       setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // フレンドを取得する処理
+    const user = auth.currentUser;
+    const f = query(collection(firestore, `users/${user.uid}/friends`));
+    const listfriend = onSnapshot(f, (querySnapshot) => {
+      const friends = [];
+      querySnapshot.forEach((doc) => {
+        friends.push({ ...doc.data(), id: doc.id });
+      });
+      setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
+    });
+    return () => {
+      listfriend();
+    };
   }, []);
 
   const handleAccept = async (request) => {
@@ -133,6 +150,15 @@ const handleSave = async () => {
       {friendRequests.length === 0 && (
         <Text>You have no friend requests.</Text>
       )}
+      <Text>Friends</Text>
+      {friends.map((friend) => (
+        <View key={friend.id} style={styles.request}>
+          <Text>{friend.friend}</Text>
+        </View>
+      ))}
+      {friends.length === 0 && (
+        <Text>You have no friends.</Text>
+      )}
     </View>
   );
 };
@@ -148,6 +174,15 @@ const styles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     width: '80%',
+  },
+  request: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '80%',
+    borderWidth: 1,
+    padding: 5,
+    marginVertical: 10,
   },
 });
 
