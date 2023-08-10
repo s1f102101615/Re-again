@@ -3,12 +3,13 @@ import { View, Text, TextInput, Button, KeyboardAvoidingView, } from 'react-nati
 import { useNavigation } from '@react-navigation/native';
 import { auth, firestore } from './firebase';
 import { updateProfile } from 'firebase/auth';
-import { collection, addDoc, getDocs, query, where, onSnapshot } from 'firebase/firestore';
+import { collectionGroup, collection, addDoc, getDocs, query, where, onSnapshot } from 'firebase/firestore';
 
 
 const SetnameScreen = () => {
   const navigation = useNavigation();
   const [displayName, setDisplayName] = useState('');
+  const [message, setMessage] = useState('');
   // ヘッダーの左側のボタンを消す
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -27,13 +28,27 @@ const SetnameScreen = () => {
     console.log("Document written with ID: ", docRef.id);
   };
 
+  const getUserByDisplayName = async (displayName) => {
+    //同じ名前がいるか確かめる関数
+    const querySnapshot = await getDocs(query(collectionGroup(firestore, 'profile'), where('displayName', '==', displayName.trim())));
+    if (querySnapshot.empty) {
+      return false;
+    }
+    return true;
+  };
+
   // ユーザー名を設定する処理
   const handleSave = async () => {
     const user = await auth.currentUser;
+    const existingUser = await getUserByDisplayName(displayName); // displayNameが既に存在するかどうかを確認する
+    if (existingUser) {
+      setMessage('この名前は既に使用されています');
+      return;
+    }
     await updateProfile(user, {
-        displayName: displayName,
-      });
-    try{
+      displayName: displayName,
+    });
+    try {
       await saveUser(user);
       navigation.navigate('Main');
     } catch (e) {
@@ -67,6 +82,7 @@ const SetnameScreen = () => {
         />
         </View>
       <Button title="決定" onPress={handleSave} />
+      <Text>{message}</Text>
     </KeyboardAvoidingView>
   );
 };

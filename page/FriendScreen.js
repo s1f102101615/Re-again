@@ -99,10 +99,27 @@ const getUserUidByDisplayName = async (displayName) => {
   }
 };
 
+const alreadyFriend = async (displayName) => {
+  //displayNameがフレンドかを判定する処理
+  const user = auth.currentUser;
+  const q = query(collection(firestore, `users/${user.uid}/friends`), where('friend', '==', displayName.trim()));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    console.log('いないよ')
+    return false;
+  } else {
+    console.log('いるよ')
+    return true;
+  }
+};
+
 const handleSave = async () => {
   //フレンド申請を送る処理 
   const user = auth.currentUser;
   const enemy = await getUserUidByDisplayName(name);
+  if (await alreadyFriend(name)) {
+    setMessage('すでにフレンドです。');
+  } else {
   if (enemy !== null) {
     const sentRequestsRef = collection(firestore, `users/${user.uid}/sentRequests`);
     const sentRequestsQuery = query(sentRequestsRef, where('sendRequest', '==', name));
@@ -122,10 +139,11 @@ const handleSave = async () => {
         setMessage('フレンド申請に失敗しました。');
       }
     }
-  } else {
-    setMessage('ユーザーが見つかりませんでした。');
-  }
-};
+    } else {
+      setMessage('ユーザーが見つかりませんでした。');
+    }
+  };
+  };
   
 
   return (

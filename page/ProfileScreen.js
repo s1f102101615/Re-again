@@ -34,7 +34,7 @@ const ProfileScreen = () => {
   return (
     <View>
     <Text>ホーム画面</Text>
-    <Text>a{displayName}</Text>
+    <Text>{displayName}</Text>
     
     <TouchableOpacity
       onPress={handleLogout}
