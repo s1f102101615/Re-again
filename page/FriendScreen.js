@@ -142,22 +142,22 @@ const handleSave = async () => {
       <Text>Friend Requests</Text>
       {friendRequests.map((request) => (
         <View key={request.id} style={styles.request}>
-          <Text>{request.gotRequest} sent you a friend request.</Text>
+          <Text>{request.gotRequest} からフレンド申請が来ています。</Text>
           <Button title="Accept" onPress={() => handleAccept(request)} />
           <Button title="Reject" onPress={() => handleReject(request)} />
         </View>
       ))}
       {friendRequests.length === 0 && (
-        <Text>You have no friend requests.</Text>
+        <Text>フレンド申請はありません。</Text>
       )}
-      <Text>Friends</Text>
+      <Text>フレンド欄</Text>
       {friends.map((friend) => (
         <View key={friend.id} style={styles.request}>
           <Text>{friend.friend}</Text>
         </View>
       ))}
       {friends.length === 0 && (
-        <Text>You have no friends.</Text>
+        <Text>フレンドはまだいません...</Text>
       )}
     </View>
   );
