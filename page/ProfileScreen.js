@@ -173,13 +173,13 @@ const styles = StyleSheet.create({
   box1: {
     width: '49 %',
     height: '100%',
-    backgroundColor: 'blue',
+    backgroundColor: '#00FF00',
     borderRadius: 10,
   },
   box2: {
     width: '48%',
     height: '100%',
-    backgroundColor: 'green',
+    backgroundColor: '#6A5ACD',
     borderRadius: 10,
   },
   post: {
