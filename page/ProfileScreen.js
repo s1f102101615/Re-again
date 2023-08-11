@@ -33,91 +33,92 @@ const ProfileScreen = () => {
   };
   const displayName = user || '未定義';
   return (
-    <View>
-      <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'5%' }}>
-        <Icon name="user" size={80} color="black" />
+    <View style={styles.container}>
+      <View>
+        <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'5%' }}>
+          <Icon name="user" size={80} color="black" />
+        </View>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 20 }}>{displayName}</Text>
+        </View>
+        <View style={styles.profileedit}>
+        <TouchableOpacity style={styles.item}>
+          <Icon name="id-badge" size={35} color="black" />
+          <Text style={styles.label}>アイコン変更</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.item}>
+          <Icon name="handshake-o" size={35} color="black" />
+          <Text style={styles.label}>友達一覧</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.item}>
+          <Icon name="google-plus-official" size={35} color="black" />
+          <Text style={styles.label}>Googleさん</Text>
+        </TouchableOpacity>
       </View>
-      <View style={{ alignItems: 'center' }}>
-        <Text style={{ fontSize: 20 }}>{displayName}</Text>
+      <TouchableOpacity style={{ alignItems:'center', marginTop: '4%', marginBottom: '4%' }}>
+        <View style={styles.post}>
+          <Text><Icon name="list-alt" size={15} color='blue' /> 過去の約束一覧 <Icon name="angle-right" size={15} color="black" /></Text>
+        </View>
+      </TouchableOpacity>
+      <View style={styles.settinglist}>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem} onPress={handleLogout}>
+          <Icon name="sign-out" size={35} color="black" />
+          <Text style={styles.label}>ログアウト</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingitem}>
+          <Icon name="cog" size={35} color="black" />
+          <Text style={styles.label}>設定</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.profileedit}>
-      <TouchableOpacity style={styles.item}>
-        <Icon name="id-badge" size={35} color="black" />
-        <Text style={styles.label}>アイコン変更</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.item}>
-        <Icon name="handshake-o" size={35} color="black" />
-        <Text style={styles.label}>友達一覧</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.item}>
-        <Icon name="google-plus-official" size={35} color="black" />
-        <Text style={styles.label}>Googleさん</Text>
-      </TouchableOpacity>
     </View>
-    <TouchableOpacity style={{ alignItems:'center', marginTop: '4%', marginBottom: '4%' }}>
-      <View style={styles.post}>
-        <Text><Icon name="list-alt" size={15} color='blue' /> 過去の約束一覧 <Icon name="angle-right" size={15} color="black" /></Text>
-      </View>
-    </TouchableOpacity>
-    <View style={styles.settinglist}>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem} onPress={handleLogout}>
-        <Icon name="sign-out" size={35} color="black" />
-        <Text style={styles.label}>ログアウト</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.settingitem}>
-        <Icon name="cog" size={35} color="black" />
-        <Text style={styles.label}>設定</Text>
-      </TouchableOpacity>
     </View>
-  </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor:'#fff',     
   },
   profileedit: {
     flexDirection: 'row', // 要素を横に並べる
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     // 100%の大きさ
     width: '90%',
     height: 40,
-    backgroundColor: 'white',
+    backgroundColor: '#dcdcdc',
     borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
