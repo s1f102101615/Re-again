@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 
 const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [friendRequests, setFriendRequests] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
@@ -149,14 +151,14 @@ const handleSave = async () => {
   return (
     <View style={styles.container}>
       <Text>Friend欄</Text>
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         onChangeText={setName}
         value={name}
         placeholder="Enter friend's UID"
       />
       <Button title="Send friend request" onPress={handleSave} />
-      <Text>{message}</Text>
+      <Text>{message}</Text> */}
       <Text>Friend Requests</Text>
       {friendRequests.map((request) => (
         <View key={request.id} style={styles.request}>
@@ -177,7 +179,43 @@ const handleSave = async () => {
       {friends.length === 0 && (
         <Text>フレンドはまだいません...</Text>
       )}
+      {/* フレンドリクエストアイコン */}
+      <View style={styles.circleContainer}>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <View style={styles.circle}>
+              <Ionicons name="person-add" size={32} color="#fff" />
+            </View>
+        </TouchableOpacity>
+      </View>
+    {/* //フレンドリクエストを送信する */}
+    <Modal
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>フレンドリクエスト送信</Text>
+            <TextInput
+              style={styles.input1}
+              onChangeText={setName}
+              placeholder="フレンドの名前"
+            />
+            <Text>{message}</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+              <Text style={styles.buttonText}>送信</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>閉じる</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </View>
+    
   );
 };
 
@@ -186,12 +224,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor:'#fff',
   },
   input: {
     borderWidth: 1,
     padding: 5,
     marginVertical: 10,
     width: '80%',
+  },
+  input1: {
+    borderWidth: 1,
+    padding: 5,
+    marginVertical: 10,
+    width: 230,
   },
   request: {
     flexDirection: 'row',
@@ -201,6 +246,65 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 5,
     marginVertical: 10,
+  },
+  circle: {
+    backgroundColor: '#00FF7F',
+    borderRadius: 50,
+    width: 64,
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circleContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  button: {
+    backgroundColor: '#00FF7F',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#000000',
+    textAlign: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 45,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 10,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 
