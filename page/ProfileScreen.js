@@ -34,8 +34,9 @@ const ProfileScreen = () => {
   const displayName = user || '未定義';
   return (
     <View style={styles.container}>
+    
       <View>
-        <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'5%' }}>
+        <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'6%' }}>
           <Icon name="user" size={80} color="black" />
         </View>
         <View style={{ alignItems: 'center' }}>
@@ -55,11 +56,24 @@ const ProfileScreen = () => {
           <Text style={styles.label}>Googleさん</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={{ alignItems:'center', marginTop: '4%', marginBottom: '4%' }}>
+
+      <TouchableOpacity style={{ alignItems:'center', marginTop: '4%' }}>
         <View style={styles.post}>
           <Text><Icon name="list-alt" size={15} color='blue' /> 過去の約束一覧 <Icon name="angle-right" size={15} color="black" /></Text>
         </View>
       </TouchableOpacity>
+
+      <View style={styles.postdouble}>
+        <TouchableOpacity style={styles.box1}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.box2}>
+        </TouchableOpacity>
+      </View>
+
+       <View>
+        <Text style={{ fontSize:20, marginLeft:'5%', fontWeight:'bold' }}>ユーザー設定</Text>
+      </View> 
+
       <View style={styles.settinglist}>
         <TouchableOpacity style={styles.settingitem}>
           <Icon name="cog" size={35} color="black" />
@@ -125,7 +139,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // 要素間のスペースを均等に分配
     paddingHorizontal: '15%', // 左右のパディング
     alignItems: 'center', // 縦方向に中央揃え
-    marginTop: 20,
+    marginTop: '4%',
+  },
+  postdouble: { 
+    flexDirection: 'row', // 要素を横に並べる
+    justifyContent: 'space-between', // 要素間のスペースを均等に分配
+    paddingHorizontal: '5%', // 左右のパディング
+    marginTop: '3%',
+    height: '15%', 
+    marginBottom: '3%', 
   },
   settinglist: {
     flexDirection: 'row', // 要素を横に並べる
@@ -134,7 +156,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // 縦方向に中央揃え
     marginTop: 4,
     flexWrap: 'wrap', // 要素数が超えると改行
-    marginTop: '4%',
+    marginTop: '3%',
   },
   item: {
     alignItems: 'center',
@@ -147,6 +169,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginTop: 8,
+  },
+  box1: {
+    width: '49 %',
+    height: '100%',
+    backgroundColor: 'blue',
+    borderRadius: 10,
+  },
+  box2: {
+    width: '48%',
+    height: '100%',
+    backgroundColor: 'green',
+    borderRadius: 10,
   },
   post: {
     // 100%の大きさ
