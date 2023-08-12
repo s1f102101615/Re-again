@@ -166,6 +166,11 @@ const handleSave = async () => {
           style={[styles.tab, activeTab === 'requests' && styles.activeTab]}
           onPress={() => handleTabPress('requests')}
         >
+            {friendRequests.length > 0 && (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>{friendRequests.length}</Text>
+              </View>
+            )}
           <Text style={styles.tabText}>フレンドリクエスト</Text>
         </TouchableOpacity>
       </View>
@@ -344,6 +349,21 @@ const styles = StyleSheet.create({
     width: '100%',
     borderBottomWidth: 1,
     borderColor: '#ccc',
+  },
+  tabBadgeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  tabBadge: {
+    position: 'absolute',
+    top: 5,
+    right: 3,
+    backgroundColor: 'red',
+    borderRadius: 50,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
