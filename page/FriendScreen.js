@@ -161,7 +161,7 @@ const handleSave = async () => {
           style={[styles.tab, activeTab === 'friends' && styles.activeTab]}
           onPress={() => handleTabPress('friends')}
         >
-          <Text style={styles.tabText}>フレンド</Text>
+          <Text style={styles.tabText}>フレンド一覧</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'requests' && styles.activeTab]}
@@ -172,36 +172,50 @@ const handleSave = async () => {
                 <Text style={styles.tabBadgeText}>{friendRequests.length}</Text>
               </View>
             )}
-          <Text style={styles.tabText}>フレンドリクエスト</Text>
+          <Text style={styles.tabText}>リクエスト</Text>
         </TouchableOpacity>
       </View>
       {/* フレンド欄 */}
       {activeTab === 'friends' && (
       <>
-        <Text>フレンド欄</Text>
         {friends.map((friend) => (
-          <View key={friend.id} style={styles.request}>
-            <Text>{friend.friend}</Text>
-          </View>
+          <TouchableOpacity key={friend.id} style={styles.request}>
+            {friend.photoURL ? (
+                <Image source={{ uri: friend.photoURL }} style={styles.friendIcon} />
+              ) : (
+                <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
+              )}
+            <Text style={{ marginLeft: '2%',fontWeight: 'bold', fontSize: 20 }}>{friend.friend}</Text>
+          </TouchableOpacity>
         ))}
         {friends.length === 0 && (
-          <Text>フレンドはまだいません...</Text>
+          <Text style={{ color: 'gray', marginTop:'80%'}}>フレンドはまだいません</Text>
         )}
       </>
       )}
       {/* フレンドリクエスト欄 */}
       {activeTab === 'requests' && (
       <>
-        <Text>Friend Requests</Text>
         {friendRequests.map((request) => (
           <View key={request.id} style={styles.request}>
-            <Text>{request.gotRequest}からフレンド申請が来ています。</Text>
-            <Button title="Accept" onPress={() => handleAccept(request)} />
-            <Button title="Reject" onPress={() => handleReject(request)} />
+            {request.photoURL ? (
+                <Image source={{ uri: request.photoURL }} style={styles.friendIcon} />
+              ) : (
+                <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
+              )}
+            <Text style={{ marginLeft: '2%',fontWeight: 'bold', fontSize: 20 }}>{request.gotRequest}</Text>
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handleAccept(request)}>
+                <Ionicons name="checkmark-circle-outline" size={40} color={'green'} style={{ marginRight: '1%' }} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleReject(request)} style={{ marginRight: '12%' }}>
+                <Ionicons name="close-circle-outline" size={40} color={'red'} />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
         {friendRequests.length === 0 && (
-          <Text>フレンド申請はありません。</Text>
+          <Text style={{ color: 'gray', marginTop:'80%'}}>リクエストはありません</Text>
         )}
       </>
       )}
@@ -265,12 +279,10 @@ const styles = StyleSheet.create({
   },
   request: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '80%',
-    borderWidth: 1,
-    padding: 5,
-    marginVertical: 10,
+    width: '100%',
+    height: '10%',
+    borderBottomWidth: 0.5,
   },
   circle: {
     backgroundColor: '#00FF7F',
@@ -365,6 +377,12 @@ const styles = StyleSheet.create({
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  friendIcon: {
+    width: 65,
+    height: 65,
+    borderRadius: 20,
+    marginRight: 10,
   },
 });
 
