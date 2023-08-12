@@ -1,6 +1,6 @@
 // MainScreen.js
-import React, { useEffect } from 'react';
-import { StyleSheet, route } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, route, View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './page/HomeScreen';
 import ProfileScreen from './page/ProfileScreen';
@@ -8,10 +8,12 @@ import ApoScreen from './page/ApoScreen';
 import FriendScreen from './page/FriendScreen';
 import TalkScreen from './page/TalkScreen';
 import { Ionicons } from '@expo/vector-icons';
+import { auth, firestore } from './firebase';
+import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
 const Tab = createBottomTabNavigator();
 
 const MainScreen = ({ navigation }) => {
-  const [friendRequests, setFriendRequests] = React.useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: null,
@@ -108,12 +110,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: 0,
+    right: -9,
     backgroundColor: 'red',
     borderRadius: 10,
-    width: 20,
-    height: 20,
+    width: 16,
+    height: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -11,6 +11,7 @@ const FriendScreen = () => {
   const [friends, setFriends] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
+  
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
