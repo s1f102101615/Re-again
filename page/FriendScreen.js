@@ -10,6 +10,7 @@ const FriendScreen = () => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [friends, setFriends] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState('friends');
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
@@ -115,6 +116,10 @@ const alreadyFriend = async (displayName) => {
   }
 };
 
+const handleTabPress = (tab) => {
+  setActiveTab(tab);
+};
+
 const handleSave = async () => {
   //フレンド申請を送る処理 
   const user = auth.currentUser;
@@ -150,34 +155,49 @@ const handleSave = async () => {
 
   return (
     <View style={styles.container}>
-      <Text>Friend欄</Text>
-      {/* <TextInput
-        style={styles.input}
-        onChangeText={setName}
-        value={name}
-        placeholder="Enter friend's UID"
-      />
-      <Button title="Send friend request" onPress={handleSave} />
-      <Text>{message}</Text> */}
-      <Text>Friend Requests</Text>
-      {friendRequests.map((request) => (
-        <View key={request.id} style={styles.request}>
-          <Text>{request.gotRequest} からフレンド申請が来ています。</Text>
-          <Button title="Accept" onPress={() => handleAccept(request)} />
-          <Button title="Reject" onPress={() => handleReject(request)} />
-        </View>
-      ))}
-      {friendRequests.length === 0 && (
-        <Text>フレンド申請はありません。</Text>
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'friends' && styles.activeTab]}
+          onPress={() => handleTabPress('friends')}
+        >
+          <Text style={styles.tabText}>フレンド</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'requests' && styles.activeTab]}
+          onPress={() => handleTabPress('requests')}
+        >
+          <Text style={styles.tabText}>フレンドリクエスト</Text>
+        </TouchableOpacity>
+      </View>
+      {/* フレンド欄 */}
+      {activeTab === 'friends' && (
+      <>
+        <Text>フレンド欄</Text>
+        {friends.map((friend) => (
+          <View key={friend.id} style={styles.request}>
+            <Text>{friend.friend}</Text>
+          </View>
+        ))}
+        {friends.length === 0 && (
+          <Text>フレンドはまだいません...</Text>
+        )}
+      </>
       )}
-      <Text>フレンド欄</Text>
-      {friends.map((friend) => (
-        <View key={friend.id} style={styles.request}>
-          <Text>{friend.friend}</Text>
-        </View>
-      ))}
-      {friends.length === 0 && (
-        <Text>フレンドはまだいません...</Text>
+      {/* フレンドリクエスト欄 */}
+      {activeTab === 'requests' && (
+      <>
+        <Text>Friend Requests</Text>
+        {friendRequests.map((request) => (
+          <View key={request.id} style={styles.request}>
+            <Text>{request.gotRequest} からフレンド申請が来ています。</Text>
+            <Button title="Accept" onPress={() => handleAccept(request)} />
+            <Button title="Reject" onPress={() => handleReject(request)} />
+          </View>
+        ))}
+        {friendRequests.length === 0 && (
+          <Text>フレンド申請はありません。</Text>
+        )}
+      </>
       )}
       {/* フレンドリクエストアイコン */}
       <View style={styles.circleContainer}>
@@ -187,7 +207,7 @@ const handleSave = async () => {
             </View>
         </TouchableOpacity>
       </View>
-    {/* //フレンドリクエストを送信する */}
+    {/* フレンドリクエストを送信する */}
     <Modal
         transparent={true}
         visible={modalVisible}
@@ -222,7 +242,6 @@ const handleSave = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor:'#fff',
   },
@@ -305,6 +324,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderColor: '#7f5df0',
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
   },
 });
 
