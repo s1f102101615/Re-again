@@ -194,7 +194,7 @@ const handleSave = async () => {
         <Text>Friend Requests</Text>
         {friendRequests.map((request) => (
           <View key={request.id} style={styles.request}>
-            <Text>{request.gotRequest} からフレンド申請が来ています。</Text>
+            <Text>{request.gotRequest}からフレンド申請が来ています。</Text>
             <Button title="Accept" onPress={() => handleAccept(request)} />
             <Button title="Reject" onPress={() => handleReject(request)} />
           </View>
