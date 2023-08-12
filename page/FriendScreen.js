@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendRequests, setFriendRequests] = React.useState([]);
   const [friends, setFriends] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');

@@ -1,5 +1,5 @@
 // MainScreen.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, route } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './page/HomeScreen';
@@ -11,11 +11,27 @@ import { Ionicons } from '@expo/vector-icons';
 const Tab = createBottomTabNavigator();
 
 const MainScreen = ({ navigation }) => {
+  const [friendRequests, setFriendRequests] = React.useState([]);
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: null,
     });
   }, [navigation]);
+
+  useEffect(() => {
+    // フレンド申請を受け取る処理 
+    const user = auth.currentUser;
+    const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const requests = [];
+      querySnapshot.forEach((doc) => {
+        requests.push({ ...doc.data(), id: doc.id });
+      });
+      setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <Tab.Navigator
       //tabに影を追加する
@@ -34,6 +50,16 @@ const MainScreen = ({ navigation }) => {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'フレンド') {
             iconName = focused ? 'people' : 'people-outline';
+            if (friendRequests.length > 0) {
+              return (
+                <View>
+                  <Ionicons name={iconName} size={size} color={'black'} />
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{friendRequests.length}</Text>
+                  </View>
+                </View>
+              );
+            }
           } else if (route.name === 'プロフィール') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -79,6 +105,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 3,
     elevation: 5,
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 
