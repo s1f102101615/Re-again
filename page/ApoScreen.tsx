@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
 import { Modal } from 'react-native';
@@ -14,8 +14,8 @@ const ApoScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedFriends, setSelectedFriends] = useState<{ name: string }[]>([]);
-  const [friends, setFriends] = useState<{ name: string }[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
+  const [friends, setFriends] = useState<{ name: string , id:string}[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
 
   useEffect(() => {
@@ -28,10 +28,10 @@ const ApoScreen = () => {
     const f = query(collection(firestore, `users/${user.uid}/friends`));
     const listfriend = onSnapshot(f, (querySnapshot) => {
       //frinedsの中身にuserのfriendを入れる
-      const friends: { name: string }[] = [];
+      const friends: { name: string, id:string }[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          return friends.push({ name: doc.get('friend') } as { name: string });
+          return friends.push({ name: doc.get('friend') } as { name: string, id:string });
         });
       }
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
@@ -132,113 +132,119 @@ const ApoScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* 約束追加 */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
+    <View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* 約束追加 */}
         <Modal
           transparent={true}
-          visible={friendModalVisible}
+          visible={modalVisible}
           onRequestClose={() => {
-            setFriendModalVisible(false);
+            setModalVisible(false);
           }}
         >
+          <Modal
+            transparent={true}
+            visible={friendModalVisible}
+            onRequestClose={() => {
+              setFriendModalVisible(false);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>招待する友達を選択してください</Text>
+                {friends.map((friend) => (
+                  <TouchableOpacity key={friend.id} onPress={() => setSelectedFriends([...selectedFriends, friend])}>
+                    <Text>{friend.name}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={styles.closeButton} onPress={() => {
+                  setFriendModalVisible(false);
+                }}>
+                  <Text style={styles.closeButtonText}>閉じる</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text>招待する友達を選択してください</Text>
-              {friends.map((friend) => (
-                <TouchableOpacity onPress={() => setSelectedFriends([...selectedFriends, friend])}>
-                  <Text>{friend.name}</Text>
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity style={styles.closeButton} onPress={() => {
-                setFriendModalVisible(false);
-              }}>
+            <DateTimePickerModal
+              isVisible={showDatePicker}
+              mode="date"
+              onConfirm={handleDateChange}
+              onCancel={() => setShowDatePicker(false)}
+              locale="ja"
+            />
+            <DateTimePickerModal
+              isVisible={showTimePicker}
+              mode="time"
+              onConfirm={handleTimeChange}
+              onCancel={() => setShowTimePicker(false)}
+              locale="ja"
+            />
+              <View>
+                <Text>Apo Screen</Text>
+                <TextInput
+                  style={styles.input1}
+                  onChangeText={setTitle}
+                  value={title}
+                  placeholder="約束名を入力してください"
+                />
+                <TextInput
+                  style={styles.input1}
+                  onChangeText={setContent}
+                  value={content}
+                  placeholder="詳細を入力してください"
+                />
+              <View>
+                <View>
+                  <Text onPress={handlePressDate}>日付: {selectedDate.toLocaleDateString("ja-JP")}</Text>
+                </View>
+                <View>
+                  <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                </View>
+                <View>
+                  <TouchableOpacity onPress={() => setFriendModalVisible(true)}>
+                    <Text>招待する友達を選択</Text>
+                  </TouchableOpacity>
+                  {selectedFriends.length > 0 && (
+                    <View>
+                      <Text>選択されたフレンド:</Text>
+                      {selectedFriends.map((friend) => (
+                        <Text key={friend.id}>{friend.name}</Text>
+                      ))}
+                    </View>
+                  )}
+                </View>
+                <Button title="Save" onPress={handleSave} />
+              </View>
+              <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
                 <Text style={styles.closeButtonText}>閉じる</Text>
               </TouchableOpacity>
             </View>
+            </View>
           </View>
         </Modal>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-          <DateTimePickerModal
-            isVisible={showDatePicker}
-            mode="date"
-            onConfirm={handleDateChange}
-            onCancel={() => setShowDatePicker(false)}
-            locale="ja"
-          />
-          <DateTimePickerModal
-            isVisible={showTimePicker}
-            mode="time"
-            onConfirm={handleTimeChange}
-            onCancel={() => setShowTimePicker(false)}
-            locale="ja"
-          />
-            <View>
-              <Text>Apo Screen</Text>
-              <TextInput
-                style={styles.input1}
-                onChangeText={setTitle}
-                value={title}
-                placeholder="約束名を入力してください"
-              />
-              <TextInput
-                style={styles.input1}
-                onChangeText={setContent}
-                value={content}
-                placeholder="詳細を入力してください"
-              />
-            <View>
-              <View>
-                <Text onPress={handlePressDate}>日付: {selectedDate.toLocaleDateString("ja-JP")}</Text>
-              </View>
-              <View>
-                <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-              </View>
-              <View>
-                <TouchableOpacity onPress={() => setFriendModalVisible(true)}>
-                  <Text>招待する友達を選択</Text>
-                </TouchableOpacity>
-                {selectedFriends.length > 0 && (
-                  <View>
-                    <Text>選択されたフレンド:</Text>
-                    {selectedFriends.map((friend) => (
-                      <Text key={friend.name}>{friend.name}</Text>
-                    ))}
-                  </View>
-                )}
-              </View>
-              <Button title="Save" onPress={handleSave} />
-            </View>
-            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-              <Text style={styles.closeButtonText}>閉じる</Text>
-            </TouchableOpacity>
-          </View>
-          </View>
+        {/* 約束表示 */}
+        {appointments.map((appointment) => (
+          <View style={styles.contain}>
+          <Text style={styles.title}>{appointment.title}</Text>
+          <Text style={styles.content}>{appointment.content}</Text>
+          <Text style={styles.content}>{appointment.content}</Text>
         </View>
-      </Modal>
-      {/* 約束表示 */}
-      {appointments.map((appointment) => (
-        <View key={appointment.id}>
-          <Text>{appointment.title}</Text>
-          <Text>{appointment.content}</Text>
+        ))}
+      </ScrollView>
+      {/* スクロールしないアイコン */}
+      <View style={styles.circleContainer} >
+      <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <View style={styles.circle}>
+          <Ionicons name="add" size={32} color="#fff" />
         </View>
-      ))}
-      {/* 約束追加アイコン */}
-      <View style={styles.circleContainer}>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <View style={styles.circle}>
-            <Ionicons name="add" size={32} color="#fff" />
-          </View>
-        </TouchableOpacity>
+      </TouchableOpacity>
       </View>
     </View>
+
+    
+    
   );
 };
 
@@ -270,6 +276,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
+    zIndex: 1,
   },
   centeredView: {
     flex: 1,
@@ -296,6 +303,33 @@ const styles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     width: 230,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  content: {
+    fontSize: 16,
+  },
+  contain: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    height: '10%',
+    width: '90%',
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 10,
   },
 });
 
