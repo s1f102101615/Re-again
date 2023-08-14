@@ -7,7 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const ApoScreen = () => {
-  const [text, setText] = useState('');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<{ id: string; title: string; content: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -48,6 +49,8 @@ const ApoScreen = () => {
   };
 
   const handleClose = () => {
+    setTitle('');
+    setContent('');
     setSelectedDate(new Date());
     setModalVisible(false);
   };
@@ -63,13 +66,14 @@ const ApoScreen = () => {
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
         inviter: 'test',
-        title: '初めての約束',
-        content: text,
+        title: title,
+        content: content,
         appointmentDate: selectedDate,
         createdAt: new Date(),
       });
       console.log('Document written with ID: ', docRef.id);
-      setText(''); // テキストをクリアする
+      setTitle(''); // タイトルをクリアする
+      setContent(''); // コンテンツをクリアする
       setSelectedDate(new Date()); // 日付を初期化する
       setModalVisible(false); // モーダルを閉じる
     } catch (e) {
@@ -129,9 +133,15 @@ const ApoScreen = () => {
               <Text>Apo Screen</Text>
               <TextInput
                 style={styles.input1}
-                onChangeText={setText}
-                value={text}
-                placeholder="Enter text"
+                onChangeText={setTitle}
+                value={title}
+                placeholder="Enter title"
+              />
+              <TextInput
+                style={styles.input1}
+                onChangeText={setContent}
+                value={content}
+                placeholder="Enter content"
               />
             <View>
               <View>
