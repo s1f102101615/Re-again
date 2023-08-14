@@ -5,6 +5,7 @@ import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Calendar } from 'react-native-calendars';
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -17,6 +18,8 @@ const ApoScreen = () => {
   const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
   const [friends, setFriends] = useState<{ name: string , id:string}[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  
 
   useEffect(() => {
     // フレンドを取得する処理
@@ -40,6 +43,10 @@ const ApoScreen = () => {
       listfriend();
     };
   }, []);
+
+  const toggleCalendar = () => {
+    setCalendarVisible(!calendarVisible);
+  };
 
   const handleDateChange = (date: Date) => {
     setShowDatePicker(false);
@@ -92,7 +99,7 @@ const ApoScreen = () => {
     try {
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
-        inviter: 'test',
+        inviter: selectedFriends,
         title: title,
         content: content,
         appointmentDate: selectedDate,
@@ -133,6 +140,17 @@ const ApoScreen = () => {
 
   return (
     <View>
+      {/* カレンダー */}
+      {calendarVisible && (
+        <View>
+          <Calendar
+            // ここにカレンダーの設定やプロパティを指定
+            // 例: onDayPress、markedDates など
+          />
+        </View>
+      )}
+      <TouchableOpacity style={styles.calendarline} onPress={toggleCalendar} />
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* 約束追加 */}
         <Modal
@@ -233,7 +251,16 @@ const ApoScreen = () => {
         </View>
         ))}
       </ScrollView>
-      {/* スクロールしないアイコン */}
+      {/* スクロールしないアイコン(実装が強引後で変えたい) */}
+      {calendarVisible && (
+        <View style={styles.circleContainerd} >
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <View style={styles.circle}>
+            <Ionicons name="add" size={32} color="#fff" />
+          </View>
+        </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <View style={styles.circle}>
@@ -274,9 +301,15 @@ const styles = StyleSheet.create({
   },
   circleContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: '7%',
     right: 20,
-    zIndex: 1,
+    zIndex: 2,
+  },
+  circleContainerd: {
+    position: 'absolute',
+    bottom: '34%',
+    right: 20,
+    zIndex: 2,
   },
   centeredView: {
     flex: 1,
@@ -317,7 +350,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: '10%',
     width: '90%',
-    marginVertical: 10,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -331,6 +364,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 10,
   },
+  calendarline: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: 27,
+    backgroundColor: '#000000',
+    
+  },
+
 });
 
 export default ApoScreen;
