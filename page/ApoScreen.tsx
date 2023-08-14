@@ -14,6 +14,32 @@ const ApoScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedFriends, setSelectedFriends] = useState<{ name: string }[]>([]);
+  const [friends, setFriends] = useState<{ name: string }[]>([]);
+  const [friendModalVisible, setFriendModalVisible] = useState(false);
+
+  useEffect(() => {
+    // フレンドを取得する処理
+    const user = auth.currentUser;
+    if (!user) {
+      console.error('User is not logged in.');
+      return;
+    }
+    const f = query(collection(firestore, `users/${user.uid}/friends`));
+    const listfriend = onSnapshot(f, (querySnapshot) => {
+      //frinedsの中身にuserのfriendを入れる
+      const friends: { name: string }[] = [];
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((doc) => {
+          return friends.push({ name: doc.get('friend') } as { name: string });
+        });
+      }
+      setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
+    });
+    return () => {
+      listfriend();
+    };
+  }, []);
 
   const handleDateChange = (date: Date) => {
     setShowDatePicker(false);
@@ -51,6 +77,7 @@ const ApoScreen = () => {
   const handleClose = () => {
     setTitle('');
     setContent('');
+    setSelectedFriends([]);
     setSelectedDate(new Date());
     setModalVisible(false);
   };
@@ -106,6 +133,7 @@ const ApoScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* 約束追加 */}
       <Modal
         transparent={true}
         visible={modalVisible}
@@ -113,6 +141,29 @@ const ApoScreen = () => {
           setModalVisible(false);
         }}
       >
+        <Modal
+          transparent={true}
+          visible={friendModalVisible}
+          onRequestClose={() => {
+            setFriendModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text>招待する友達を選択してください</Text>
+              {friends.map((friend) => (
+                <TouchableOpacity onPress={() => setSelectedFriends([...selectedFriends, friend])}>
+                  <Text>{friend.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity style={styles.closeButton} onPress={() => {
+                setFriendModalVisible(false);
+              }}>
+                <Text style={styles.closeButtonText}>閉じる</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
           <DateTimePickerModal
@@ -135,13 +186,13 @@ const ApoScreen = () => {
                 style={styles.input1}
                 onChangeText={setTitle}
                 value={title}
-                placeholder="Enter title"
+                placeholder="約束名を入力してください"
               />
               <TextInput
                 style={styles.input1}
                 onChangeText={setContent}
                 value={content}
-                placeholder="Enter content"
+                placeholder="詳細を入力してください"
               />
             <View>
               <View>
@@ -149,6 +200,19 @@ const ApoScreen = () => {
               </View>
               <View>
                 <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+              </View>
+              <View>
+                <TouchableOpacity onPress={() => setFriendModalVisible(true)}>
+                  <Text>招待する友達を選択</Text>
+                </TouchableOpacity>
+                {selectedFriends.length > 0 && (
+                  <View>
+                    <Text>選択されたフレンド:</Text>
+                    {selectedFriends.map((friend) => (
+                      <Text key={friend.name}>{friend.name}</Text>
+                    ))}
+                  </View>
+                )}
               </View>
               <Button title="Save" onPress={handleSave} />
             </View>
@@ -159,13 +223,14 @@ const ApoScreen = () => {
           </View>
         </View>
       </Modal>
+      {/* 約束表示 */}
       {appointments.map((appointment) => (
         <View key={appointment.id}>
           <Text>{appointment.title}</Text>
           <Text>{appointment.content}</Text>
         </View>
       ))}
-      {/* 約束追加 */}
+      {/* 約束追加アイコン */}
       <View style={styles.circleContainer}>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <View style={styles.circle}>
