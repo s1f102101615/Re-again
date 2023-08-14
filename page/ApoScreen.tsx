@@ -11,15 +11,45 @@ const ApoScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<{ id: string; title: string; content: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const handleDateChange = (date: Date) => {
     setShowDatePicker(false);
-    setSelectedDate(date);
+    const newDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      selectedDate.getHours(),
+      selectedDate.getMinutes()
+    );
+    setSelectedDate(newDate);
   };
 
-  const handlePress = () => {
+  const handleTimeChange = (time: Date) => {
+    setShowTimePicker(false);
+    const newDate = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      time.getHours(),
+      time.getMinutes()
+    );
+    setSelectedDate(newDate);
+  };
+
+
+  const handlePressDate = () => {
     setShowDatePicker(true);
+  };
+
+  const handlePressTime = () => {
+    setShowTimePicker(true);
+  };
+
+  const handleClose = () => {
+    setSelectedDate(new Date());
+    setModalVisible(false);
   };
 
   const handleSave = async () => {
@@ -82,10 +112,18 @@ const ApoScreen = () => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
           <DateTimePickerModal
-              isVisible={showDatePicker}
-              mode="date"
-              onConfirm={handleDateChange}
-              onCancel={() => setShowDatePicker(false)}
+            isVisible={showDatePicker}
+            mode="date"
+            onConfirm={handleDateChange}
+            onCancel={() => setShowDatePicker(false)}
+            locale="ja"
+          />
+          <DateTimePickerModal
+            isVisible={showTimePicker}
+            mode="time"
+            onConfirm={handleTimeChange}
+            onCancel={() => setShowTimePicker(false)}
+            locale="ja"
           />
             <View>
               <Text>Apo Screen</Text>
@@ -97,11 +135,14 @@ const ApoScreen = () => {
               />
             <View>
               <View>
-                <Text onPress={handlePress}>日付: {selectedDate.toString()}</Text>
+                <Text onPress={handlePressDate}>日付: {selectedDate.toLocaleDateString("ja-JP")}</Text>
+              </View>
+              <View>
+                <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
               </View>
               <Button title="Save" onPress={handleSave} />
             </View>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
               <Text style={styles.closeButtonText}>閉じる</Text>
             </TouchableOpacity>
           </View>
