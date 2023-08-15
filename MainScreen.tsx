@@ -95,6 +95,7 @@ const MainScreen = ({ navigation }) => {
         component={ProfileScreen}
       />
     </Tab.Navigator>
+    
   );
 };
 
