@@ -5,18 +5,22 @@ import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Calendar, DateData } from 'react-native-calendars';
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string }[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
   const [friends, setFriends] = useState<{ name: string , id:string}[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  
 
   useEffect(() => {
     // フレンドを取得する処理
@@ -40,6 +44,32 @@ const ApoScreen = () => {
       listfriend();
     };
   }, []);
+
+  // カレンダーの日付を選択したときの処理
+  const handleDayPress = (day) => {
+    // 記事を取得する処理
+    // setSelectedDate(day.dateString);
+    toggleCalendar();
+  };
+
+  // カレンダーの月を変更したときの処理
+  const handleMonthChange = (month: DateData) => {
+    setSelectedMonth(new Date(month.timestamp));
+  };
+
+  // 選択した月の予定を取得
+  const filteredAppointments = appointments.filter(({ appointmentDate }) => {
+    const date = new Date(
+      Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+    );
+    console.log(date.getMonth(),selectedMonth.getMonth())
+    return date.getMonth() === selectedMonth.getMonth() && date.getFullYear() === selectedMonth.getFullYear();
+  });
+  
+
+  const toggleCalendar = () => {
+    setCalendarVisible(!calendarVisible);
+  };
 
   const handleDateChange = (date: Date) => {
     setShowDatePicker(false);
@@ -82,6 +112,21 @@ const ApoScreen = () => {
     setModalVisible(false);
   };
 
+  const markedDates = {};
+
+  // データを解析してカレンダーにマークを付けるデータを作成
+  appointments.forEach(appointment => {
+    const appointmentTimestamp = new Date(
+      Number(appointment.appointmentDate['seconds']) * 1000 + Number(appointment.appointmentDate['nanoseconds']) / 1000000
+    );
+    const year = appointmentTimestamp.getUTCFullYear();
+    const month = appointmentTimestamp.getUTCMonth() + 1; // 0から始まるため +1
+    const day = appointmentTimestamp.getUTCDate();
+    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+
+    // マークデータを設定
+    markedDates[formattedDate] = { marked: true, dotColor: 'blue' };
+  });
   const handleSave = async () => {
     //約束を保存する処理
     const user = auth.currentUser;
@@ -92,7 +137,7 @@ const ApoScreen = () => {
     try {
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
-        inviter: 'test',
+        inviter: selectedFriends,
         title: title,
         content: content,
         appointmentDate: selectedDate,
@@ -118,12 +163,13 @@ const ApoScreen = () => {
     }
     const q = query(collection(firestore, 'newAppo'), where('hostname', '==', user.uid));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string }[] = [];
+      const appointments: { id: string; title: string; content: string; appointmentDate:string}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string });
+          return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string; appointmentDate: string });
         });
       }
+      console.log(appointments);
       setAppointments(appointments);
     });
     return () => {
@@ -132,8 +178,20 @@ const ApoScreen = () => {
   }, []);
 
   return (
-    <View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <View style={styles.container}>
+      {/* カレンダー */}
+      {calendarVisible && (
+        <View>
+          <Calendar
+            onDayPress={handleDayPress} 
+            markedDates={markedDates}
+            onMonthChange={handleMonthChange}
+          />
+        </View>
+      )}
+      <Text>{selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</Text>
+      <TouchableOpacity style={styles.calendarline} onPress={toggleCalendar} />
+
         {/* 約束追加 */}
         <Modal
           transparent={true}
@@ -224,16 +282,21 @@ const ApoScreen = () => {
             </View>
           </View>
         </Modal>
+        <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '97%'}}>
         {/* 約束表示 */}
-        {appointments.map((appointment) => (
+        {/* {appointments.map((appointment) => (
           <View style={styles.contain}>
           <Text style={styles.title}>{appointment.title}</Text>
           <Text style={styles.content}>{appointment.content}</Text>
-          <Text style={styles.content}>{appointment.content}</Text>
         </View>
+        ))} */}
+        {filteredAppointments.map(({ id, title, appointmentDate }) => (
+          <View key={id}>
+            <Text>{title}</Text>
+            <Text>{new Date(appointmentDate).toLocaleString()}</Text>
+          </View>
         ))}
-      </ScrollView>
-      {/* スクロールしないアイコン */}
+        </ScrollView>
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <View style={styles.circle}>
@@ -242,17 +305,13 @@ const ApoScreen = () => {
       </TouchableOpacity>
       </View>
     </View>
-
-    
-    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
+    height: 'auto',
   },
   closeButton: {
     backgroundColor: '#ccc',
@@ -274,9 +333,15 @@ const styles = StyleSheet.create({
   },
   circleContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: '7%',
     right: 20,
-    zIndex: 1,
+    zIndex: 2,
+  },
+  circleContainerd: {
+    position: 'absolute',
+    bottom: '34%',
+    right: 20,
+    zIndex: 2,
   },
   centeredView: {
     flex: 1,
@@ -307,7 +372,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 5
+    ,
   },
   content: {
     fontSize: 16,
@@ -315,9 +381,10 @@ const styles = StyleSheet.create({
   contain: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    height: '10%',
+    height: 100,
     width: '90%',
-    marginVertical: 10,
+    marginTop: 5,
+    marginBottom: 5,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -329,8 +396,21 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: 10,
+    height: 'auto',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    
   },
+  calendarline: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: 27,
+    backgroundColor: '#000000',
+    
+  },
+
 });
 
 export default ApoScreen;
