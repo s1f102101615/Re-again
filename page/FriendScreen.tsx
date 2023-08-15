@@ -7,8 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [friendRequests, setFriendRequests] = React.useState([]);
-  const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = React.useState<{ id:string}[]>([]);
+  const [friends, setFriends] = useState<{id:string}[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
   
@@ -16,9 +16,12 @@ const FriendScreen = () => {
   useEffect(() => {
     // フレンド申請を受け取る処理 
     const user = auth.currentUser;
+    if (!user){
+      return;
+    }
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const requests = [];
+      const requests:{ id:string }[] = [];
       querySnapshot.forEach((doc) => {
         requests.push({ ...doc.data(), id: doc.id });
       });
@@ -30,9 +33,12 @@ const FriendScreen = () => {
   useEffect(() => {
     // フレンドを取得する処理
     const user = auth.currentUser;
+    if (!user){
+      return;
+    } 
     const f = query(collection(firestore, `users/${user.uid}/friends`));
     const listfriend = onSnapshot(f, (querySnapshot) => {
-      const friends = [];
+      const friends:{ id:string }[] = [];
       querySnapshot.forEach((doc) => {
         friends.push({ ...doc.data(), id: doc.id });
       });
@@ -73,6 +79,9 @@ const FriendScreen = () => {
   const handleReject = async (request) => {
     // フレンド申請を拒否する処理
     const user = auth.currentUser;
+    if (!user) {
+      return;
+    }
     const enemy = await getUserUidByDisplayName(request.gotRequest);
     if (enemy !== null) {
       try {
