@@ -19,8 +19,10 @@ const LoginScreen = () => {
       await signInWithEmailAndPassword(auth, email, password);
       const user = await auth.currentUser;
       if (user.displayName === null) {
+      //mainを治せばおそらく治る
       navigation.navigate('Setname');
       } else {
+      //mainを治せばおそらく治る
       navigation.navigate('Main');
       }
     } catch (error) {
@@ -28,6 +30,7 @@ const LoginScreen = () => {
     }
   };
   const handleRegister = () => {
+    //mainを治せばおそらく治る
     navigation.navigate('Register');
   }
 
