@@ -6,7 +6,7 @@ type TalkRoom = {
   name: string;
 };
 
-const TalkScreen = () => {
+const TalkScreen = ({ navigation }) => {
   const [talkRooms, setTalkRooms] = useState<TalkRoom[]>([]);
 
   //仮設置
@@ -22,8 +22,12 @@ const TalkScreen = () => {
     setTalkRooms(talkRooms);
   }, []);
 
+  const handlePress = (item: TalkRoom) => {
+    navigation.navigate('TalkRoomDetail', { talkRoom: item });
+  };
+
   const renderItem = ({ item }: { item: TalkRoom }) => (
-    <TouchableOpacity style={styles.item}>
+    <TouchableOpacity style={styles.item} onPress={() => handlePress(item)}>
       <Text style={styles.title}>{item.name}</Text>
     </TouchableOpacity>
   );
