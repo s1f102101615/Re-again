@@ -24,12 +24,14 @@ const ApoScreen = () => {
   
   const scrollViewRef = useRef<ScrollView>(null);
 
-  //カレンダーの日を選択したときの処理(ここで調整する*今は固定値)
+  //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
-    const timestamp = day.timestamp;
-    const yOffset = -10; // スクロール位置を微調整する場合は、ここを調整してください
+    const date = new Date(day.timestamp);
+    const days = date.getDate()-1;
+    const yOffset = +115; // スクロール位置を微調整する場合は、ここを調整してください
+    console.log(days * yOffset);
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ x: 0, y: (timestamp + yOffset)/2, animated: true });
+      scrollViewRef.current.scrollTo({ x: 0, y: (days * yOffset), animated: true });
     }
   };
   
