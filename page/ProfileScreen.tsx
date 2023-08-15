@@ -14,7 +14,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user.displayName);
+        setUser(user.displayName || '');
       } else {
         setUser('');
       }
@@ -23,16 +23,16 @@ const ProfileScreen = () => {
   }, []);
   
   // ログアウト処理
-  const handleLogout = () => {
-    auth.signOut(auth)
-      .then(() => {
-        console.log('logout');
-        navigation.navigate('Login');
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
+const handleLogout = () => {
+  auth.signOut()
+    .then(() => {
+      console.log('logout');
+      navigation.navigate('Login');
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+};
   const displayName = user || '未定義';
 
   // プロフィールアイコンを変更する処理
@@ -171,7 +171,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // 要素間のスペースを均等に分配
     paddingHorizontal: '1%', // 左右のパディング
     alignItems: 'center', // 縦方向に中央揃え
-    marginTop: 4,
     flexWrap: 'wrap', // 要素数が超えると改行
     marginTop: '3%',
   },
