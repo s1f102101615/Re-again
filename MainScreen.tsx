@@ -1,6 +1,6 @@
 // MainScreen.js
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, route, View, Text } from 'react-native';
+import { StyleSheet , View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './page/HomeScreen';
 import ProfileScreen from './page/ProfileScreen';
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
     shadowColor: 'black',
     shadowOffset: {
       height: -3,
+      width: 0
     },
     shadowOpacity: 0.07,
     shadowRadius: 3,

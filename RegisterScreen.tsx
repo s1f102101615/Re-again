@@ -20,6 +20,7 @@ const RegisterScreen = () => {
         try {
           const user = await createUserWithEmailAndPassword(auth, email, password);
           console.log(user);
+          //mainを編集するとおそらく治る
           navigation.navigate('Setname');
         } catch (error) {
           console.log(error.message);
