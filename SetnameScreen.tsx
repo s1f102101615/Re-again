@@ -51,7 +51,7 @@ const SetnameScreen = () => {
     try {
       await saveUser(user);
       //mainを治すとおそらく治る
-      navigation.navigate('Main');
+      navigation.navigate('Main' as never);
     } catch (e) {
       console.log(e);
     }

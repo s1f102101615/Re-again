@@ -20,10 +20,10 @@ const LoginScreen = () => {
       const user = await auth.currentUser;
       if (user.displayName === null) {
       //mainを治せばおそらく治る
-      navigation.navigate('Setname');
+      navigation.navigate('Setname' as never);
       } else {
       //mainを治せばおそらく治る
-      navigation.navigate('Main');
+      navigation.navigate('Main' as never);
       }
     } catch (error) {
       console.log(error.message);
@@ -31,7 +31,7 @@ const LoginScreen = () => {
   };
   const handleRegister = () => {
     //mainを治せばおそらく治る
-    navigation.navigate('Register');
+    navigation.navigate('Register' as never);
   }
 
   return (
