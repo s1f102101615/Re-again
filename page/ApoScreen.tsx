@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
@@ -6,6 +6,7 @@ import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
+import { format, addMonths, subMonths } from 'date-fns';
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -20,6 +21,19 @@ const ApoScreen = () => {
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
+  const handleDayPress = (day: DateData) => {
+    const date = new Date(day.timestamp);
+    const days = date.getDate()-1;
+    const yOffset = +115; // スクロール位置を微調整する場合は、ここを調整してください
+    console.log(days * yOffset);
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: (days * yOffset), animated: true });
+    }
+  };
   
 
   useEffect(() => {
@@ -45,30 +59,28 @@ const ApoScreen = () => {
     };
   }, []);
 
-  // カレンダーの日付を選択したときの処理
-  const handleDayPress = (day) => {
-    // 記事を取得する処理
-    // setSelectedDate(day.dateString);
-    toggleCalendar();
-  };
 
   // カレンダーの月を変更したときの処理
   const handleMonthChange = (month: DateData) => {
     setSelectedMonth(new Date(month.timestamp));
   };
 
-  // 選択した月の予定を取得
+
+  // 選択した月の予定を取得(昇順に並び替え)
   const filteredAppointments = appointments.filter(({ appointmentDate }) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
     );
-    console.log(date.getMonth(),selectedMonth.getMonth())
     return date.getMonth() === selectedMonth.getMonth() && date.getFullYear() === selectedMonth.getFullYear();
+  }).sort((a, b) => {
+    const dateA = Number(a.appointmentDate['seconds']) * 1000 + Number(a.appointmentDate['nanoseconds']) / 1000000;
+    const dateB = Number(b.appointmentDate['seconds']) * 1000 + Number(b.appointmentDate['nanoseconds']) / 1000000;
+    return dateA - dateB;
   });
-  
 
   const toggleCalendar = () => {
     setCalendarVisible(!calendarVisible);
+    setSelectedMonth(new Date());
   };
 
   const handleDateChange = (date: Date) => {
@@ -169,7 +181,6 @@ const ApoScreen = () => {
           return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string; appointmentDate: string });
         });
       }
-      console.log(appointments);
       setAppointments(appointments);
     });
     return () => {
@@ -180,17 +191,26 @@ const ApoScreen = () => {
   return (
     <View style={styles.container}>
       {/* カレンダー */}
-      {calendarVisible && (
+      {calendarVisible ? (
         <View>
           <Calendar
             onDayPress={handleDayPress} 
             markedDates={markedDates}
             onMonthChange={handleMonthChange}
+            monthFormat={'yyyy年 MM月'}
+          />
+        </View>
+      ):(
+        <View style={{ height:'6.5%' }}>
+          <Calendar
+            onDayPress={handleDayPress} 
+            markedDates={markedDates}
+            onMonthChange={handleMonthChange}
+            monthFormat={'yyyy年 MM月'}
           />
         </View>
       )}
-      <Text>{selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</Text>
-      <TouchableOpacity style={styles.calendarline} onPress={toggleCalendar} />
+      <TouchableOpacity activeOpacity={1} style={styles.calendarline} onPress={toggleCalendar} />
 
         {/* 約束追加 */}
         <Modal
@@ -282,7 +302,7 @@ const ApoScreen = () => {
             </View>
           </View>
         </Modal>
-        <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '97%'}}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '92%'}} ref={scrollViewRef}>
         {/* 約束表示 */}
         {/* {appointments.map((appointment) => (
           <View style={styles.contain}>
@@ -290,10 +310,11 @@ const ApoScreen = () => {
           <Text style={styles.content}>{appointment.content}</Text>
         </View>
         ))} */}
+        <Text>{selectedMonth.toLocaleString('ja-JP', { month: 'long', year: 'numeric' })}の予定一覧</Text>
         {filteredAppointments.map(({ id, title, appointmentDate }) => (
-          <View key={id}>
-            <Text>{title}</Text>
-            <Text>{new Date(appointmentDate).toLocaleString()}</Text>
+          <View style={styles.contain} key={id}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
           </View>
         ))}
         </ScrollView>
@@ -400,7 +421,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     backgroundColor: '#fff',
-    
   },
   calendarline: {
     justifyContent: 'space-between',
@@ -408,7 +428,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 27,
     backgroundColor: '#000000',
-    
   },
 
 });

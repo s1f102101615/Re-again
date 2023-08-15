@@ -10,10 +10,11 @@ const ProfileScreen = () => {
   const [user, setUser] = useState('');
   const navigation = useNavigation();
 
+  // ログイン状態の監視
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user.displayName);
+        setUser(user.displayName || '');
       } else {
         setUser('');
       }
@@ -21,17 +22,33 @@ const ProfileScreen = () => {
     return () => unsubscribe();
   }, []);
   
-  const handleLogout = () => {
-    auth.signOut(auth)
-      .then(() => {
-        console.log('logout');
-        navigation.navigate('Login');
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
+  // ログアウト処理
+const handleLogout = () => {
+  auth.signOut()
+    .then(() => {
+      console.log('logout');
+      navigation.navigate('Login');
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+};
   const displayName = user || '未定義';
+
+  // プロフィールアイコンを変更する処理
+  // const handleChoosePhoto = () => {
+  //   const options = {
+  //     noData: true,
+  //   };
+  //   ImagePicker.launchImageLibrary(options, response => {
+  //     if (response.uri) {
+  //       // 画像をアップロードするAPIを呼び出す
+  //       // アップロードが完了したら、setAvatarで新しいアバターを設定する
+  //       setAvatar(response);
+  //     }
+  //   });
+  // };
+
   return (
     <View style={styles.container}>
     
@@ -154,7 +171,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // 要素間のスペースを均等に分配
     paddingHorizontal: '1%', // 左右のパディング
     alignItems: 'center', // 縦方向に中央揃え
-    marginTop: 4,
     flexWrap: 'wrap', // 要素数が超えると改行
     marginTop: '3%',
   },
