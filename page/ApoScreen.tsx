@@ -11,7 +11,7 @@ const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string }[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -43,6 +43,13 @@ const ApoScreen = () => {
       listfriend();
     };
   }, []);
+
+  // カレンダーの日付を選択したときの処理
+  const handleDayPress = (day) => {
+    // 記事を取得する処理
+    // setSelectedDate(day.dateString);
+    toggleCalendar();
+  };
 
   const toggleCalendar = () => {
     setCalendarVisible(!calendarVisible);
@@ -89,6 +96,11 @@ const ApoScreen = () => {
     setModalVisible(false);
   };
 
+  const markedDates = appointments.reduce((obj, { appointmentDate }) => {
+    obj[appointmentDate] = { marked: true };
+    return obj;
+  }, {});
+
   const handleSave = async () => {
     //約束を保存する処理
     const user = auth.currentUser;
@@ -125,12 +137,13 @@ const ApoScreen = () => {
     }
     const q = query(collection(firestore, 'newAppo'), where('hostname', '==', user.uid));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string }[] = [];
+      const appointments: { id: string; title: string; content: string; appointmentDate:string}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string });
+          return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string; appointmentDate: string });
         });
       }
+      console.log(querySnapshot);
       setAppointments(appointments);
     });
     return () => {
@@ -139,19 +152,18 @@ const ApoScreen = () => {
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       {/* カレンダー */}
       {calendarVisible && (
         <View>
           <Calendar
-            // ここにカレンダーの設定やプロパティを指定
-            // 例: onDayPress、markedDates など
+            onDayPress={handleDayPress} 
+            markedDates={markedDates}
           />
         </View>
       )}
       <TouchableOpacity style={styles.calendarline} onPress={toggleCalendar} />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* 約束追加 */}
         <Modal
           transparent={true}
@@ -242,25 +254,15 @@ const ApoScreen = () => {
             </View>
           </View>
         </Modal>
+        <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '97%'}}>
         {/* 約束表示 */}
         {appointments.map((appointment) => (
           <View style={styles.contain}>
           <Text style={styles.title}>{appointment.title}</Text>
           <Text style={styles.content}>{appointment.content}</Text>
-          <Text style={styles.content}>{appointment.content}</Text>
         </View>
         ))}
-      </ScrollView>
-      {/* スクロールしないアイコン(実装が強引後で変えたい) */}
-      {calendarVisible && (
-        <View style={styles.circleContainerd} >
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <View style={styles.circle}>
-            <Ionicons name="add" size={32} color="#fff" />
-          </View>
-        </TouchableOpacity>
-        </View>
-      )}
+        </ScrollView>
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <View style={styles.circle}>
@@ -277,9 +279,8 @@ const ApoScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
+    height: 'auto',
   },
   closeButton: {
     backgroundColor: '#ccc',
@@ -340,7 +341,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 5
+    ,
   },
   content: {
     fontSize: 16,
@@ -348,9 +350,10 @@ const styles = StyleSheet.create({
   contain: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    height: '10%',
+    height: 100,
     width: '90%',
-    marginBottom: 10,
+    marginTop: 5,
+    marginBottom: 5,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -362,7 +365,11 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: 10,
+    height: 'auto',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    
   },
   calendarline: {
     justifyContent: 'space-between',
