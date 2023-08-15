@@ -5,7 +5,7 @@ import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { Calendar } from 'react-native-calendars';
+import { Calendar, DateData } from 'react-native-calendars';
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -19,6 +19,7 @@ const ApoScreen = () => {
   const [friends, setFriends] = useState<{ name: string , id:string}[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
   
 
   useEffect(() => {
@@ -50,6 +51,21 @@ const ApoScreen = () => {
     // setSelectedDate(day.dateString);
     toggleCalendar();
   };
+
+  // カレンダーの月を変更したときの処理
+  const handleMonthChange = (month: DateData) => {
+    setSelectedMonth(new Date(month.timestamp));
+  };
+
+  // 選択した月の予定を取得
+  const filteredAppointments = appointments.filter(({ appointmentDate }) => {
+    const date = new Date(
+      Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+    );
+    console.log(date.getMonth(),selectedMonth.getMonth())
+    return date.getMonth() === selectedMonth.getMonth() && date.getFullYear() === selectedMonth.getFullYear();
+  });
+  
 
   const toggleCalendar = () => {
     setCalendarVisible(!calendarVisible);
@@ -96,11 +112,21 @@ const ApoScreen = () => {
     setModalVisible(false);
   };
 
-  const markedDates = appointments.reduce((obj, { appointmentDate }) => {
-    obj[appointmentDate] = { marked: true };
-    return obj;
-  }, {});
+  const markedDates = {};
 
+  // データを解析してカレンダーにマークを付けるデータを作成
+  appointments.forEach(appointment => {
+    const appointmentTimestamp = new Date(
+      Number(appointment.appointmentDate['seconds']) * 1000 + Number(appointment.appointmentDate['nanoseconds']) / 1000000
+    );
+    const year = appointmentTimestamp.getUTCFullYear();
+    const month = appointmentTimestamp.getUTCMonth() + 1; // 0から始まるため +1
+    const day = appointmentTimestamp.getUTCDate();
+    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+
+    // マークデータを設定
+    markedDates[formattedDate] = { marked: true, dotColor: 'blue' };
+  });
   const handleSave = async () => {
     //約束を保存する処理
     const user = auth.currentUser;
@@ -143,7 +169,7 @@ const ApoScreen = () => {
           return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string; appointmentDate: string });
         });
       }
-      console.log(querySnapshot);
+      console.log(appointments);
       setAppointments(appointments);
     });
     return () => {
@@ -159,9 +185,11 @@ const ApoScreen = () => {
           <Calendar
             onDayPress={handleDayPress} 
             markedDates={markedDates}
+            onMonthChange={handleMonthChange}
           />
         </View>
       )}
+      <Text>{selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</Text>
       <TouchableOpacity style={styles.calendarline} onPress={toggleCalendar} />
 
         {/* 約束追加 */}
@@ -256,11 +284,17 @@ const ApoScreen = () => {
         </Modal>
         <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '97%'}}>
         {/* 約束表示 */}
-        {appointments.map((appointment) => (
+        {/* {appointments.map((appointment) => (
           <View style={styles.contain}>
           <Text style={styles.title}>{appointment.title}</Text>
           <Text style={styles.content}>{appointment.content}</Text>
         </View>
+        ))} */}
+        {filteredAppointments.map(({ id, title, appointmentDate }) => (
+          <View key={id}>
+            <Text>{title}</Text>
+            <Text>{new Date(appointmentDate).toLocaleString()}</Text>
+          </View>
         ))}
         </ScrollView>
       <View style={styles.circleContainer} >
@@ -271,9 +305,6 @@ const ApoScreen = () => {
       </TouchableOpacity>
       </View>
     </View>
-
-    
-    
   );
 };
 
