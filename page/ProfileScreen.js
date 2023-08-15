@@ -5,11 +5,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import ImagePicker from 'react-native-image-picker';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState('');
   const navigation = useNavigation();
 
+  // ログイン状態の監視
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -21,6 +23,7 @@ const ProfileScreen = () => {
     return () => unsubscribe();
   }, []);
   
+  // ログアウト処理
   const handleLogout = () => {
     auth.signOut(auth)
       .then(() => {
@@ -32,6 +35,21 @@ const ProfileScreen = () => {
       });
   };
   const displayName = user || '未定義';
+
+  // プロフィールアイコンを変更する処理
+  const handleChoosePhoto = () => {
+    const options = {
+      noData: true,
+    };
+    ImagePicker.launchImageLibrary(options, response => {
+      if (response.uri) {
+        // 画像をアップロードするAPIを呼び出す
+        // アップロードが完了したら、setAvatarで新しいアバターを設定する
+        setAvatar(response);
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
     

@@ -66,12 +66,16 @@ const ApoScreen = () => {
   };
 
 
-  // 選択した月の予定を取得
+  // 選択した月の予定を取得(昇順に並び替え)
   const filteredAppointments = appointments.filter(({ appointmentDate }) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
     );
     return date.getMonth() === selectedMonth.getMonth() && date.getFullYear() === selectedMonth.getFullYear();
+  }).sort((a, b) => {
+    const dateA = Number(a.appointmentDate['seconds']) * 1000 + Number(a.appointmentDate['nanoseconds']) / 1000000;
+    const dateB = Number(b.appointmentDate['seconds']) * 1000 + Number(b.appointmentDate['nanoseconds']) / 1000000;
+    return dateA - dateB;
   });
 
   const toggleCalendar = () => {
@@ -310,7 +314,7 @@ const ApoScreen = () => {
         {filteredAppointments.map(({ id, title, appointmentDate }) => (
           <View style={styles.contain} key={id}>
             <Text style={styles.title}>{title}</Text>
-            <Text style={styles.content}>{new Date(appointmentDate).toLocaleString()}</Text>
+            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
           </View>
         ))}
         </ScrollView>
