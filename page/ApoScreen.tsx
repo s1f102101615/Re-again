@@ -17,7 +17,7 @@ const ApoScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
-  const [friends, setFriends] = useState<{ name: string , id:string}[]>([]);
+  const [friends, setFriends] = useState<{ name: string , id:string }[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -49,7 +49,7 @@ const ApoScreen = () => {
       const friends: { name: string, id:string }[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          return friends.push({ name: doc.get('friend') } as { name: string, id:string });
+          return friends.push({ name: doc.get('friend'), id: doc.id } as { name: string, id:string });
         });
       }
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
@@ -393,8 +393,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5
-    ,
+    marginBottom: 5,
   },
   content: {
     fontSize: 16,

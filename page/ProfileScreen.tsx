@@ -26,8 +26,7 @@ const ProfileScreen = () => {
 const handleLogout = () => {
   auth.signOut()
     .then(() => {
-      console.log('logout');
-      navigation.navigate('Login');
+      navigation.navigate('Login' as never);
     })
     .catch((error) => {
       console.log(error.message);
