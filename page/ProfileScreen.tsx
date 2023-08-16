@@ -1,146 +1,200 @@
-// ProfileScreen.js
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { auth } from '../firebase';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { auth, storage , firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import * as ImagePicker from 'expo-image-picker';
+import 'firebase/firestore';
+import 'firebase/storage';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { ref , getDownloadURL , uploadBytes} from 'firebase/storage';
 
 const ProfileScreen = () => {
-  const [user, setUser] = useState('');
+  const [user, setUser] = useState(null);
   const navigation = useNavigation();
+  const [userPhotoURL, setUserPhotoURL] = useState<string | null>(null);
 
   // ログイン状態の監視
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user.displayName || '');
+        setUser(user);
+        fetchUserPhotoURL(user.uid);
       } else {
-        setUser('');
+        setUser(null);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [firestore,userPhotoURL]);
+
+  // ユーザーのプロフィール画像を取得
+  const fetchUserPhotoURL = async ( uid :string ) => {
+    const userRef = doc(firestore, 'users', uid);
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+      if (userData && userData.photoURL) {
+        setUserPhotoURL(userData.photoURL);
+      }
+    }
+  };
+ 
   
   // ログアウト処理
-const handleLogout = () => {
-  auth.signOut()
-    .then(() => {
-      navigation.navigate('Login' as never);
-    })
-    .catch((error) => {
-      console.log(error.message);
+  const handleLogout = () => {
+    auth.signOut()
+      .then(() => {
+        navigation.navigate('Login' as never);
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('メディアライブラリへのアクセス許可が必要です');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-};
-  const displayName = user || '未定義';
+  
+    if (!result.canceled) {
+      console.log(result.assets[0].uri);
+      // 画像をFirebase Storageにアップロード
+      const imageRef = ref(storage, `userImages/${user.uid}`);
+      const response = await fetch(result.assets[0].uri);
+      const blob = await response.blob();
+  
+      const metadata = {
+        contentType: 'image/jpeg', // 画像の種類に合わせて調整
+      };
+  
+      await uploadBytes(imageRef, blob, metadata);
+  
+      // Firestoreに画像URLを保存
+      const downloadURL = await getDownloadURL(imageRef);
+      console.log(downloadURL, 'downloadURL')
+      // downloadURLをFirestoreに保存 usersコレクションの中のuser.uidのprofileの中のphotoURLに保存
+      const userRef = doc(firestore, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
+      if (userSnapshot.exists()) {
+        await updateDoc(userRef, {
+          photoURL: downloadURL,
+        });
+      } else {
+        // ドキュメントが存在しない場合は、新しいドキュメントを作成する
+        await setDoc(userRef, {
+          photoURL: downloadURL,
+        });
+      }
+      fetchUserPhotoURL(user.uid)
+    }
+  };
 
-  // プロフィールアイコンを変更する処理
-  // const handleChoosePhoto = () => {
-  //   const options = {
-  //     noData: true,
-  //   };
-  //   ImagePicker.launchImageLibrary(options, response => {
-  //     if (response.uri) {
-  //       // 画像をアップロードするAPIを呼び出す
-  //       // アップロードが完了したら、setAvatarで新しいアバターを設定する
-  //       setAvatar(response);
-  //     }
-  //   });
-  // };
-
+  const displayName = user ? user.displayName : '未定義';
   return (
     <View style={styles.container}>
-    
       <View>
         <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'6%' }}>
-          <Icon name="user" size={80} color="black" />
+          {userPhotoURL ? (
+            <Image source={{ uri: userPhotoURL }} style={{ width: 80, height: 80, borderRadius: 40 }} />
+          ) : (
+            <Icon name="user" size={80} color="black" />
+          )}
         </View>
         <View style={{ alignItems: 'center' }}>
           <Text style={{ fontSize: 20 }}>{displayName}</Text>
         </View>
-        <View style={styles.profileedit}>
-        <TouchableOpacity style={styles.item}>
-          <Icon name="id-badge" size={35} color="black" />
-          <Text style={styles.label}>アイコン変更</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Icon name="handshake-o" size={35} color="black" />
-          <Text style={styles.label}>友達一覧</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Icon name="google-plus-official" size={35} color="black" />
-          <Text style={styles.label}>Googleさん</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={{ alignItems:'center', marginTop: '4%' }}>
-        <View style={styles.post}>
-          <Text><Icon name="list-alt" size={15} color='blue' /> 過去の約束一覧 <Icon name="angle-right" size={15} color="black" /></Text>
+        <View style={styles.profileedit} >
+          <TouchableOpacity style={styles.item} onPress={pickImage}>
+            <Icon name="id-badge" size={35} color="black" />
+            <Text style={styles.label}>アイコン変更</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.item}>
+            <Icon name="handshake-o" size={35} color="black" />
+            <Text style={styles.label}>友達一覧</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.item}>
+            <Icon name="google-plus-official" size={35} color="black" />
+            <Text style={styles.label}>Googleさん</Text>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
 
-      <View style={styles.postdouble}>
-        <TouchableOpacity style={styles.box1}>
+        <TouchableOpacity style={{ alignItems:'center', marginTop: '4%' }}>
+          <View style={styles.post}>
+            <Text><Icon name="list-alt" size={15} color='blue' /> 過去の約束一覧 <Icon name="angle-right" size={15} color="black" /></Text>
+          </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.box2}>
-        </TouchableOpacity>
+
+        <View style={styles.postdouble}>
+          <TouchableOpacity style={styles.box1}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.box2}>
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <Text style={{ fontSize:20, marginLeft:'5%', fontWeight:'bold' }}>ユーザー設定</Text>
+        </View> 
+
+        <View style={styles.settinglist}>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem} onPress={handleLogout}>
+            <Icon name="sign-out" size={35} color="black" />
+            <Text style={styles.label}>ログアウト</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingitem}>
+            <Icon name="cog" size={35} color="black" />
+            <Text style={styles.label}>設定</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-       <View>
-        <Text style={{ fontSize:20, marginLeft:'5%', fontWeight:'bold' }}>ユーザー設定</Text>
-      </View> 
-
-      <View style={styles.settinglist}>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem} onPress={handleLogout}>
-          <Icon name="sign-out" size={35} color="black" />
-          <Text style={styles.label}>ログアウト</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingitem}>
-          <Icon name="cog" size={35} color="black" />
-          <Text style={styles.label}>設定</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
     </View>
   );
 };
