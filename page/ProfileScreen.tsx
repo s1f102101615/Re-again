@@ -84,10 +84,18 @@ const ProfileScreen = () => {
   
         // Firestoreに画像URLを保存
         const downloadURL = await getDownloadURL(imageRef);
+        console.log(user.uid);
         const userRef = doc(firestore, 'users', user.uid);
-        await updateDoc(userRef, {
-          photoURL: downloadURL,
-        });
+        const docSnapshot = await getDoc(userRef);
+        if (docSnapshot.exists()) {
+          await updateDoc(userRef, {
+            photoURL: downloadURL,
+          });
+        } else {
+          await setDoc(userRef, {
+            photoURL: downloadURL,
+          });
+        }
       } catch (error) {
         console.log(error);
         alert('画像のアップロードに失敗しました');
