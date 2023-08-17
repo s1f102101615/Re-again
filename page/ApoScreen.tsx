@@ -67,6 +67,7 @@ const ApoScreen = () => {
 
 
   // 選択した月の予定を取得(昇順に並び替え)
+  // 
   const filteredAppointments = appointments.filter(({ appointmentDate }) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
@@ -174,26 +175,31 @@ const ApoScreen = () => {
   };
 
   useEffect(() => {
-    //約束を取得する処理
-    const user = auth.currentUser;
-    if (!user) {
-      console.error('User is not logged in.');
-      return;
-    }
-    const q = query(collection(firestore, 'newAppo'), where('hostname', '==', user.uid));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //約束を取得する処理
+  const user = auth.currentUser;
+  if (!user) {
+    console.error('User is not logged in.');
+    return;
+  }
+    const q2 = query(collection(firestore, 'newAppo'));
+    const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
       const appointments: { id: string; title: string; content: string; appointmentDate:string}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          return appointments.push({ id: doc.id, ...doc.data() } as { id: string; title: string; content: string; appointmentDate: string });
+          const data = doc.data();
+            if (data.hostname === user.uid || (data.inviter && data.inviter.some((inviterObj) => inviterObj.name === user.displayName))) {
+              appointments.push({ id: doc.id, ...data } as { id: string; title: string; content: string; appointmentDate: string });
+            }
         });
       }
       setAppointments(appointments);
     });
     return () => {
-      unsubscribe();
+      // unsubscribe();
+      unsubscribe2();
     };
-  }, []);
+  },[]);
+
 
   return (
     <View style={styles.container}>
