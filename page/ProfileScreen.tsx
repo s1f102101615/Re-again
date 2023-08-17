@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import 'firebase/firestore';
 import 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { ref , getDownloadURL , uploadBytes} from 'firebase/storage';
+import { ref , getDownloadURL , uploadBytes, uploadBytesResumable} from 'firebase/storage';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
@@ -67,34 +67,32 @@ const ProfileScreen = () => {
   
     if (!result.canceled) {
       console.log(result.assets[0].uri);
+  
       // 画像をFirebase Storageにアップロード
       const imageRef = ref(storage, `userImages/${user.uid}`);
-      const response = await fetch(result.assets[0].uri);
-      const blob = await response.blob();
+      
   
-      const metadata = {
-        contentType: 'image/jpeg', // 画像の種類に合わせて調整
-      };
+      try {
+        const response = await fetch(result.assets[0].uri);
+        const blob = await response.blob();
   
-      await uploadBytes(imageRef, blob, metadata);
+        const metadata = {
+          contentType: 'image/jpeg', // 画像の種類に合わせて調整
+        };
   
-      // Firestoreに画像URLを保存
-      const downloadURL = await getDownloadURL(imageRef);
-      console.log(downloadURL, 'downloadURL')
-      // downloadURLをFirestoreに保存 usersコレクションの中のuser.uidのprofileの中のphotoURLに保存
-      const userRef = doc(firestore, 'users', user.uid);
-      const userSnapshot = await getDoc(userRef);
-      if (userSnapshot.exists()) {
+        await uploadBytesResumable(imageRef, blob, metadata);
+  
+        // Firestoreに画像URLを保存
+        const downloadURL = await getDownloadURL(imageRef);
+        const userRef = doc(firestore, 'users', user.uid);
         await updateDoc(userRef, {
           photoURL: downloadURL,
         });
-      } else {
-        // ドキュメントが存在しない場合は、新しいドキュメントを作成する
-        await setDoc(userRef, {
-          photoURL: downloadURL,
-        });
+      } catch (error) {
+        console.log(error);
+        alert('画像のアップロードに失敗しました');
       }
-      fetchUserPhotoURL(user.uid)
+      fetchUserPhotoURL(user.uid);
     }
   };
 
