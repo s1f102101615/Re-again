@@ -147,15 +147,22 @@ const ApoScreen = () => {
       return;
     }
     try {
+      const randamid = Math.random().toString(32).substring(2);
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
         inviter: selectedFriends,
         title: title,
         content: content,
+        talkroomid: randamid,
         appointmentDate: selectedDate,
         createdAt: new Date(),
       });
-      console.log('Document written with ID: ', docRef.id);
+      // firestoreにtalkroomを作成
+      const talkroomRef = collection(firestore, `talkroom/${randamid}/title`)
+      const talkroomdocRef = await addDoc(talkroomRef, {
+        talktitle:title,
+      });
+      console.log("Document written with ID: ", talkroomdocRef.id);
       setTitle(''); // タイトルをクリアする
       setContent(''); // コンテンツをクリアする
       setSelectedDate(new Date()); // 日付を初期化する

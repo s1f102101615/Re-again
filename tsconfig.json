@@ -5,6 +5,9 @@
       "react",
       "react-native",
       "native-base"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
     ]
   },
   "extends": "expo/tsconfig.base"

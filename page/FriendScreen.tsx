@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { Image } from 'react-native';
-import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, DocumentData } from 'firebase/firestore';
+import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, DocumentData, getDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+
 
 const FriendScreen = () => {
   const [name, setName] = useState('');
@@ -21,13 +22,18 @@ const FriendScreen = () => {
       return;
     }
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const requests:{ id:string }[] = [];
-      querySnapshot.forEach((doc) => {
-        requests.push({ ...doc.data(), id: doc.id });
-        console.log(requests)
-      });
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const requests:{ id:string , photoURL: string}[] = [];
+      for (const doco of querySnapshot.docs) {
+        const requestData = doco.data();
+        const requestUid = requestData.gotRequestuid;
+        const userRef = doc(firestore, 'users', requestUid);
+        const userDoc = await getDoc(userRef);
+        const photoURL = userDoc.get('photoURL');
+        requests.push({ ...requestData, id: doco.id, photoURL });
+      }
       setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
+      console.log(requests)
     });
     return () => unsubscribe();
   }, []);
@@ -40,11 +46,17 @@ const FriendScreen = () => {
       return;
     } 
     const f = query(collection(firestore, `users/${user.uid}/friends`));
-    const listfriend = onSnapshot(f, (querySnapshot) => {
-      const friends:{ id:string }[] = [];
-      querySnapshot.forEach((doc) => {
-        friends.push({ ...doc.data(), id: doc.id });
-      });
+
+    const listfriend = onSnapshot(f, async (querySnapshot) => {
+      const friends:{ id:string, photoURL: string }[] = [];
+      for (const doco of querySnapshot.docs) {
+        const friendData = doco.data();
+        const friendUid = friendData.frienduid;
+        const userRef = doc(firestore, 'users', friendUid);
+        const userDoc = await getDoc(userRef);
+        const photoURL = userDoc.get('photoURL');
+        friends.push({ ...friendData, id: doco.id, photoURL });
+      }
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
     });
     return () => {
@@ -208,13 +220,12 @@ const handleSave = async () => {
       <>
         {friends.map((friend) => (
           <TouchableOpacity key={friend.id} style={styles.request}>
-            {friend['friendicon'] ? (
-                // <Image source={{ uri: friend.photoURL }} style={styles.friendIcon} />
-                <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
+            {friend['photoURL'] ? (
+                <Image source={{ uri: friend['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }}/>
               ) : (
                 <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
               )}
-            <Text style={{ marginLeft: '2%',fontWeight: 'bold', fontSize: 20 }}>{friend['friend']}</Text>
+            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{friend['friend']}</Text>
           </TouchableOpacity>
         ))}
         {friends.length === 0 && (
@@ -227,12 +238,12 @@ const handleSave = async () => {
       <>
         {friendRequests.map((request) => (
           <View key={request.id} style={styles.request}>
-            {request['getRequesticon'] ? (
-                <Image source={{ uri: request['friendicon'] }} style={styles.friendIcon} />
+            {request['photoURL'] ? (
+                <Image source={{ uri: request['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }} />
               ) : (
                 <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
               )}
-            <Text style={{ marginLeft: '2%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest']}</Text>
+            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest']}</Text>
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity onPress={() => handleAccept(request)}>
                 <Ionicons name="checkmark-circle-outline" size={40} color={'green'} style={{ marginRight: '1%' }} />
