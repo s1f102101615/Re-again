@@ -22,13 +22,18 @@ const FriendScreen = () => {
       return;
     }
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const requests:{ id:string }[] = [];
-      querySnapshot.forEach((doc) => {
-        requests.push({ ...doc.data(), id: doc.id });
-        console.log(requests)
-      });
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const requests:{ id:string , photoURL: string}[] = [];
+      for (const doco of querySnapshot.docs) {
+        const requestData = doco.data();
+        const requestUid = requestData.gotRequestuid;
+        const userRef = doc(firestore, 'users', requestUid);
+        const userDoc = await getDoc(userRef);
+        const photoURL = userDoc.get('photoURL');
+        requests.push({ ...requestData, id: doco.id, photoURL });
+      }
       setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
+      console.log(requests)
     });
     return () => unsubscribe();
   }, []);
@@ -53,7 +58,6 @@ const FriendScreen = () => {
         friends.push({ ...friendData, id: doco.id, photoURL });
       }
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
-      console.log(friends)
     });
     return () => {
       listfriend();
@@ -234,12 +238,12 @@ const handleSave = async () => {
       <>
         {friendRequests.map((request) => (
           <View key={request.id} style={styles.request}>
-            {request['getRequesticon'] ? (
-                <Image source={{ uri: request['friendicon'] }} style={styles.friendIcon} />
+            {request['photoURL'] ? (
+                <Image source={{ uri: request['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }} />
               ) : (
                 <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
               )}
-            <Text style={{ marginLeft: '2%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest']}</Text>
+            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest']}</Text>
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity onPress={() => handleAccept(request)}>
                 <Ionicons name="checkmark-circle-outline" size={40} color={'green'} style={{ marginRight: '1%' }} />
