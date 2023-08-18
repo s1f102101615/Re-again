@@ -12,7 +12,7 @@ const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string }[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -21,8 +21,14 @@ const ApoScreen = () => {
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  
   const scrollViewRef = useRef<ScrollView>(null);
+  const [showApoModalVisible, setShowApoModalVisible] = useState(false);
+  const [showTitle, setShowTitle] = useState('');
+  const [showContent, setShowContent] = useState('');
+  const [showApoDate, setShowApoDate] = useState('');
+  const [showInviter, setShowInviter] = useState([]);
+  const [showTalkroomid, setShowTalkroomid] = useState('');
+  const [showCreateAt, setShowCreateAt] = useState('');
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
@@ -174,6 +180,41 @@ const ApoScreen = () => {
     setModalVisible(false);
   };
 
+  // 約束を選択したときの処理
+  const setSelectedApo = (id: string, title: string, appointmentDate: string, content: string, inviter: [], talkroomid:string, createAt:DateData) => {
+    const date = new Date(
+      Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+    );
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1; // 0から始まるため +1
+    const day = date.getUTCDate();
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day} ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    //CreatAtのDateDataを解析してstringにする
+    const createAtDate = new Date(
+      Number(createAt['seconds']) * 1000 + Number(createAt['nanoseconds']) / 1000000
+    );
+    const createAtyear = createAtDate.getUTCFullYear();
+    const createAtmonth = createAtDate.getUTCMonth() + 1; // 0から始まるため +1
+    const createAtday = createAtDate.getUTCDate();
+    const createAtdays = createAtDate.getUTCDay();
+    const createAthours = createAtDate.getUTCHours();
+    const createAtminutes = createAtDate.getUTCMinutes();
+    const createAtseconds = createAtDate.getUTCSeconds();
+    const formattedCreateAtDate = `${createAtyear}-${createAtmonth < 10 ? '0' : ''}${createAtmonth}-${createAtday < 10 ? '0' : ''}${createAtday} ${createAthours < 10 ? '0' : ''}${createAthours}:${createAtminutes < 10 ? '0' : ''}${createAtminutes}:${createAtseconds < 10 ? '0' : ''}${createAtseconds}`;
+
+    //これらのデータをuseStateに入れる
+    setShowApoDate(formattedDate);
+    setShowTitle(title);
+    setShowContent(content);
+    setShowInviter(inviter);
+    setShowTalkroomid(talkroomid);
+    setShowCreateAt(formattedCreateAtDate);
+    setShowApoModalVisible(true);
+    }
+
   useEffect(() => {
   //約束を取得する処理
   const user = auth.currentUser;
@@ -183,12 +224,20 @@ const ApoScreen = () => {
   }
     const q2 = query(collection(firestore, 'newAppo'));
     const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string; appointmentDate:string}[] = [];
+      const appointments: { id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
             if (data.hostname === user.uid || (data.inviter && data.inviter.some((inviterObj) => inviterObj.name === user.displayName))) {
-              appointments.push({ id: doc.id, ...data } as { id: string; title: string; content: string; appointmentDate: string });
+              appointments.push({
+                id: doc.id,
+                title: data.title,
+                content: data.content,
+                appointmentDate: data.appointmentDate,
+                inviter: data.inviter,
+                talkroomid: data.talkroomid,
+                createAt: data.createdAt,
+              });
             }
         });
       }
@@ -224,7 +273,33 @@ const ApoScreen = () => {
         </View>
       )}
       <TouchableOpacity activeOpacity={1} style={styles.calendarline} onPress={toggleCalendar} />
-
+        {/* 約束詳細 */}
+        <Modal
+          transparent={true}
+          visible={showApoModalVisible}
+          onRequestClose={() => {
+            setShowApoModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text>約束名:{showTitle}</Text>
+              <Text>詳細:{showContent}</Text>
+              <Text>日付:{showApoDate}</Text>
+              <Text>招待者:{showInviter.map((inviter) => (
+                <Text key={inviter.id}>{inviter.name}</Text>
+              ))}</Text>
+              <Text>トークルームID:{showTalkroomid}</Text>
+              <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
+              <TouchableOpacity style={styles.closeButton} onPress={() => {
+                setShowApoModalVisible(false);
+              }}>
+                <Text style={styles.closeButtonText}>閉じる</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      
         {/* 約束追加 */}
         <Modal
           transparent={true}
@@ -324,11 +399,12 @@ const ApoScreen = () => {
         </View>
         ))} */}
         <Text>{selectedMonth.toLocaleString('ja-JP', { month: 'long', year: 'numeric' })}の予定一覧</Text>
-        {filteredAppointments.map(({ id, title, appointmentDate }) => (
-          <View style={styles.contain} key={id}>
+        {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
+        {filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
         </ScrollView>
       <View style={styles.circleContainer} >
