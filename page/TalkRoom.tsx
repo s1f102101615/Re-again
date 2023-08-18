@@ -4,15 +4,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from '../firebase';
 import { collection, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Image } from 'react-native';
 
 const TalkRoom = () => {
-  const [messages, setMessages] = useState<{ id: string; text: string; name: string; uid: string; createdAt: number }[]>([]);
+  const [messages, setMessages] = useState<{ id: string; text: string; name: string; uid: string; createdAt: number; icon:string}[]>([]);
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const navigation = useNavigation();
   const route = useRoute();
   const { talkroomId } = route.params as { talkroomId: string };
+  const [userPhotoURL, setUserPhotoURL] = useState<string | null>(null);
 
   const handleSend = async () => {
     const user = auth.currentUser;
@@ -20,8 +21,12 @@ const TalkRoom = () => {
       return;
     }
     const { uid, displayName } = user;
+    // firestoreのusers.uidにあるphotoURLを取得
+    const userRef = doc(firestore, 'users', uid);
+    const userSnapshot = await getDoc(userRef);
+    const { photoURL } = userSnapshot.data();
     const createdAt = Date.now();
-    const message = { id: String(messages.length + 1), text: inputText, name: displayName, uid, createdAt };
+    const message = { id: String(messages.length + 1), text: inputText, name: displayName, uid, createdAt, icon: photoURL };
     setMessages([...messages, message]);
     setInputText('');
     const talkroomRef = doc(firestore, 'talkroom', talkroomId);
@@ -36,6 +41,8 @@ const TalkRoom = () => {
         await setDoc(talkroomRef, { messages: [message] });
       }
   };
+
+  
   
   useEffect(() => {
     const fetchMessages = async () => {
@@ -75,15 +82,23 @@ const TalkRoom = () => {
         <Text style={styles.header}>Talk Room {talkroomId}</Text>
         {messages.map((message) => (
           <View
-          key={message.id}
-          style={[
-            styles.message,
-            message.uid === auth.currentUser?.uid ? styles.rightMessage : styles.leftMessage,
-          ]}
-        >
-          <Text style={styles.messageText}>{message.text}</Text>
-          <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
-        </View>
+            key={message.id}
+            style={[
+              styles.message,
+              message.uid === auth.currentUser?.uid ? styles.rightMessage : styles.leftMessage,
+            ]}
+          >
+            {message.uid !== auth.currentUser?.uid && (
+              <View style={styles.iconContainer}>
+                <Image
+                  source={{ uri: message.icon }}
+                  style={styles.iconImage}
+                />
+              </View>
+            )}
+              <Text style={styles.messageText}>{message.text}</Text>
+              <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
+          </View>
         ))}
       </ScrollView>
       <View style={styles.inputContainer}>
@@ -166,6 +181,24 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     marginHorizontal: 8,
     maxWidth: '80%',
+  },
+  iconContainer :{
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#ccc',
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText :{
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  iconImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
 });
 
