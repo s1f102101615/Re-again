@@ -14,16 +14,16 @@ const HomeScreen = () => {
 
   const db = firestore;
 
-  const getFriendsCount = async (uid: string): Promise<number> => {
-    const friendRef: DocumentReference<DocumentData> = doc(db, `users/${uid}/friends`);
-    const friendSnapshot = await getDoc(friendRef);
-    const friendData = friendSnapshot.data();
-    if (friendData) {
-      return Object.keys(friendData).length;
-    } else {
-      return 0;
-    }
-  };
+  // const getFriendsCount = async (uid: string): Promise<number> => {
+  //   const friendRef: DocumentReference<DocumentData> = doc(db, `users/${uid}/friends`);
+  //   const friendSnapshot = await getDoc(friendRef);
+  //   const friendData = friendSnapshot.data();
+  //   if (friendData) {
+  //     return Object.keys(friendData).length;
+  //   } else {
+  //     return 0;
+  //   }
+  // };
 
 
   // ログイン状態の監視
@@ -31,8 +31,8 @@ const HomeScreen = () => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        const count = await getFriendsCount(user.uid);
-      setFriendsCount(count);
+        // const count = await getFriendsCount(user.uid);
+        setFriendsCount(3);
       } else {
         setUser(undefined);
       }
