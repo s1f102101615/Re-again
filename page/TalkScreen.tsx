@@ -7,9 +7,10 @@ import TalkList from './TalkList';
 const Stack = createStackNavigator();
 
 const TalkScreen = () => {
+
   return (
     <Stack.Navigator initialRouteName="List">
-      <Stack.Screen name="List" options={{ title: 'トーク', headerShown: false }} component={TalkList} />
+      <Stack.Screen name="List" options={{ title: 'トーク' }} component={TalkList} />
       <Stack.Screen name="Talk" options={{ title: 'ルーム' }} component={TalkRoom}  />
     </Stack.Navigator>
   );

@@ -12,6 +12,12 @@ const TalkList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; talkroomid:string }[]>([]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+    });
+  }, []);
+
   //navigatgeで遷移するときにtalkroomidを渡す
   const handleTalkPress = (talkroomId: string) => {
     navigation.navigate('Talk', { talkroomId });

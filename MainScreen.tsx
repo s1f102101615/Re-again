@@ -80,6 +80,7 @@ const MainScreen = ({ navigation }) => {
       />
       <Tab.Screen
         name="トーク"
+        options={{ headerShown: false }}
         component={TalkScreen}
       />
       <Tab.Screen
