@@ -5,6 +5,7 @@ import { auth, firestore } from '../firebase';
 import { collection, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Image } from 'react-native';
+import { vi } from 'date-fns/locale';
 
 const TalkRoom = () => {
   const [messages, setMessages] = useState<{ id: string; text: string; name: string; uid: string; createdAt: number; icon:string}[]>([]);
@@ -88,18 +89,24 @@ const TalkRoom = () => {
               message.uid === auth.currentUser?.uid ? styles.rightMessage : styles.leftMessage,
             ]}
           >
-            {message.uid !== auth.currentUser?.uid && (
-              <View style={styles.iconContainer}>
-                <Image
-                  source={{ uri: message.icon }}
-                  style={styles.iconImage}
-                />
+            {message.uid !== auth.currentUser?.uid ? (
+              <View>
+                <View style={styles.iconContainer}>
+                  <Image
+                    source={{ uri: message.icon }}
+                    style={styles.iconImage}
+                  />
+                </View>
+                <Text style={styles.messageText}>{message.text}</Text>
+                <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
               </View>
-            )}
+            ) : (
+              <>
               <Text style={styles.messageText}>{message.text}</Text>
               <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
-          </View>
-        ))}
+              </>
+            )} 
+            </View>))}
       </ScrollView>
       <View style={styles.inputContainer}>
         <TextInput
@@ -164,7 +171,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   leftMessage: {
     alignSelf: 'flex-start',
