@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from '../firebase';
 import { collection, doc, onSnapshot, query, setDoc } from 'firebase/firestore';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const TalkRoom = () => {
   const [messages, setMessages] = useState<{ id: string; text: string }[]>([]);
   const [inputText, setInputText] = useState('');
-  const scrollViewRef = useRef<FlatList>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -37,27 +36,25 @@ const TalkRoom = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <FlatList
-        ref={scrollViewRef}
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={<Text style={styles.header}>Talk Room {talkroomId}</Text>}
-        ListFooterComponent={
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Type a message"
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-              <Ionicons name="send" size={24} color="white" />
-            </TouchableOpacity>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.header}>Talk Room {talkroomId}</Text>
+        {messages.map((message) => (
+          <View key={message.id} style={styles.message}>
+            <Text style={styles.messageText}>{message.text}</Text>
           </View>
-        }
-        contentContainerStyle={styles.contentContainer}
-      />
+        ))}
+      </ScrollView>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="Type a message"
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <Ionicons name="send" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -86,8 +83,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     backgroundColor: '#eee',
     padding: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
   },
   input: {
     flex: 1,
@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
   },
 });
 
