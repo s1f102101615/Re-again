@@ -95,6 +95,20 @@ const ApoScreen = () => {
   }
   , [searchText]);
 
+  //マッチした文字に色を付ける
+  const highlightText = (text, highlight) => {
+    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+    return (
+      <Text>
+        {parts.map((part, i) => (
+          <Text key={i} style={part.toLowerCase() === highlight.toLowerCase() ? styles.highlight : null}>
+            {part}
+          </Text>
+        ))}
+      </Text>
+    );
+  };
+
 
   // 選択した月の予定を取得(昇順に並び替え)
   // 
@@ -447,7 +461,7 @@ const ApoScreen = () => {
         ))}
         {searchText && serchAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title}>{highlightText(title, searchText)}</Text>
             <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
           </TouchableOpacity>
         ))}
@@ -601,7 +615,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
     marginBottom: 16,
-  }
+  },
+  highlight: {
+    backgroundColor: 'yellow',
+  },
 });
 
 export default ApoScreen;
