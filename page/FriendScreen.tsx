@@ -4,6 +4,7 @@ import { auth, firestore } from '../firebase';
 import { Image } from 'react-native';
 import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, DocumentData, getDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+import FriendList from './FriendList';
 
 
 const FriendScreen = () => {
@@ -218,19 +219,7 @@ const handleSave = async () => {
       {/* フレンド欄 */}
       {activeTab === 'friends' && (
       <>
-        {friends.map((friend) => (
-          <TouchableOpacity key={friend.id} style={styles.request}>
-            {friend['photoURL'] ? (
-                <Image source={{ uri: friend['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }}/>
-              ) : (
-                <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
-              )}
-            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{friend['friend']}</Text>
-          </TouchableOpacity>
-        ))}
-        {friends.length === 0 && (
-          <Text style={{ color: 'gray', marginTop:'80%'}}>フレンドはまだいません</Text>
-        )}
+        <FriendList friends={friends} />
       </>
       )}
       {/* フレンドリクエスト欄 */}
@@ -293,6 +282,8 @@ const handleSave = async () => {
           </View>
         </View>
       </Modal>
+      <View>
+      </View>
 
     </View>
     

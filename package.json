@@ -18,12 +18,14 @@
     "@types/react": "~18.2.14",
     "date-fns": "^2.30.0",
     "expo": "~49.0.5",
+    "expo-image-picker": "~14.3.2",
     "expo-status-bar": "~1.6.0",
     "firebase": "^10.1.0",
     "native-base": "^3.4.28",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-native": "^0.72.3",
+    "react-native-calendar-events": "^2.2.0",
     "react-native-calendars": "^1.1300.0",
     "react-native-gesture-handler": "^2.12.1",
     "react-native-modal-datetime-picker": "^17.0.0",
@@ -33,8 +35,7 @@
     "react-native-svg": "^12.1.1",
     "react-native-vector-icons": "^10.0.0",
     "react-native-web": "~0.19.6",
-    "typescript": "^5.1.3",
-    "expo-image-picker": "~14.3.2"
+    "typescript": "^5.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

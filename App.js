@@ -10,6 +10,7 @@ import SetnameScreen from './SetnameScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
+  
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login" headerShown="false">

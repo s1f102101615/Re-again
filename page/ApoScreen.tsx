@@ -6,7 +6,8 @@ import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
-import { format, addMonths, subMonths } from 'date-fns';
+import { format, addMonths, subMonths, lightFormat } from 'date-fns';
+import RNCalendarEvents from "react-native-calendar-events";
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -29,6 +30,8 @@ const ApoScreen = () => {
   const [showInviter, setShowInviter] = useState([]);
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
@@ -69,6 +72,42 @@ const ApoScreen = () => {
   // カレンダーの月を変更したときの処理
   const handleMonthChange = (month: DateData) => {
     setSelectedMonth(new Date(month.timestamp));
+  };
+
+  // 検索ボックスのテキストが変更されたときappointmetsをフィルタリングする 
+  useEffect(() => {
+    const serch = appointments.filter(({ title, content }) => {
+      return title.includes(searchText) || content.includes(searchText);
+    });
+    const serchAppointmets = serch
+    .filter(({ appointmentDate }) => {
+      const date = new Date(
+        Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+      );
+      return date;
+    })
+    .sort((a, b) => {
+      const dateA = Number(a.appointmentDate['seconds']) * 1000 + Number(a.appointmentDate['nanoseconds']) / 1000000;
+      const dateB = Number(b.appointmentDate['seconds']) * 1000 + Number(b.appointmentDate['nanoseconds']) / 1000000;
+      return dateA - dateB;
+    });
+
+    setSerchAppointments(serchAppointmets);
+  }
+  , [searchText]);
+
+  //マッチした文字に色を付ける
+  const highlightText = (text, highlight) => {
+    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+    return (
+      <Text>
+        {parts.map((part, i) => (
+          <Text key={i} style={part.toLowerCase() === highlight.toLowerCase() ? styles.highlight : null}>
+            {part}
+          </Text>
+        ))}
+      </Text>
+    );
   };
 
 
@@ -114,6 +153,14 @@ const ApoScreen = () => {
     setSelectedDate(newDate);
   };
 
+  //記事をスクロールで下げれる 離したときに下がりきるようにしたい
+  const handleScrollEnd = (event) => {
+    console.log(event.nativeEvent.contentOffset.y)
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY < -120) {
+      setShowApoModalVisible(false);;
+    }
+  };
 
   const handlePressDate = () => {
     setShowDatePicker(true);
@@ -276,28 +323,56 @@ const ApoScreen = () => {
         {/* 約束詳細 */}
         <Modal
           transparent={true}
+          animationType="slide"
           visible={showApoModalVisible}
           onRequestClose={() => {
             setShowApoModalVisible(false);
           }}
+          
         >
-          <View style={styles.centeredView}>
+          <ScrollView style={styles.centeredView} scrollEventThrottle={100} contentContainerStyle={styles.contentContainer} onScrollEndDrag={handleScrollEnd}>
             <View style={styles.modalView}>
-              <Text>約束名:{showTitle}</Text>
-              <Text>詳細:{showContent}</Text>
-              <Text>日付:{showApoDate}</Text>
-              <Text>招待者:{showInviter.map((inviter) => (
-                <Text key={inviter.id}>{inviter.name}</Text>
-              ))}</Text>
-              <Text>トークルームID:{showTalkroomid}</Text>
-              <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={() => {
-                setShowApoModalVisible(false);
-              }}>
-                <Text style={styles.closeButtonText}>閉じる</Text>
-              </TouchableOpacity>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>約束の詳細</Text>
+                <TouchableOpacity style={styles.closeButtonX} onPress={() => {
+                  setShowApoModalVisible(false);
+                }}>
+                  <Ionicons name="close" size={30} color="black" />
+                </TouchableOpacity>
+              </View>
+                <View style={styles.likeedit} >
+                  <TouchableOpacity style={styles.item}>
+                    <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>お気に入り</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.item}>
+                  <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>約束している人</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.item}>
+                    <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>招待</Text>
+                  </TouchableOpacity>
+                </View>
+              <Text style={ styles.headtitle}>画像</Text>
+              <View style={ styles.lightLine } />
+              <View style={ styles.lightLine2 } />
+                <Text style={ styles.headtitle}>約束名</Text>
+                <Text>{showTitle}</Text>
+                <Text style={ styles.headtitle}>日付</Text>
+                <Text>{showApoDate}</Text>
+                <Text style={ styles.headtitle}>詳細</Text>
+                <Text>{showContent}</Text>
+                <Text style={ styles.headtitle}>場所</Text>
+                {/* <Text>{showContent}</Text> まだ */}
+                <Text style={ styles.headtitle}>約束名</Text>
+                <Text style={ styles.headtitle}>招待者:{showInviter.map((inviter) => (
+                  <Text key={inviter.id}>{inviter.name}</Text>
+                ))}</Text>
+                <Text>トークルームID:{showTalkroomid}</Text>
+                <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       
         {/* 約束追加 */}
@@ -315,8 +390,8 @@ const ApoScreen = () => {
               setFriendModalVisible(false);
             }}
           >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
+            <View style={styles.centeredViewNewApo}>
+              <View style={styles.modalViewNewApo}>
                 <Text>招待する友達を選択してください</Text>
                 {friends.map((friend) => (
                   <TouchableOpacity key={friend.id} onPress={() => setSelectedFriends([...selectedFriends, friend])}>
@@ -331,8 +406,8 @@ const ApoScreen = () => {
               </View>
             </View>
           </Modal>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
+          <View style={styles.centeredViewNewApo}>
+            <View style={styles.modalViewNewApo}>
             <DateTimePickerModal
               isVisible={showDatePicker}
               mode="date"
@@ -398,14 +473,26 @@ const ApoScreen = () => {
           <Text style={styles.content}>{appointment.content}</Text>
         </View>
         ))} */}
-        <Text>{selectedMonth.toLocaleString('ja-JP', { month: 'long', year: 'numeric' })}の予定一覧</Text>
+        <TextInput
+          style={styles.searchBox}
+          placeholder="Search"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
+        {!searchText && filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
           </TouchableOpacity>
         ))}
+        {searchText && serchAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
+            <Text style={styles.title}>{highlightText(title, searchText)}</Text>
+            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
+          </TouchableOpacity>
+        ))}
+
         </ScrollView>
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -424,13 +511,17 @@ const styles = StyleSheet.create({
     height: 'auto',
   },
   closeButton: {
-    backgroundColor: '#ccc',
-    padding: 10,
     borderRadius: 5,
-    marginTop: 10,
+    padding: 10,
+    marginTop: 0,
+  },
+  closeButtonX:{
+    paddingTop:10,
+    paddingRight:20,
   },
   closeButtonText: {
-    color: '#fff',
+    color: 'Black',
+    fontWeight: 'bold',
     textAlign: 'center',
   },
   circle: {
@@ -455,13 +546,39 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     flex: 1,
+  },
+  centeredViewNewApo: {
+    flex: 1,
+    backgroundColor: '#000000aa',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  contentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalView: {
     backgroundColor: '#fff',
+    marginTop: '100%',
     borderRadius: 5,
+    width: '100%',
+    height: '125%',
+    padding: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 5,
+    justifyContent: 'flex-start',
+  },
+  modalViewNewApo: {
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    width: '90%',
+    height: '60%',
     padding: 45,
     alignItems: 'center',
     shadowColor: '#000',
@@ -469,8 +586,8 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 1,
+    shadowRadius: 10,
     elevation: 5,
   },
   input1: {
@@ -502,6 +619,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    justifyContent: 'flex-start',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -517,7 +635,68 @@ const styles = StyleSheet.create({
     height: 27,
     backgroundColor: '#000000',
   },
-
+  modalText: {
+    marginBottom: 10,
+  },
+  searchBox: {
+    width: '100%',
+    height: 40,
+    padding: 8,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  highlight: {
+    backgroundColor: 'yellow',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+  },
+  modalHeaderText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginRight: '26%',
+    marginTop: '2%',
+  },
+  likeedit: {
+    flexDirection: 'row', // 要素を横に並べる
+    justifyContent: 'space-between', // 要素間のスペースを均等に分配
+    paddingHorizontal: '13%', // 左右のパディング
+    alignItems: 'center', // 縦方向に中央揃え
+    marginTop: '3%',
+    marginRight: '4%',
+  },
+  item: {
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 12,
+    marginTop: 8,
+  },
+  lightLine: {
+    height: 1,
+    backgroundColor: '#000000',
+    opacity: 0.2,
+    marginTop: '7%',
+  },
+  lightLine2: {
+    height: 1,
+    backgroundColor: '#000000',
+    opacity: 0.2,
+    marginTop: '35%',
+  },
+  headtitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: '5%',
+    marginLeft: '5%',
+  }
 });
 
 export default ApoScreen;

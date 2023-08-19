@@ -1,11 +1,13 @@
 // HomeScreen.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { auth, firebase, firestore } from '../firebase';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { User } from 'firebase/auth';
-import { DocumentData, DocumentReference, collection, doc, getDoc } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+
 
 const HomeScreen = () => {
   const [user, setUser] = useState<User>();
@@ -13,6 +15,12 @@ const HomeScreen = () => {
   const [friendsCount, setFriendsCount] = useState(0);
 
   const db = firestore;
+
+  const navigator = useNavigation();
+  const goApo = () => {
+    // navigator.navigate('ApoScreen' as never);
+  };
+
 
   // const getFriendsCount = async (uid: string): Promise<number> => {
   //   const friendRef: DocumentReference<DocumentData> = doc(db, `users/${uid}/friends`);
@@ -46,7 +54,9 @@ const HomeScreen = () => {
     }
   }, []);
 
-
+  const handleChoosePhoto = () => {
+    // 画像を選択する処理
+  };
     // プロフィールアイコンを変更する処理
   // const handleChoosePhoto = () => {
   //   const options = {
@@ -62,57 +72,97 @@ const HomeScreen = () => {
   // };
 
   return (
+  //   <View style={styles.container}>
+  //   <View>
+  //     <View style={{ alignItems: 'center', marginTop: '10%', marginBottom: '6%' }}>
+  //       <Icon name="user" size={80} color="black" />
+  //     </View>
+  //     <View style={{ alignItems: 'center' }}>
+  //       <Text style={{ fontSize: 20 }}>{displayName}</Text>
+  //       <Text style={{ fontSize: 16 }}>友達の数: {friendsCount}</Text>
+  //     </View>
+  //   </View>
+  // </View>
     <View style={styles.container}>
-    <View>
-      <View style={{ alignItems: 'center', marginTop: '10%', marginBottom: '6%' }}>
-        <Icon name="user" size={80} color="black" />
+        <View style={styles.profile}>
+          <TouchableOpacity onPress={handleChoosePhoto}>
+            {/* <Image source={avatar} style={styles.avatar} /> */}
+            <Ionicons name="camera" size={24} color="#666" style={styles.cameraIcon} />
+          </TouchableOpacity>
+          <Text style={styles.name}>{displayName}</Text>
+        </View>
+        <View style={styles.info}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoItemLabel}>Friends</Text>
+            <Text style={styles.infoItemValue}>10</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoItemLabel}>Appointments</Text>
+            <Text style={styles.infoItemValue}>5</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={goApo}>
+          <Text style={styles.buttonText}>View Appointments</Text>
+        </TouchableOpacity>
       </View>
-      <View style={{ alignItems: 'center' }}>
-        <Text style={{ fontSize: 20 }}>{displayName}</Text>
-        <Text style={{ fontSize: 16 }}>友達の数: {friendsCount}</Text>
-      </View>
-    </View>
-  </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
     backgroundColor: '#fff',
-  },
-  header: {
-    height: 60,
-    backgroundColor: '#2196F3',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
   },
   profile: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  iconContainer: {
-    marginRight: 20,
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
   },
-  profileInfo: {
-    flex: 1,
+  cameraIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 4,
   },
-  displayName: {
+  name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginRight: 16,
   },
-  friendsCount: {
+  info: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  infoItem: {
+    marginRight: 16,
+  },
+  infoItemLabel: {
     fontSize: 16,
+    color: '#666',
+  },
+  infoItemValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

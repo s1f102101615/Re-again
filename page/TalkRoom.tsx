@@ -51,7 +51,9 @@ const TalkRoom = () => {
       if (!user) {
         return;
       }
-      const { uid } = user;
+      if (!talkroomId) {
+        return;
+      }
       const messageRef = doc(firestore, 'talkroom', talkroomId);
       const messageSnapshot = await getDoc(messageRef);
       const data = messageSnapshot.data();
