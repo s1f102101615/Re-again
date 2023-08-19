@@ -354,19 +354,21 @@ const ApoScreen = () => {
                     <Text style={styles.label}>招待</Text>
                   </TouchableOpacity>
                 </View>
-              <Text style={ styles.headtitle}>画像</Text>
-              <View style={ styles.lightLine } />
-              <View style={ styles.lightLine2 } />
-                <Text style={ styles.headtitle}>約束名</Text>
+              <View>
+                <Text style={{fontSize: 18, fontWeight: 'bold', marginTop:'5%'}}>画像</Text>
+                <View style={ styles.lightLine } />
+                <View style={ styles.lightLine2 } />
+              </View>
+                <Text style={ styles.headtitle }>約束名</Text>
                 <Text>{showTitle}</Text>
-                <Text style={ styles.headtitle}>日付</Text>
+                <Text style={ styles.headtitle }>日付</Text>
                 <Text>{showApoDate}</Text>
-                <Text style={ styles.headtitle}>詳細</Text>
+                <Text style={ styles.headtitle }>詳細</Text>
                 <Text>{showContent}</Text>
-                <Text style={ styles.headtitle}>場所</Text>
+                <Text style={ styles.headtitle }>場所</Text>
                 {/* <Text>{showContent}</Text> まだ */}
-                <Text style={ styles.headtitle}>約束名</Text>
-                <Text style={ styles.headtitle}>招待者:{showInviter.map((inviter) => (
+                <Text style={ styles.headtitle }>約束名</Text>
+                <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.id}>{inviter.name}</Text>
                 ))}</Text>
                 <Text>トークルームID:{showTalkroomid}</Text>
@@ -483,13 +485,15 @@ const ApoScreen = () => {
         {!searchText && filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
             <Text style={styles.title}>{title}</Text>
-            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
+            <Text style={styles.content}>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })}</Text>
+            <Text style={ styles.content }>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { hour: 'numeric', minute: 'numeric' })}</Text>
           </TouchableOpacity>
         ))}
         {searchText && serchAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
             <Text style={styles.title}>{highlightText(title, searchText)}</Text>
-            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
+            <Text style={styles.content}>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })}</Text>
+            <Text style={ styles.content }>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { hour: 'numeric', minute: 'numeric' })}</Text>
           </TouchableOpacity>
         ))}
 
@@ -683,7 +687,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#000000',
     opacity: 0.2,
-    marginTop: '7%',
+    marginTop: '2%',
   },
   lightLine2: {
     height: 1,
