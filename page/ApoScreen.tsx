@@ -114,6 +114,14 @@ const ApoScreen = () => {
     setSelectedDate(newDate);
   };
 
+  //記事をスクロールで下げれる 離したときに下がりきるようにしたい
+  const handleScrollEnd = (event) => {
+    console.log(event.nativeEvent.contentOffset.y)
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY < -120) {
+      setShowApoModalVisible(false);;
+    }
+  };
 
   const handlePressDate = () => {
     setShowDatePicker(true);
@@ -276,12 +284,14 @@ const ApoScreen = () => {
         {/* 約束詳細 */}
         <Modal
           transparent={true}
+          animationType="slide"
           visible={showApoModalVisible}
           onRequestClose={() => {
             setShowApoModalVisible(false);
           }}
+          
         >
-          <View style={styles.centeredView}>
+          <ScrollView style={styles.centeredView} scrollEventThrottle={100} contentContainerStyle={styles.contentContainer} onScrollEndDrag={handleScrollEnd}>
             <View style={styles.modalView}>
               <Text>約束名:{showTitle}</Text>
               <Text>詳細:{showContent}</Text>
@@ -297,7 +307,7 @@ const ApoScreen = () => {
                 <Text style={styles.closeButtonText}>閉じる</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       
         {/* 約束追加 */}
@@ -315,8 +325,8 @@ const ApoScreen = () => {
               setFriendModalVisible(false);
             }}
           >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
+            <View style={styles.centeredViewNewApo}>
+              <View style={styles.modalViewNewApo}>
                 <Text>招待する友達を選択してください</Text>
                 {friends.map((friend) => (
                   <TouchableOpacity key={friend.id} onPress={() => setSelectedFriends([...selectedFriends, friend])}>
@@ -331,8 +341,8 @@ const ApoScreen = () => {
               </View>
             </View>
           </Modal>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
+          <View style={styles.centeredViewNewApo}>
+            <View style={styles.modalViewNewApo}>
             <DateTimePickerModal
               isVisible={showDatePicker}
               mode="date"
@@ -424,13 +434,14 @@ const styles = StyleSheet.create({
     height: 'auto',
   },
   closeButton: {
-    backgroundColor: '#ccc',
-    padding: 10,
+    backgroundColor: '#2196F3',
     borderRadius: 5,
-    marginTop: 10,
+    padding: 10,
+    marginTop: 20,
   },
   closeButtonText: {
-    color: '#fff',
+    color: 'white',
+    fontWeight: 'bold',
     textAlign: 'center',
   },
   circle: {
@@ -455,13 +466,38 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     flex: 1,
+  },
+  centeredViewNewApo: {
+    flex: 1,
+    backgroundColor: '#000000aa',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  contentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalView: {
     backgroundColor: '#fff',
+    marginTop: '90%',
     borderRadius: 5,
+    width: '100%',
+    height: '140%',
+    padding: 45,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  modalViewNewApo: {
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    width: '90%',
+    height: '60%',
     padding: 45,
     alignItems: 'center',
     shadowColor: '#000',
@@ -469,8 +505,8 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 1,
+    shadowRadius: 10,
     elevation: 5,
   },
   input1: {
@@ -517,7 +553,9 @@ const styles = StyleSheet.create({
     height: 27,
     backgroundColor: '#000000',
   },
-
+  modalText: {
+    marginBottom: 10,
+  },
 });
 
 export default ApoScreen;
