@@ -6,7 +6,7 @@ import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
-import { format, addMonths, subMonths, lightFormat } from 'date-fns';
+import { format, addMonths, subMonths, lightFormat, set } from 'date-fns';
 import RNCalendarEvents from "react-native-calendar-events";
 
 const ApoScreen = () => {
@@ -32,6 +32,8 @@ const ApoScreen = () => {
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
   const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
+  const [selectnowFriends, setSelectnowFriends] = useState<{ name: string , id:string}[]>([]);
+  const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string , id:string}[]>([]);
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
@@ -110,6 +112,32 @@ const ApoScreen = () => {
     );
   };
 
+  // 招待する友達を選択する処理
+  function inviteSelectedFriends() {
+    const notedSelectedFriends = friends.filter((friend) => {
+      return !selectedFriends.some((selectedFriend) => selectedFriend.id === friend.id);
+    });
+    setNotSelectedFriends(notedSelectedFriends);
+    // 招待する処理     
+    };
+
+  // friendを複数選択して招待する処理
+  const toggleFriendSelection = (friend) => {
+    if (selectnowFriends.includes(friend)) {
+      setSelectnowFriends(selectnowFriends.filter((selectedFriend) => selectedFriend !== friend));
+    } else {
+      setSelectnowFriends([...selectnowFriends, friend]);
+    }
+  };
+
+  // ここで選択された友達を招待する処理を実装する
+  const inviteAllFriends = () => {
+    const newSelectedFriends = [...selectedFriends, ...selectnowFriends];
+    setSelectedFriends(newSelectedFriends);
+    setSelectnowFriends([]);
+    setFriendModalVisible(false);
+  };
+
 
   // 選択した月の予定を取得(昇順に並び替え)
   // 
@@ -174,6 +202,7 @@ const ApoScreen = () => {
     setTitle('');
     setContent('');
     setSelectedFriends([]);
+    setSelectnowFriends([]);
     setSelectedDate(new Date());
     setModalVisible(false);
   };
@@ -394,15 +423,23 @@ const ApoScreen = () => {
           >
             <View style={styles.centeredViewNewApo}>
               <View style={styles.modalViewNewApo}>
-                <Text>招待する友達を選択してください</Text>
-                {friends.map((friend) => (
-                  <TouchableOpacity key={friend.id} onPress={() => setSelectedFriends([...selectedFriends, friend])}>
-                    <Text>{friend.name}</Text>
+                <Text style={styles.modalTitle} >招待する友達を選択してください</Text>
+                {notSelectedFriends.map((friend) => (
+                  <TouchableOpacity key={friend.id} onPress={() => toggleFriendSelection(friend)}>
+                    <View style={styles.friendRow}>
+                      <Text style={styles.friendName}>{friend.name}</Text>
+                      <Ionicons
+                        name={selectnowFriends.includes(friend) ? 'checkbox' : 'checkbox-outline'}
+                        size={25}
+                        color={selectnowFriends.includes(friend) ? 'black' : 'gray'}
+                      />
+                    </View>
                   </TouchableOpacity>
                 ))}
-                <TouchableOpacity style={styles.closeButton} onPress={() => {
-                  setFriendModalVisible(false);
-                }}>
+                <TouchableOpacity style={styles.inviteButton} onPress={inviteAllFriends}>
+                  <Text style={styles.inviteButtonText}>全員を招待する</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.closeButton} onPress={() => setFriendModalVisible(false)}>
                   <Text style={styles.closeButtonText}>閉じる</Text>
                 </TouchableOpacity>
               </View>
@@ -446,14 +483,16 @@ const ApoScreen = () => {
                   <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                 </View>
                 <View>
-                  <TouchableOpacity onPress={() => setFriendModalVisible(true)}>
+                  <TouchableOpacity onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
                     <Text>招待する友達を選択</Text>
                   </TouchableOpacity>
                   {selectedFriends.length > 0 && (
                     <View>
                       <Text>選択されたフレンド:</Text>
                       {selectedFriends.map((friend) => (
-                        <Text key={friend.id}>{friend.name}</Text>
+                        <View key={friend.id}>
+                          <Text>{friend.name}</Text>
+                        </View>
                       ))}
                     </View>
                   )}
@@ -700,7 +739,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: '5%',
     marginLeft: '5%',
-  }
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  friendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  friendName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  inviteButton: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 20,
+  },
+  inviteButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
 });
 
 export default ApoScreen;
