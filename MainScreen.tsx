@@ -9,11 +9,15 @@ import FriendScreen from './page/FriendScreen';
 import TalkScreen from './page/TalkScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from './firebase';
-import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { Image as ImageNative  } from 'react-native';
+import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, getDoc } from 'firebase/firestore';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 const Tab = createBottomTabNavigator();
 
 const MainScreen = ({ navigation }) => {
   const [friendRequests, setFriendRequests] = useState([]);
+  const [iconFriends, seticonFriends] = useState<string[]>([]);
+  const [iconLoaded, setIconLoaded] = useState(false);
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: null,
@@ -33,6 +37,60 @@ const MainScreen = ({ navigation }) => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    // フレンドを取得する処理
+    const user = auth.currentUser;
+    if (!user){
+      return;
+    } 
+    const f = query(collection(firestore, `users/${user.uid}/friends`));
+
+    const listfriend = onSnapshot(f, async (querySnapshot) => {
+      const friends = [];
+      for (const doco of querySnapshot.docs) {
+        const friendData = doco.data();
+        const friendUid = friendData.frienduid;
+        const userRef = doc(firestore, 'users', friendUid);
+        const userDoc = await getDoc(userRef);
+        const photoURL = userDoc.get('photoURL');
+        friends.push({ photoURL });
+      }
+      seticonFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
+    });
+
+    return () => {
+      listfriend();
+    };
+  }, []);
+
+  useEffect(() => {
+    function getSizeNative(uri: string) {
+      console.log(uri)
+      if (uri === 'undefined') {
+        console.log(uri)
+        return null;
+      }
+      console.log(uri)
+      ImageNative.prefetch(uri)
+        .then(() => console.log('Image is ready to use'))
+        .catch((error) => console.log('Image failed to load', error));
+      return null;
+    }
+
+    const friendImagesRoad = iconFriends.map((image) => {
+      console.log(image['photoURL'])
+      if (image['photoURL'] === 'undefined') {
+        return null;
+      }
+        ImageNative.prefetch(image['photoURL'])
+          .then(() => console.log('Image is ready to use'))
+          .catch((error) => console.log('Image failed to load', error));
+        return null;
+    });
+
+  }, [iconFriends]);
+
 
   return (
     <Tab.Navigator
