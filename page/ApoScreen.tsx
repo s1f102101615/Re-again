@@ -75,10 +75,23 @@ const ApoScreen = () => {
 
   // 検索ボックスのテキストが変更されたときappointmetsをフィルタリングする 
   useEffect(() => {
-    const serchAppointments = appointments.filter(({ title, content }) => {
+    const serch = appointments.filter(({ title, content }) => {
       return title.includes(searchText) || content.includes(searchText);
     });
-    setSerchAppointments(serchAppointments);
+    const serchAppointmets = serch
+    .filter(({ appointmentDate }) => {
+      const date = new Date(
+        Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+      );
+      return date;
+    })
+    .sort((a, b) => {
+      const dateA = Number(a.appointmentDate['seconds']) * 1000 + Number(a.appointmentDate['nanoseconds']) / 1000000;
+      const dateB = Number(b.appointmentDate['seconds']) * 1000 + Number(b.appointmentDate['nanoseconds']) / 1000000;
+      return dateA - dateB;
+    });
+
+    setSerchAppointments(serchAppointmets);
   }
   , [searchText]);
 
