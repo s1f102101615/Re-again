@@ -354,11 +354,19 @@ const ApoScreen = () => {
                     <Text style={styles.label}>招待</Text>
                   </TouchableOpacity>
                 </View>
+              <Text style={ styles.headtitle}>画像</Text>
               <View style={ styles.lightLine } />
-                <Text>約束名:{showTitle}</Text>
-                <Text>詳細:{showContent}</Text>
-                <Text>日付:{showApoDate}</Text>
-                <Text>招待者:{showInviter.map((inviter) => (
+              <View style={ styles.lightLine2 } />
+                <Text style={ styles.headtitle}>約束名</Text>
+                <Text>{showTitle}</Text>
+                <Text style={ styles.headtitle}>日付</Text>
+                <Text>{showApoDate}</Text>
+                <Text style={ styles.headtitle}>詳細</Text>
+                <Text>{showContent}</Text>
+                <Text style={ styles.headtitle}>場所</Text>
+                {/* <Text>{showContent}</Text> まだ */}
+                <Text style={ styles.headtitle}>約束名</Text>
+                <Text style={ styles.headtitle}>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.id}>{inviter.name}</Text>
                 ))}</Text>
                 <Text>トークルームID:{showTalkroomid}</Text>
@@ -554,7 +562,7 @@ const styles = StyleSheet.create({
     marginTop: '100%',
     borderRadius: 5,
     width: '100%',
-    height: '150%',
+    height: '125%',
     padding: 0,
     shadowColor: '#000',
     shadowOffset: {
@@ -677,6 +685,18 @@ const styles = StyleSheet.create({
     opacity: 0.2,
     marginTop: '7%',
   },
+  lightLine2: {
+    height: 1,
+    backgroundColor: '#000000',
+    opacity: 0.2,
+    marginTop: '35%',
+  },
+  headtitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: '5%',
+    marginLeft: '5%',
+  }
 });
 
 export default ApoScreen;
