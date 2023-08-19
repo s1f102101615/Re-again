@@ -29,6 +29,8 @@ const ApoScreen = () => {
   const [showInviter, setShowInviter] = useState([]);
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
@@ -70,6 +72,15 @@ const ApoScreen = () => {
   const handleMonthChange = (month: DateData) => {
     setSelectedMonth(new Date(month.timestamp));
   };
+
+  // 検索ボックスのテキストが変更されたときappointmetsをフィルタリングする 
+  useEffect(() => {
+    const serchAppointments = appointments.filter(({ title, content }) => {
+      return title.includes(searchText) || content.includes(searchText);
+    });
+    setSerchAppointments(serchAppointments);
+  }
+  , [searchText]);
 
 
   // 選択した月の予定を取得(昇順に並び替え)
@@ -408,14 +419,26 @@ const ApoScreen = () => {
           <Text style={styles.content}>{appointment.content}</Text>
         </View>
         ))} */}
-        <Text>{selectedMonth.toLocaleString('ja-JP', { month: 'long', year: 'numeric' })}の予定一覧</Text>
+        <TextInput
+          style={styles.searchBox}
+          placeholder="Search"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
+        {!searchText && filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
           </TouchableOpacity>
         ))}
+        {searchText && serchAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.content}>{(new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString())}</Text>
+          </TouchableOpacity>
+        ))}
+
         </ScrollView>
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -556,6 +579,16 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 10,
   },
+  searchBox: {
+    width: '100%',
+    height: 40,
+    padding: 8,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginBottom: 16,
+  }
 });
 
 export default ApoScreen;
