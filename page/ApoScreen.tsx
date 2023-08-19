@@ -6,7 +6,8 @@ import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
-import { format, addMonths, subMonths } from 'date-fns';
+import { format, addMonths, subMonths, lightFormat } from 'date-fns';
+import RNCalendarEvents from "react-native-calendar-events";
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -331,19 +332,37 @@ const ApoScreen = () => {
         >
           <ScrollView style={styles.centeredView} scrollEventThrottle={100} contentContainerStyle={styles.contentContainer} onScrollEndDrag={handleScrollEnd}>
             <View style={styles.modalView}>
-              <Text>約束名:{showTitle}</Text>
-              <Text>詳細:{showContent}</Text>
-              <Text>日付:{showApoDate}</Text>
-              <Text>招待者:{showInviter.map((inviter) => (
-                <Text key={inviter.id}>{inviter.name}</Text>
-              ))}</Text>
-              <Text>トークルームID:{showTalkroomid}</Text>
-              <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={() => {
-                setShowApoModalVisible(false);
-              }}>
-                <Text style={styles.closeButtonText}>閉じる</Text>
-              </TouchableOpacity>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>約束の詳細</Text>
+                <TouchableOpacity style={styles.closeButtonX} onPress={() => {
+                  setShowApoModalVisible(false);
+                }}>
+                  <Ionicons name="close" size={30} color="black" />
+                </TouchableOpacity>
+              </View>
+                <View style={styles.likeedit} >
+                  <TouchableOpacity style={styles.item}>
+                    <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>お気に入り</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.item}>
+                  <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>約束している人</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.item}>
+                    <Ionicons name="close" size={30} color="black" />
+                    <Text style={styles.label}>招待</Text>
+                  </TouchableOpacity>
+                </View>
+              <View style={ styles.lightLine } />
+                <Text>約束名:{showTitle}</Text>
+                <Text>詳細:{showContent}</Text>
+                <Text>日付:{showApoDate}</Text>
+                <Text>招待者:{showInviter.map((inviter) => (
+                  <Text key={inviter.id}>{inviter.name}</Text>
+                ))}</Text>
+                <Text>トークルームID:{showTalkroomid}</Text>
+                <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
             </View>
           </ScrollView>
         </Modal>
@@ -484,13 +503,16 @@ const styles = StyleSheet.create({
     height: 'auto',
   },
   closeButton: {
-    backgroundColor: '#2196F3',
     borderRadius: 5,
     padding: 10,
-    marginTop: 20,
+    marginTop: 0,
+  },
+  closeButtonX:{
+    paddingTop:10,
+    paddingRight:20,
   },
   closeButtonText: {
-    color: 'white',
+    color: 'Black',
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -529,11 +551,11 @@ const styles = StyleSheet.create({
   },
   modalView: {
     backgroundColor: '#fff',
-    marginTop: '90%',
+    marginTop: '100%',
     borderRadius: 5,
     width: '100%',
-    height: '140%',
-    padding: 45,
+    height: '150%',
+    padding: 0,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -542,6 +564,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 5,
+    justifyContent: 'flex-start',
   },
   modalViewNewApo: {
     backgroundColor: '#fff',
@@ -588,6 +611,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    justifyContent: 'flex-start',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -618,6 +642,40 @@ const styles = StyleSheet.create({
   },
   highlight: {
     backgroundColor: 'yellow',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+  },
+  modalHeaderText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginRight: '26%',
+    marginTop: '2%',
+  },
+  likeedit: {
+    flexDirection: 'row', // 要素を横に並べる
+    justifyContent: 'space-between', // 要素間のスペースを均等に分配
+    paddingHorizontal: '13%', // 左右のパディング
+    alignItems: 'center', // 縦方向に中央揃え
+    marginTop: '3%',
+    marginRight: '4%',
+  },
+  item: {
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 12,
+    marginTop: 8,
+  },
+  lightLine: {
+    height: 1,
+    backgroundColor: '#000000',
+    opacity: 0.2,
+    marginTop: '7%',
   },
 });
 

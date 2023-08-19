@@ -8,7 +8,8 @@ const firebaseConfig = {
   apiKey: "AIzaSyBhjbJsXG_u4bCy3pFqRIgreYU_aNG_2uM",
   authDomain: "re-again-b7bb2.firebaseapp.com",
   projectId: "re-again-b7bb2",
-  storageBucket: "re-again-b7bb2.appspot.com",
+  //使用量を抑えるために停止語尾のmを削除
+  storageBucket: "re-again-b7bb2.appspot.co",
   messagingSenderId: "1096224012505",
   appId: "1:1096224012505:web:5b3338ddf3e4f36e1d26c8"
 };
