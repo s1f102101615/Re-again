@@ -143,6 +143,7 @@ const MainScreen = ({ navigation }) => {
       />
       <Tab.Screen
         name="約束"
+        options={{ headerShown: false }}
         component={ApoScreen}
       />
       <Tab.Screen
