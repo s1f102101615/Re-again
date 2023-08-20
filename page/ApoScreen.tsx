@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView
 import { auth, firestore } from '../firebase';
 import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
 import { Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
 import { format, addMonths, subMonths, lightFormat, set } from 'date-fns';
@@ -447,6 +447,9 @@ const ApoScreen = () => {
           </Modal>
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
+              <View style={{ width: '100%', marginTop:'7%' }}>
+                <Text style={{ fontSize:27, fontWeight: 'bold', textAlign:'left', paddingLeft:'5%' }}>約束の作成</Text>
+              </View>
             <DateTimePickerModal
               isVisible={showDatePicker}
               mode="date"
@@ -461,47 +464,63 @@ const ApoScreen = () => {
               onCancel={() => setShowTimePicker(false)}
               locale="ja"
             />
-              <View>
-                <Text>Apo Screen</Text>
-                <TextInput
-                  style={styles.input1}
-                  onChangeText={setTitle}
-                  value={title}
-                  placeholder="約束名を入力してください"
-                />
-                <TextInput
-                  style={styles.input1}
-                  onChangeText={setContent}
-                  value={content}
-                  placeholder="詳細を入力してください"
-                />
-              <View>
-                <View>
-                  <Text onPress={handlePressDate}>日付: {selectedDate.toLocaleDateString("ja-JP")}</Text>
+              <View style={{ width: '100%', paddingTop:'6%' }}>
+                  <TextInput
+                    style={styles.input1}
+                    onChangeText={setTitle}
+                    value={title}
+                    placeholder="約束名を入力してください"
+                  />
+                <Text style={{ paddingTop:'5%', paddingLeft:'5%', fontWeight:'bold', fontSize:20 }}>日時: </Text>
+                <View style={{ paddingLeft:'6%' }}>
+                  <View style={{ flexDirection: 'row', paddingLeft:'3%' }}>
+                    <Text style={{ fontWeight:'bold', fontSize:20 }} onPress={handlePressDate}>{selectedDate.toLocaleDateString("ja-JP")}</Text>
+                    <Text style={{ fontWeight:'bold', fontSize:20 }} onPress={handlePressTime}> {selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  </View>
+                  <Text style={{ fontSize:20, fontWeight:'bold', paddingLeft:'40%'}}> ～</Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ fontWeight:'bold', fontSize:20, paddingLeft:'43%' }} >{selectedDate.toLocaleDateString("ja-JP")}</Text>
+                    <Text style={{ fontWeight:'bold', fontSize:20  }} > {selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  </View>
                 </View>
                 <View>
-                  <Text onPress={handlePressTime}>時間:{selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-                </View>
-                <View>
-                  <TouchableOpacity onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
-                    <Text>招待する友達を選択</Text>
+                  <View style={[styles.likeedit,{ paddingTop:'5%' }]} >
+                    <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
+                      <Ionicons name="close" size={30} color="black" />
+                      <Text style={styles.label}>招待</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.item}>
+                      <Ionicons name="close" size={30} color="black" />
+                      <Text style={styles.label}>場所</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.item}>
+                      <Ionicons name="close" size={30} color="black" />
+                      <Text style={styles.label}>画像投稿</Text>
+                    </TouchableOpacity>
+                  </View>
+                    {selectedFriends.length > 0 && (
+                      <View>
+                        <Text>選択されたフレンド:</Text>
+                        {selectedFriends.map((friend) => (
+                          <View key={friend.id}>
+                            <Text>{friend.name}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    <TextInput
+                    style={styles.input2}
+                    onChangeText={setContent}
+                    value={content}
+                    multiline={true}
+                    placeholder="詳細を入力してください"
+                    numberOfLines={4}
+                    />
+                    <Button title="Save" onPress={handleSave} />
+                  <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+                    <Text style={styles.closeButtonText}>閉じる</Text>
                   </TouchableOpacity>
-                  {selectedFriends.length > 0 && (
-                    <View>
-                      <Text>選択されたフレンド:</Text>
-                      {selectedFriends.map((friend) => (
-                        <View key={friend.id}>
-                          <Text>{friend.name}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
                 </View>
-                <Button title="Save" onPress={handleSave} />
-              </View>
-              <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-                <Text style={styles.closeButtonText}>閉じる</Text>
-              </TouchableOpacity>
             </View>
             </View>
           </View>
@@ -556,14 +575,13 @@ const styles = StyleSheet.create({
   closeButton: {
     borderRadius: 5,
     padding: 10,
-    marginTop: 0,
   },
   closeButtonX:{
     paddingTop:10,
     paddingRight:20,
   },
   closeButtonText: {
-    color: 'Black',
+    color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -621,8 +639,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 5,
     width: '90%',
-    height: '60%',
-    padding: 45,
+    height: '70%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -635,9 +652,19 @@ const styles = StyleSheet.create({
   },
   input1: {
     borderWidth: 1,
-    padding: 5,
-    marginVertical: 10,
-    width: 230,
+    padding: 15,
+    width: '90%',
+    marginLeft: '5%',
+    textAlign: 'left',
+  },
+  input2: {
+    borderWidth: 1,
+    padding: 15,
+    width: '90%',
+    height: '30%',
+    marginLeft: '5%',
+    textAlign: 'left',
+    marginTop: '7%',
   },
   title: {
     fontSize: 18,
