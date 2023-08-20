@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import TalkRoom from './TalkRoom';
+import TalkRoom from './TalkScreen/TalkRoom';
 import { createStackNavigator } from '@react-navigation/stack';
-import TalkList from './TalkList';
+import TalkList from './TalkScreen/TalkList';
 
 const Stack = createStackNavigator();
 
