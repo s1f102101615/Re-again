@@ -7,6 +7,8 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import * as ExpoCalendar from 'expo-calendar';
+
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
@@ -14,8 +16,11 @@ const ApoScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDateEnd, setSelectedDateEnd] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePickerEnd, setShowDatePickerEnd] = useState(false);
+  const [showTimePickerEnd, setShowTimePickerEnd] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
   const [friends, setFriends] = useState<{ name: string , id:string }[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
@@ -181,6 +186,18 @@ const ApoScreen = () => {
     setSelectedDate(newDate);
   };
 
+  const handleDateChangeEnd = (date: Date) => {
+    setShowDatePickerEnd(false);
+    const newDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      selectedDateEnd.getHours(),
+      selectedDateEnd.getMinutes()
+    );
+    setSelectedDateEnd(newDate);
+  };
+
   const handleTimeChange = (time: Date) => {
     setShowTimePicker(false);
     const newDate = new Date(
@@ -191,6 +208,18 @@ const ApoScreen = () => {
       time.getMinutes()
     );
     setSelectedDate(newDate);
+  };
+
+  const handleTimeChangeEnd = (time: Date) => {
+    setShowTimePickerEnd(false);
+    const newDate = new Date(
+      selectedDateEnd.getFullYear(),
+      selectedDateEnd.getMonth(),
+      selectedDateEnd.getDate(),
+      time.getHours(),
+      time.getMinutes()
+    );
+    setSelectedDateEnd(newDate);
   };
 
   //記事をスクロールで下げれる 離したときに下がりきるようにしたい
@@ -206,8 +235,16 @@ const ApoScreen = () => {
     setShowDatePicker(true);
   };
 
+  const handlePressDateEnd = () => {
+    setShowDatePickerEnd(true);
+  };
+
   const handlePressTime = () => {
     setShowTimePicker(true);
+  };
+
+  const handlePressTimeEnd = () => {
+    setShowTimePickerEnd(true);
   };
 
   const handleClose = () => {
@@ -257,6 +294,27 @@ const ApoScreen = () => {
       const talkroomdocRef = await addDoc(talkroomRef, {
         talktitle:title,
       });
+
+      // 手元のカレンダーに追加
+      const eventDetails = {
+        title: title, // 予定のタイトル
+        startDate: selectedDate,
+        endDate: selectedDateEnd,
+        timeZone: 'Asia/Tokyo', // タイムゾーン
+        location: 'オフィス', // 場所
+        notes: content, // メモ
+      };
+      try {
+        const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
+        if (status === 'granted') {
+          const calendar = await ExpoCalendar.getDefaultCalendarAsync();
+          const eventId = await ExpoCalendar.createEventAsync(calendar.id, eventDetails);
+          console.log('Event added with ID:', eventId);
+        }
+      } catch (error) {
+        console.error('Error adding event:', error);
+      }
+
       console.log("Document written with ID: ", talkroomdocRef.id);
       setTitle(''); // タイトルをクリアする
       setContent(''); // コンテンツをクリアする
@@ -482,6 +540,20 @@ const ApoScreen = () => {
               onCancel={() => setShowTimePicker(false)}
               locale="ja"
             />
+            <DateTimePickerModal
+              isVisible={showDatePickerEnd}
+              mode="date"
+              onConfirm={handleDateChangeEnd}
+              onCancel={() => setShowDatePickerEnd(false)}
+              locale="ja"
+            />
+            <DateTimePickerModal
+              isVisible={showTimePickerEnd}
+              mode="time"
+              onConfirm={handleTimeChangeEnd}
+              onCancel={() => setShowTimePickerEnd(false)}
+              locale="ja"
+            />
               <View style={{ width: '100%', paddingTop:'6%' }}>
                   <TextInput
                     style={styles.input1}
@@ -497,8 +569,8 @@ const ApoScreen = () => {
                   </View>
                   <Text style={{ fontSize:20, fontWeight:'bold', paddingLeft:'40%'}}> ～</Text>
                   <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ fontWeight:'bold', fontSize:20, paddingLeft:'43%' }} >{selectedDate.toLocaleDateString("ja-JP")}</Text>
-                    <Text style={{ fontWeight:'bold', fontSize:20  }} > {selectedDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <Text style={{ fontWeight:'bold', fontSize:20, paddingLeft:'43%' }}  onPress={handlePressDateEnd}>{selectedDateEnd.toLocaleDateString("ja-JP")}</Text>
+                    <Text style={{ fontWeight:'bold', fontSize:20  }}  onPress={handlePressTimeEnd}> {selectedDateEnd.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
                 </View>
                 <View>

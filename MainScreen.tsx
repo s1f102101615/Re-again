@@ -1,6 +1,6 @@
 // MainScreen.js
 import React, { useEffect, useState } from 'react';
-import { StyleSheet , View, Text } from 'react-native';
+import { StyleSheet , View, Text, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './page/HomeScreen';
 import ProfileScreen from './page/ProfileScreen';
@@ -11,7 +11,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from './firebase';
 import { Image as ImageNative  } from 'react-native';
 import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, getDoc } from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +26,7 @@ const MainScreen = ({ navigation }) => {
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
+    
     const user = auth.currentUser;
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
