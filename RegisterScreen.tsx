@@ -10,6 +10,18 @@ import {
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+// ログイン情報を保存する関数
+const saveLoginInfo = async (email: string, password: string) => {
+  try {
+    await AsyncStorage.setItem('email', email);
+    await AsyncStorage.setItem('password', password);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 
 const RegisterScreen = () => {
@@ -20,7 +32,8 @@ const RegisterScreen = () => {
         try {
           const user = await createUserWithEmailAndPassword(auth, email, password);
           console.log(user);
-          //mainを編集するとおそらく治る
+          saveLoginUser(email,password);
+
           navigation.navigate('Setname' as never);
         } catch (error) {
           console.log(error.message);

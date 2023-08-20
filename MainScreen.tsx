@@ -11,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from './firebase';
 import { Image as ImageNative  } from 'react-native';
 import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, getDoc } from 'firebase/firestore';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Tab = createBottomTabNavigator();
 
 const MainScreen = ({ navigation }) => {
@@ -90,7 +91,6 @@ const MainScreen = ({ navigation }) => {
     });
 
   }, [iconFriends]);
-
 
   return (
     <Tab.Navigator
