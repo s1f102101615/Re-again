@@ -1,15 +1,52 @@
 // LoginScreen.js
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
+
+  // ログイン情報を取得する関数
+  const getLoginInfo = async () => {
+    try {
+      const email = await AsyncStorage.getItem('email');
+      const password = await AsyncStorage.getItem('password');
+      if (email !== null && password !== null) {
+        // ログイン情報が存在する場合は、ログイン処理を行う
+        try {
+              await signInWithEmailAndPassword(auth, email, password);
+              const user = await auth.currentUser;
+              if (user.displayName === null) {
+              saveLoginInfo(email,password);
+              navigation.navigate('Setname' as never);
+              } else {
+              saveLoginInfo(email,password);
+              navigation.navigate('Main' as never);
+              }
+            } catch (error) {
+              console.log(error.message);
+            }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ログイン情報を保存する関数
+const saveLoginInfo = async (email: string, password: string) => {
+  try {
+    await AsyncStorage.setItem('email', email);
+    await AsyncStorage.setItem('password', password);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleLogin = async () => {
     // ここでログイン処理を実行し、ログインが成功した場合にメイン画面に遷移する処理を追加する
@@ -19,10 +56,10 @@ const LoginScreen = () => {
       await signInWithEmailAndPassword(auth, email, password);
       const user = await auth.currentUser;
       if (user.displayName === null) {
-      //mainを治せばおそらく治る
+      saveLoginInfo(email,password);
       navigation.navigate('Setname' as never);
       } else {
-      //mainを治せばおそらく治る
+      saveLoginInfo(email,password);
       navigation.navigate('Main' as never);
       }
     } catch (error) {
@@ -33,6 +70,12 @@ const LoginScreen = () => {
     //mainを治せばおそらく治る
     navigation.navigate('Register' as never);
   }
+
+  useEffect(() => {
+    getLoginInfo();
+  }
+  , []);
+
 
   return (
     <View style={styles.container}>
