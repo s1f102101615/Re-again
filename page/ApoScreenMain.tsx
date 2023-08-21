@@ -8,13 +8,14 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import * as ExpoCalendar from 'expo-calendar';
+import { ja } from 'date-fns/locale';
 
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateEnd, setSelectedDateEnd] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -35,7 +36,7 @@ const ApoScreen = () => {
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
-  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
+  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
   const [selectnowFriends, setSelectnowFriends] = useState<{ name: string , id:string}[]>([]);
   const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string , id:string}[]>([]);
   const [talkid, setTalkid] = useState('');
@@ -96,7 +97,7 @@ const ApoScreen = () => {
   // 検索ボックスのテキストが変更されたときappointmetsをフィルタリングする 
   useEffect(() => {
     const serch = appointments.filter(({ title, content }) => {
-      return title.includes(searchText) || content.includes(searchText);
+      return title.includes(searchText);
     });
     const serchAppointmets = serch
     .filter(({ appointmentDate }) => {
@@ -287,6 +288,7 @@ const ApoScreen = () => {
         content: content,
         talkroomid: randamid,
         appointmentDate: selectedDate,
+        appointmentDateEnd: selectedDateEnd,
         createdAt: new Date(),
       });
       // firestoreにtalkroomを作成
@@ -327,7 +329,7 @@ const ApoScreen = () => {
   };
 
   // 約束を選択したときの処理
-  const setSelectedApo = (id: string, title: string, appointmentDate: string, content: string, inviter: [], talkroomid:string, createAt:DateData) => {
+  const setSelectedApo = (id: string, title: string, appointmentDate: string,appointmentDateEnd:string, content: string, inviter: [], talkroomid:string, createAt:DateData) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
     );
@@ -372,7 +374,7 @@ const ApoScreen = () => {
   }
     const q2 = query(collection(firestore, 'newAppo'));
     const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string; appointmentDate: string; inviter:[]; talkroomid:string;createAt:DateData}[] = [];
+      const appointments: { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -382,6 +384,7 @@ const ApoScreen = () => {
                 title: data.title,
                 content: data.content,
                 appointmentDate: data.appointmentDate,
+                appointmentDateEnd: data.appointmentDateEnd,
                 inviter: data.inviter,
                 talkroomid: data.talkroomid,
                 createAt: data.createdAt,
@@ -630,18 +633,50 @@ const ApoScreen = () => {
           onChangeText={setSearchText}
         />
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {!searchText && filteredAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.content}>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })}</Text>
-            <Text style={ styles.content }>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { hour: 'numeric', minute: 'numeric' })}</Text>
+        {!searchText && filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
+            <View style={{ flexDirection: 'row',height:'100%' }}>
+            <Text style={styles.contenttime}>{
+            Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
+            }時間{
+              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
+            }分</Text>
+            <View style={styles.ibar}></View>
+            <View>
+              <Text style={styles.title}>{title}</Text>
+              <View style={{ marginTop:11, marginLeft:3 }}>
+              <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+              {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              </View>
+            </View>
+            <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
+              <Ionicons name="md-pin" size={18} color="#900" />
+              <Text>場所</Text>
+            </View>
+            </View>
           </TouchableOpacity>
         ))}
-        {searchText && serchAppointments.map(({ id, title, appointmentDate, content , inviter, talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate, content , inviter, talkroomid, createAt)} >
-            <Text style={styles.title}>{highlightText(title, searchText)}</Text>
-            <Text style={styles.content}>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })}</Text>
-            <Text style={ styles.content }>{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { hour: 'numeric', minute: 'numeric' })}</Text>
+        {searchText && serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
+            <View style={{ flexDirection: 'row',height:'100%' }}>
+            <Text style={styles.contenttime}>{
+            Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
+            }時間{
+            Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
+            }分</Text>
+            <View style={styles.ibar}></View>
+            <View>
+              <Text style={styles.title}>{highlightText(title, searchText)}</Text>
+              <View style={{ marginTop:11, marginLeft:3 }}>
+              <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
+              {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              </View>
+            </View>
+            <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
+              <Ionicons name="md-pin" size={18} color="#900" />
+              <Text>場所</Text>
+            </View>
+            </View>
           </TouchableOpacity>
         ))}
 
@@ -757,20 +792,32 @@ const styles = StyleSheet.create({
     marginTop: '7%',
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    marginLeft: 3,
   },
   content: {
     fontSize: 16,
   },
+  contentLeft: {
+    fontSize: 16,
+    
+  },
+  contenttime: {
+    fontSize: 16,
+    height: '100%',
+    width: '27%',
+    textAlign: 'center',
+    paddingTop: '7%',
+  
+  },
   contain: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    height: 100,
-    width: '90%',
-    marginTop: 5,
-    marginBottom: 5,
+    backgroundColor: '#f7feff',
+    height: 80,
+    width: '100%',
+    marginTop: 4,
+    marginBottom: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -884,6 +931,13 @@ const styles = StyleSheet.create({
   talkroomRef: {
     width: '100%',
     marginTop: '3%',
+  },
+  ibar: {
+    width: '2%',
+    height: '100%',
+    backgroundColor: '#f13434',
+    opacity: 0.2,
+    
   }
 });
 
