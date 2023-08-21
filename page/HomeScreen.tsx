@@ -113,17 +113,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#fff',
+    width:'100%',
   },
   profile: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
+    marginLeft: 34,
+    marginTop: 12,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginRight: 16,
+    marginRight: 18,
   },
   cameraIcon: {
     position: 'absolute',

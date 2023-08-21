@@ -32,7 +32,7 @@ const RegisterScreen = () => {
         try {
           const user = await createUserWithEmailAndPassword(auth, email, password);
           console.log(user);
-          saveLoginUser(email,password);
+          saveLoginInfo(email,password);
 
           navigation.navigate('Setname' as never);
         } catch (error) {
