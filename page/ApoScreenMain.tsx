@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
 import { Modal } from 'react-native';
@@ -40,6 +40,8 @@ const ApoScreen = () => {
   const [selectnowFriends, setSelectnowFriends] = useState<{ name: string , id:string}[]>([]);
   const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string , id:string}[]>([]);
   const [talkid, setTalkid] = useState('');
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [apoAddVisible, setApoAddVisible] = useState(false);
 
   //ヘッダー消去
   useEffect(() => {
@@ -277,6 +279,14 @@ const ApoScreen = () => {
     const user = auth.currentUser;
     if (!user) {
       console.error('User is not logged in.');
+      return;
+    }
+    if (!title) {
+      Alert.alert('エラー', '約束名を入力してください');
+      return;
+    }
+    if (selectedDate > selectedDateEnd) {
+      Alert.alert('エラー', '開始日時が終了日時よりも前になっています');
       return;
     }
     try {
@@ -626,12 +636,31 @@ const ApoScreen = () => {
           <Text style={styles.content}>{appointment.content}</Text>
         </View>
         ))} */}
-        <TextInput
-          style={styles.searchBox}
-          placeholder="Search"
-          value={searchText}
-          onChangeText={setSearchText}
-        />
+        <View style={styles.searchContainer}>
+          <TouchableOpacity style={styles.searchIconContainer} onPress={() => setSearchVisible(true)}>
+            <Ionicons name="search" size={20} color="black" />
+          </TouchableOpacity>
+          {searchVisible && (
+            <View style={styles.searchBoxContainer}>
+            <TextInput
+              style={styles.searchBox}
+              placeholder="Search"
+              value={searchText}
+              onChangeText={setSearchText}
+              autoFocus={true}
+            />
+            <TouchableOpacity style={styles.closeIconContainer} onPress={() => {
+                setSearchText('');
+                setSearchVisible(false)
+              }}>
+              <Ionicons name="close-circle" size={24} color="black" />
+            </TouchableOpacity>
+            </View>
+          )}
+          <TouchableOpacity style={styles.ApoIconContainer} onPress={() => setApoAddVisible(true)}>
+            <Ionicons name="md-add-circle" size={20} color="black" />
+          </TouchableOpacity>
+        </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
         {!searchText && filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
@@ -852,8 +881,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 4,
-    marginBottom: 16,
+    paddingHorizontal: 10,
+    marginLeft: 5,
+    borderRadius: 5,
   },
   highlight: {
     backgroundColor: 'yellow',
@@ -937,8 +967,42 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#f13434',
     opacity: 0.2,
-    
-  }
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 5,
+    alignContent: 'flex-start',
+    width: '100%',
+  },
+  searchIconContainer: {
+    padding: 10,
+    marginLeft: 10,
+  },
+  ApoIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 5,
+    alignContent: 'flex-start',
+    width: '100%',
+    left: '76%',
+  },
+  searchBoxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    alignContent: 'flex-start',
+    width: '80%',
+  },
+  closeIconContainer: {
+    position: 'absolute',
+    top: -3,
+    right: -5,
+    padding: 10,
+  },
+  
 });
 
 export default ApoScreen;

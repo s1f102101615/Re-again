@@ -152,6 +152,7 @@ const MainScreen = ({ navigation }) => {
       />
       <Tab.Screen
         name="プロフィール"
+        options={{ headerShown: false }}
         component={ProfileScreen}
       />
     </Tab.Navigator>
