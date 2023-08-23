@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { auth, firebase, firestore } from '../../firebase';
 import { collection, query, where, QuerySnapshot, getDocs, onSnapshot } from 'firebase/firestore';
-
+import { Ionicons, Feather } from '@expo/vector-icons';
 
 const InvFriend = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,12 +37,33 @@ const InvFriend = () => {
   return (
     <View style={styles.container}>
       {promises.map((promise) => (
-        <TouchableOpacity key={promise.id} onPress={() => {
-          setSelectedPromise(promise);
-          setModalVisible(true);
-        }} style={styles.promise}>
-          <Text style={styles.promiseTitle}>{promise.title}</Text>
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.contain} key={promise.id} onPress={() => {setSelectedPromise(promise);setModalVisible(true);}} >
+        <View style={{ flexDirection: 'row',height:'100%' }}>
+        <Text style={styles.contenttime}>{
+        Math.floor((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
+        }時間{
+          Math.floor(((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
+        }分</Text>
+        <View style={styles.ibar}></View>
+        <View>
+          <Text style={styles.title}>{promise.title}</Text>
+          <View style={{ marginTop:11, marginLeft:3 }}>
+          <Text style={styles.content}>開始:{new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+          {promise.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(promise.appointmentDateEnd['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+          </View>
+        </View>
+        <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
+          <Ionicons name="md-pin" size={18} color="#900" />
+          <Text>場所</Text>
+        </View>
+        </View>
+      </TouchableOpacity>
+        // <TouchableOpacity key={promise.id} onPress={() => {
+        //   setSelectedPromise(promise);
+        //   setModalVisible(true);
+        // }} style={styles.promise}>
+        //   <Text style={styles.promiseTitle}>{promise.title}</Text>
+        // </TouchableOpacity>
       ))}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modal}>
@@ -108,6 +129,44 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  contain: {
+    backgroundColor: '#f7feff',
+    height: 80,
+    width: '100%',
+    marginTop: 4,
+    marginBottom: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    justifyContent: 'flex-start',
+  },
+  contenttime: {
+    fontSize: 16,
+    height: '100%',
+    width: '27%',
+    textAlign: 'center',
+    paddingTop: '7%',
+  },
+  ibar: {
+    width: '2%',
+    height: '100%',
+    backgroundColor: '#f13434',
+    opacity: 0.2,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    marginLeft: 3,
+  },
+  content: {
+    fontSize: 16,
   },
 });
 

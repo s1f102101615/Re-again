@@ -612,7 +612,7 @@ const ApoScreen = () => {
                       <View>
                         <Text>選択されたフレンド:</Text>
                         {selectedFriends.map((friend) => (
-                          <View key={friend.id}>
+                          <View key={friend.name}>
                             <Text>{friend.name}</Text>
                           </View>
                         ))}
