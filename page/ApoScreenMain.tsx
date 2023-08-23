@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, where, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, addDoc, onSnapshot } from 'firebase/firestore';
 import { Modal } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar, DateData } from 'react-native-calendars';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import * as ExpoCalendar from 'expo-calendar';
-import { ja } from 'date-fns/locale';
 
 
 const ApoScreen = () => {

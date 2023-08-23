@@ -3,7 +3,6 @@ import TalkRoom from './TalkScreen/TalkRoom';
 import ApoScreenMain from './ApoScreenMain';
 import invfriend from './AposcreenTab/invfriend'
 import { NavigationContainer } from '@react-navigation/native';
-import * as Calendar from 'expo-calendar';
 
 
 const Stack = createStackNavigator();

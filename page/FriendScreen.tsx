@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { Image } from 'react-native';
 import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, collectionGroup, DocumentData, getDoc } from 'firebase/firestore';

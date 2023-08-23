@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { auth, firebase, firestore } from '../../firebase';
-import { collection, query, where, QuerySnapshot, getDocs, onSnapshot } from 'firebase/firestore';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { auth, firestore } from '../../firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 
 const InvFriend = () => {
   const [modalVisible, setModalVisible] = useState(false);
