@@ -58,17 +58,14 @@ const InvFriend = () => {
         </View>
         </View>
       </TouchableOpacity>
-        // <TouchableOpacity key={promise.id} onPress={() => {
-        //   setSelectedPromise(promise);
-        //   setModalVisible(true);
-        // }} style={styles.promise}>
-        //   <Text style={styles.promiseTitle}>{promise.title}</Text>
-        // </TouchableOpacity>
       ))}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>{selectedPromise?.title}</Text>
-          <Text style={styles.modalDescription}>{selectedPromise?.description}</Text>
+          <Text style={styles.modalDescription}>{selectedPromise?.content}</Text>
+          <Text style={styles.content}>開始:{new Date(Number(selectedPromise?.appointmentDate['seconds']) * 1000 + Number(selectedPromise?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+          {selectedPromise?.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(selectedPromise?.appointmentDateEnd['seconds']) * 1000 + Number(selectedPromise?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+          <Text style={styles.modalDescription}>場所: {selectedPromise?.location}</Text>
           <TouchableOpacity onPress={handleAccept} style={styles.modalButton}>
             <Text style={styles.modalButtonText}>承諾</Text>
           </TouchableOpacity>
@@ -108,6 +105,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#fff',
+    justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 20,
