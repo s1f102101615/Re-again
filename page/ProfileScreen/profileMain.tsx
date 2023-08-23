@@ -64,6 +64,11 @@ const ProfileScreen = () => {
       });
   };
 
+  // 設定画面に遷移
+  const handleSetting = () => {
+    navigation.navigate('setting' as never);
+  };
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -163,7 +168,7 @@ const ProfileScreen = () => {
         </View> 
 
         <View style={styles.settinglist}>
-          <TouchableOpacity style={styles.settingitem}>
+          <TouchableOpacity style={styles.settingitem} onPress={handleSetting}>
             <Icon name="cog" size={35} color="black" />
             <Text style={styles.label}>設定</Text>
           </TouchableOpacity>
