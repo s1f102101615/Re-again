@@ -43,8 +43,12 @@ const TalkRoom = () => {
       }
   };
 
-  
-  
+  const navigation = useNavigation();
+
+  const handleMenuPress = () => {
+    navigation.navigate('TalkRoomMenu', { talkroomId });
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       const user = auth.currentUser;
@@ -82,7 +86,12 @@ const TalkRoom = () => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.header}>Talk Room {talkroomId}</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Talk Room {talkroomId}</Text>
+          <TouchableOpacity onPress={handleMenuPress}>
+            <Ionicons name="menu" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
         {messages.map((message) => (
           <View
             key={message.id}
@@ -130,10 +139,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    padding: 16,
   },
   message: {
     padding: 8,
