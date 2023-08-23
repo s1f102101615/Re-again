@@ -22,8 +22,8 @@ const ApoScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePickerEnd, setShowDatePickerEnd] = useState(false);
   const [showTimePickerEnd, setShowTimePickerEnd] = useState(false);
-  const [selectedFriends, setSelectedFriends] = useState<{ name: string , id:string}[]>([]);
-  const [friends, setFriends] = useState<{ name: string , id:string }[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<{ name: string }[]>([]);
+  const [friends, setFriends] = useState<{ name: string }[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -37,8 +37,8 @@ const ApoScreen = () => {
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
   const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
-  const [selectnowFriends, setSelectnowFriends] = useState<{ name: string , id:string}[]>([]);
-  const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string , id:string}[]>([]);
+  const [selectnowFriends, setSelectnowFriends] = useState<{ name: string }[]>([]);
+  const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string }[]>([]);
   const [talkid, setTalkid] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
   const [apoAddVisible, setApoAddVisible] = useState(false);
@@ -132,10 +132,16 @@ const ApoScreen = () => {
     );
   };
 
+  const Apoinviter = () => {
+    //invfriendに遷移する処理
+    navigation.navigate('招待' as never);
+  }
+
+
   // 招待する友達を選択する処理
   function inviteSelectedFriends() {
     const notedSelectedFriends = friends.filter((friend) => {
-      return !selectedFriends.some((selectedFriend) => selectedFriend.id === friend.id);
+      return !selectedFriends.some((selectedFriend) => selectedFriend.name === friend.name);
     });
     setNotSelectedFriends(notedSelectedFriends);
     // 招待する処理     
@@ -291,9 +297,10 @@ const ApoScreen = () => {
     }
     try {
       const randamid = Math.random().toString(32).substring(2);
+      const inviterList = selectedFriends.map((friend) => ({ name: friend.name }));
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
-        inviter: selectedFriends,
+        inviter: inviterList,
         title: title,
         content: content,
         talkroomid: randamid,
@@ -487,7 +494,7 @@ const ApoScreen = () => {
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>約束名</Text>
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
-                  <Text key={inviter.id}>{inviter.name}</Text>
+                  <Text key={inviter.name}>{inviter.name}</Text>
                 ))}</Text>
                 <Text>トークルームID:{showTalkroomid}</Text>
                 <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
@@ -514,7 +521,7 @@ const ApoScreen = () => {
               <View style={styles.modalViewNewApo}>
                 <Text style={styles.modalTitle} >招待する友達を選択してください</Text>
                 {notSelectedFriends.map((friend) => (
-                  <TouchableOpacity key={friend.id} onPress={() => toggleFriendSelection(friend)}>
+                  <TouchableOpacity key={friend.name} onPress={() => toggleFriendSelection(friend)}>
                     <View style={styles.friendRow}>
                       <Text style={styles.friendName}>{friend.name}</Text>
                       <Ionicons
@@ -657,7 +664,7 @@ const ApoScreen = () => {
             </TouchableOpacity>
             </View>
           )}
-          <TouchableOpacity style={styles.ApoIconContainer} onPress={() => setApoAddVisible(true)}>
+          <TouchableOpacity style={styles.ApoIconContainer} onPress={() => Apoinviter()}>
             <Ionicons name="md-add-circle" size={20} color="black" />
           </TouchableOpacity>
         </View>
