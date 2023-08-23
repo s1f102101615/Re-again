@@ -1,6 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import TalkRoom from './TalkScreen/TalkRoom';
 import ApoScreenMain from './ApoScreenMain';
+import invfriend from './AposcreenTab/invfriend'
 import { NavigationContainer } from '@react-navigation/native';
 import * as Calendar from 'expo-calendar';
 
@@ -30,6 +31,7 @@ function AppScreen() {
     <NavigationContainer independent={true}>
       <Stack.Navigator initialRouteName="約束" >
         <Stack.Screen name="約束" component={ApoScreenMain} />
+        <Stack.Screen name="招待" component={invfriend} />
         <Stack.Screen name="ルーム" component={TalkRoom} />
       </Stack.Navigator>
     </NavigationContainer>
