@@ -1,9 +1,6 @@
-// HomeScreen.js
-
 import React, { useEffect, useState } from 'react';
-import { Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { auth, firebase, firestore } from '../../firebase';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { auth } from '../../firebase';
 import { User } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';

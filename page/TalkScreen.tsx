@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import React from 'react';
 import TalkRoom from './TalkScreen/TalkRoom';
 import { createStackNavigator } from '@react-navigation/stack';
 import TalkList from './TalkScreen/TalkList';
-import { Timestamp } from 'firebase/firestore';
 import TalkRoomMenu from './TalkScreen/TalkRoomMenu';
 
 const Stack = createStackNavigator();

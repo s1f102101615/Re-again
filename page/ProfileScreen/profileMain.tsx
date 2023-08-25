@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import 'firebase/firestore';
 import 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { ref , getDownloadURL , uploadBytes, uploadBytesResumable} from 'firebase/storage';
+import { ref , getDownloadURL,  uploadBytesResumable} from 'firebase/storage';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
