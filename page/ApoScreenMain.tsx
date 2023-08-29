@@ -397,7 +397,8 @@ const ApoScreen = () => {
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-            if (data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) {
+          // 終了時間を過ぎていないものを表示
+          if ((data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) && (new Date(Number(data.appointmentDateEnd['seconds']) * 1000 + Number(data.appointmentDateEnd['nanoseconds']) / 1000000).getTime() > new Date().getTime())) {
               appointments.push({
                 id: doc.id,
                 title: data.title,
@@ -675,10 +676,17 @@ const ApoScreen = () => {
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
-            Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
-            }時間{
-              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
-            }分</Text>
+              // 時間がマイナスなら赤色にする
+              Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
+              <Text style={{ color:'red' }}>
+              現在約束中
+              </Text>
+              :
+              <Text>
+              {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
+              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
+              </Text>
+            }</Text>
             <View style={styles.ibar}></View>
             <View>
               <Text style={styles.title}>{title}</Text>
@@ -698,10 +706,17 @@ const ApoScreen = () => {
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
-            Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
-            }時間{
-            Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
-            }分</Text>
+              // 時間がマイナスなら赤色にする
+              Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
+              <Text style={{ color:'red' }}>
+              現在約束中
+              </Text>
+              :
+              <Text>
+              {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
+              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
+              </Text>
+            }</Text>
             <View style={styles.ibar}></View>
             <View>
               <Text style={styles.title}>{highlightText(title, searchText)}</Text>
