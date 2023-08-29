@@ -298,9 +298,11 @@ const ApoScreen = () => {
     try {
       const randamid = Math.random().toString(32).substring(2);
       const inviterList = selectedFriends.map((friend) => ({ name: friend.name }));
+      const appointerList = [{ name: user.displayName }];
       const docRef = await addDoc(collection(firestore, 'newAppo'), {
         hostname: user.uid,
         inviter: inviterList,
+        appointer: appointerList,
         title: title,
         content: content,
         talkroomid: randamid,
@@ -395,7 +397,7 @@ const ApoScreen = () => {
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-            if (data.hostname === user.uid || (data.inviter && data.inviter.some((inviterObj) => inviterObj.name === user.displayName))) {
+            if (data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) {
               appointments.push({
                 id: doc.id,
                 title: data.title,
