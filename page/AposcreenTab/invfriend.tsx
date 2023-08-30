@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { auth, firestore } from '../../firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { auth, firebase, firestore } from '../../firebase';
+import { collection, query, where, onSnapshot, doc, FieldValue, updateDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../css/invfriend';
 
@@ -27,12 +27,36 @@ const InvFriend = () => {
   , []);
 
 
-  const handleAccept = () => {
-    // 承諾の処理
+  const handleAccept = async () => {
+    // 承諾の処理 AcceptしたらそのnewAppoのinviterから削除して、newAppoの中のappointerに追加する
+    const user = auth.currentUser;
+    const newAppoRef = doc(firestore, 'newAppo', selectedPromise.id);
+    // selectedPromise.idのドキュメントのinviterの配列の中の辞書型のnameがuser.displayNameであれば削除する
+    const newinviter = selectedPromise.inviter.filter((inviter) => inviter.name !== user.displayName);
+    // selectedPromise.appointerにuser.displayNameを追加する
+    const newappointer = selectedPromise.appointer;
+    newappointer.push({name: user.displayName});  
+    await updateDoc(newAppoRef, {
+      // selectedPromise.idのドキュメントのinviterの配列の中の辞書型のnameがuser.displayNameであれば削除する
+      inviter: newinviter,
+      appointer: newappointer,
+    });
+    setSelectedPromise(null);
+    setModalVisible(false);
   };
 
-  const handleReject = () => {
-    // 拒否の処理
+  const handleReject = async () => {
+    // 拒否の処理 RejectしたらそのnewAppoのinviterから削除する
+    const user = auth.currentUser;
+    const newAppoRef = doc(firestore, 'newAppo', selectedPromise.id);
+    // selectedPromise.idのドキュメントのinviterの配列の中の辞書型のnameがuser.displayNameであれば削除する
+    const newinviter = selectedPromise.inviter.filter((inviter) => inviter.name !== user.displayName);
+    await updateDoc(newAppoRef, {
+      // selectedPromise.idのドキュメントのinviterの配列の中の辞書型のnameがuser.displayNameであれば削除する
+      inviter: newinviter,
+    });
+    setSelectedPromise(null);
+    setModalVisible(false);
   };
 
   return (
