@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { auth } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 import { User } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { DateData } from 'react-native-calendars';
 
 
 const HomeScreen = () => {
   const [user, setUser] = useState<User>();
   const [displayName, setDisplayName] = useState('');
   const [friendsCount, setFriendsCount] = useState(0);
+  const [lateappo, setLateappo] = useState([]);
 
 
   const navigator = useNavigation();
@@ -31,10 +34,32 @@ const HomeScreen = () => {
   }, []);
 
   useEffect(() => {
+    const user = auth.currentUser;
     if (user) {
       setDisplayName(user.displayName);
     }
-  }, []);
+  // lateappoにはすでに終了している約束のドキュメントの配列を入れる
+  // 過去の約束の取得
+    const q2 = query(collection(firestore, 'newAppo'));
+      const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
+        const appointments: { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[] = [];
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if ((data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) && !(new Date(Number(data.appointmentDateEnd['seconds']) * 1000 + Number(data.appointmentDateEnd['nanoseconds']) / 1000000).getTime() > new Date().getTime())) {
+              appointments.push({ id: doc.id, ...data } as { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData});
+            }
+          }
+          );
+        }
+        setLateappo(appointments);
+      }
+      );
+      return () => unsubscribe2();
+  }
+  , []);
+
+
 
 
 
