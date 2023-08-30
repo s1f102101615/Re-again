@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { auth, firestore } from '../../firebase';
 import { User } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,8 @@ const HomeScreen = () => {
   const [displayName, setDisplayName] = useState('');
   const [friendsCount, setFriendsCount] = useState(0);
   const [lateappo, setLateappo] = useState([]);
+  const [selectedLateappo, setSelectedLateappo] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
 
   const navigator = useNavigation();
@@ -52,6 +54,12 @@ const HomeScreen = () => {
           }
           );
         }
+        // appointmentsを終了時間順にソート 降順にして
+        appointments.sort(function(a,b){
+          if(a.appointmentDateEnd > b.appointmentDateEnd) return -1;
+          if(a.appointmentDateEnd < b.appointmentDateEnd) return 1;
+          return 0;
+        });
         setLateappo(appointments);
       }
       );
@@ -65,31 +73,55 @@ const HomeScreen = () => {
 
   // lateappoは後で実装する
   return (
-    <View style={styles.container}>
+    <><ScrollView style={styles.container}>
       {lateappo.map((lateappo) => (
-        <TouchableOpacity style={styles.contain} key={lateappo.id} onPress={() => {setSelectedLateappo(lateappo);setModalVisible(true);}} >
-        <View style={{ flexDirection: 'row',height:'100%' }}>
-        <Text style={styles.contenttime}>{
-        Math.floor((new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
-        }時間{
-          Math.floor(((new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
-        }分</Text>
-        <View style={styles.ibar}></View>
-        <View>
-          <Text style={styles.title}>{lateappo.title}</Text>
-          <View style={{ marginTop:11, marginLeft:3 }}>
-          <Text style={styles.content}>開始:{new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
-          {lateappo.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(lateappo.appointmentDateEnd['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+        <TouchableOpacity style={styles.contain} key={lateappo.id} onPress={() => { setSelectedLateappo(lateappo); setModalVisible(true); } }>
+          <View style={{ flexDirection: 'row', height: '100%' }}>
+            {/* 〇月〇日のように表示してほしい */}
+            <Text style={styles.contenttime}>
+              <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { month: 'numeric' })}</Text>
+              <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { day: 'numeric' })}</Text>
+              <Text>終了</Text>
+            </Text>
+            <View style={styles.ibar}></View>
+            <View>
+              <Text style={styles.title}>{lateappo.title}</Text>
+              <View style={{ marginTop: 11, marginLeft: 3 }}>
+                <Text style={styles.content}>開始:{new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
+                {lateappo.appointmentDateEnd && <Text style={styles.content}>終了:{new Date(Number(lateappo.appointmentDateEnd['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', width: '30%' }}>
+              <Ionicons name="md-pin" size={18} color="#900" />
+              <Text>場所</Text>
+            </View>
           </View>
-        </View>
-        <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
-          <Ionicons name="md-pin" size={18} color="#900" />
-          <Text>場所</Text>
-        </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
       ))}
-    </View>
+    </ScrollView>
+      <Modal
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        } }
+      >
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>{selectedLateappo?.title}</Text>
+          <Text style={styles.modalDescription}>{selectedLateappo?.content}</Text>
+          <Text style={styles.modalDescription}>開始:{new Date(Number(selectedLateappo?.appointmentDate['seconds']) * 1000 + Number(selectedLateappo?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
+          {selectedLateappo?.appointmentDateEnd && <Text style={styles.modalDescription}>終了:{new Date(Number(selectedLateappo?.appointmentDateEnd['seconds']) * 1000 + Number(selectedLateappo?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => {
+              setModalVisible(false);
+            } }
+          >
+            <Text style={styles.modalButtonText}>閉じる</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal></>
+
   );
 };
 
@@ -114,6 +146,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#fff',
+    alignContent: 'center',
+    justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 20,
