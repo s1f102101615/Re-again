@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ExpoCalendar from 'expo-calendar';
 import styles from './css/AppoScreen';
 import { list } from 'firebase/storage';
+import MapScreen from './MapScreen';
 
 
 const ApoScreen = () => {
@@ -44,6 +45,8 @@ const ApoScreen = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [apoAddVisible, setApoAddVisible] = useState(false);
   const [promises, setPromises] = useState([]);
+  const [showMap, setShowMap] = useState(false);
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 }); // 緯度経度
 
   //ヘッダー消去
   useEffect(() => {
@@ -62,6 +65,8 @@ const ApoScreen = () => {
       scrollViewRef.current.scrollTo({ x: 0, y: (days * yOffset), animated: true });
     }
   };
+
+
   
   useEffect(() => {
     // フレンドを取得する処理
@@ -560,6 +565,14 @@ const ApoScreen = () => {
               </View>
             </View>
           </Modal>
+          <Modal
+            transparent={true}
+            visible={showMap}
+            onRequestClose={() => {
+              setShowMap(false);
+            }}>
+              <MapScreen onLocationSelect={(location) => setLocation(location)} onselect={(bool) => setShowMap(bool)} />
+          </Modal>
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
               <View style={{ width: '100%', marginTop:'7%' }}>
@@ -618,7 +631,7 @@ const ApoScreen = () => {
                       <Ionicons name="md-person-add" size={30} color="black" />
                       <Text style={styles.label}>招待</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.item}>
+                    <TouchableOpacity style={styles.item} onPress={() => setShowMap(true)}>
                       <Ionicons name="location-sharp" size={30} color="black" />
                       <Text style={styles.label}>場所</Text>
                     </TouchableOpacity>
@@ -635,6 +648,12 @@ const ApoScreen = () => {
                             <Text>{friend.name}</Text>
                           </View>
                         ))}
+                      </View>
+                    )}
+                    {location && (
+                      <View>
+                        <Text>選択された場所</Text>
+                        <Text>{location.latitude}</Text>
                       </View>
                     )}
                     <TextInput
