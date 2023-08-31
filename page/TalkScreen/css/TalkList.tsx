@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     contain: {
       backgroundColor: '#fff',
       borderRadius: 10,
-      height: 100,
+      height: 80,
       width: '90%',
       marginTop: 5,
       marginBottom: 5,
@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.25,
       shadowRadius: 3.84,
       elevation: 5,
+      justifyContent: 'center',
     },
     item: {
       backgroundColor: '#f9c2ff',
@@ -31,9 +32,10 @@ const styles = StyleSheet.create({
       marginHorizontal: 16,
     },
     title: {
-      fontSize: 18,
+      fontSize: 22,
       fontWeight: 'bold',
       marginBottom: 5,
+      marginLeft: 20,
     },
     circle: {
       backgroundColor: '#00FF7F',

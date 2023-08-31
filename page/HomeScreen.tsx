@@ -72,17 +72,6 @@ const HomeScreen = () => {
   // };
 
   return (
-  //   <View style={styles.container}>
-  //   <View>
-  //     <View style={{ alignItems: 'center', marginTop: '10%', marginBottom: '6%' }}>
-  //       <Icon name="user" size={80} color="black" />
-  //     </View>
-  //     <View style={{ alignItems: 'center' }}>
-  //       <Text style={{ fontSize: 20 }}>{displayName}</Text>
-  //       <Text style={{ fontSize: 16 }}>友達の数: {friendsCount}</Text>
-  //     </View>
-  //   </View>
-  // </View>
     <View style={styles.container}>
         <View style={styles.profile}>
           <TouchableOpacity onPress={handleChoosePhoto}>
@@ -104,6 +93,10 @@ const HomeScreen = () => {
         <TouchableOpacity style={styles.button} onPress={goApo}>
           <Text style={styles.buttonText}>View Appointments</Text>
         </TouchableOpacity>
+        <View style={styles.friendList}>
+        <Text style={styles.friendListTitle}>友達リスト</Text>
+        {/* Add your friend list component here */}
+      </View>
       </View>
   );
 };

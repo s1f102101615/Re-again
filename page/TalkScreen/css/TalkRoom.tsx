@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       padding: 16,
     },
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
       
     },
     messageText: {
-      fontSize: 16,
+      fontSize: 18,
     },
     messageInfo: {
       fontSize: 12,
@@ -78,6 +78,11 @@ const styles = StyleSheet.create({
       backgroundColor: '#ccc',
       marginRight: 8,
       justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    messageEnemy: {
+      flexDirection: 'row',
       alignItems: 'center',
     },
     iconText :{

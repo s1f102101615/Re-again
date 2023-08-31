@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       width: '100%',
       height: '10%',
-      borderBottomWidth: 0.5,
     },
     circle: {
       backgroundColor: '#00FF7F',

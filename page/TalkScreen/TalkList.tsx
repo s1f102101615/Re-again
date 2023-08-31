@@ -36,7 +36,7 @@ const TalkList = () => {
         if (!querySnapshot.empty) {
           querySnapshot.forEach((doc) => {
             const data = doc.data();
-              if (data.hostname === user.uid || (data.inviter && data.inviter.some((inviterObj) => inviterObj.name === user.displayName))) {
+              if ((data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) && (new Date(Number(data.appointmentDateEnd['seconds']) * 1000 + Number(data.appointmentDateEnd['nanoseconds']) / 1000000).getTime() > new Date().getTime())) {
                 appointments.push({ id: doc.id, ...data } as { id: string; title: string; content: string; appointmentDate: string; talkroomid:string});
               }
           });
@@ -54,17 +54,8 @@ const TalkList = () => {
       {appointments.map((appointment) => (
         <TouchableOpacity style={styles.contain}key={appointment.id} onPress={() => handleTalkPress(appointment.talkroomid)}>
           <Text style={styles.title}>{appointment.title}</Text>
-          <Text style={styles.content}>{appointment.content}</Text>
         </TouchableOpacity>
       ))}
-
-      <View style={styles.circleContainer} >
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <View style={styles.circle}>
-          <Ionicons name="add" size={32} color="#fff" />
-        </View>
-      </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 };
