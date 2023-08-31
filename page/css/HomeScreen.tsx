@@ -58,6 +58,15 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       textAlign: 'center',
     },
-  });
+    friendList: {
+      marginTop: 30,
+      width: '100%',
+    },
+    friendListTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 10,
+  },
+});
 
   export default styles;

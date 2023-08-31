@@ -87,7 +87,6 @@ const TalkRoom = () => {
     >
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.contentContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.header}>Talk Room {talkroomId}</Text>
           <TouchableOpacity onPress={handleMenuPress}>
             <Ionicons name="menu" size={24} color="black" />
           </TouchableOpacity>
@@ -101,20 +100,21 @@ const TalkRoom = () => {
             ]}
           >
             {message.uid !== auth.currentUser?.uid ? (
-              <View>
+              <View style={styles.messageEnemy}>
                 <View style={styles.iconContainer}>
                   <Image
                     source={{ uri: message.icon }}
                     style={styles.iconImage}
                   />
                 </View>
-                <Text style={styles.messageText}>{message.text}</Text>
-                <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
+                <View>
+                  <Text style={styles.messageInfo}>{message.name} </Text>
+                  <Text style={styles.messageText}>{message.text}</Text>
+                </View>
               </View>
             ) : (
               <>
               <Text style={styles.messageText}>{message.text}</Text>
-              <Text style={styles.messageInfo}>{message.name} ({message.uid})</Text>
               </>
             )} 
             </View>))}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, addDoc, onSnapshot, where } from 'firebase/firestore';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -9,6 +9,8 @@ import { Calendar, DateData } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import * as ExpoCalendar from 'expo-calendar';
 import styles from './css/AppoScreen';
+import { list } from 'firebase/storage';
+import MapScreen from './MapScreen';
 
 
 const ApoScreen = () => {
@@ -42,6 +44,9 @@ const ApoScreen = () => {
   const [talkid, setTalkid] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
   const [apoAddVisible, setApoAddVisible] = useState(false);
+  const [promises, setPromises] = useState([]);
+  const [showMap, setShowMap] = useState(false);
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 }); // 緯度経度
 
   //ヘッダー消去
   useEffect(() => {
@@ -60,6 +65,8 @@ const ApoScreen = () => {
       scrollViewRef.current.scrollTo({ x: 0, y: (days * yOffset), animated: true });
     }
   };
+
+
   
   useEffect(() => {
     // フレンドを取得する処理
@@ -137,6 +144,19 @@ const ApoScreen = () => {
     navigation.navigate('招待' as never);
   }
 
+  useEffect(() => {
+    const user = auth.currentUser;
+    const q = query(collection(firestore, `newAppo`), where('inviter', 'array-contains', {name: user.displayName}));
+    const listpromise = onSnapshot(q, (querySnapshot) => {
+      const promises = [];
+      querySnapshot.forEach((doc) => {
+        promises.push({ ...doc.data(), id: doc.id });
+      });
+      setPromises(promises); // 新しい配列を作成して、それをpromisesに設定する
+    });
+    return () => listpromise();
+  }
+  , [setPromises]);
 
   // 招待する友達を選択する処理
   function inviteSelectedFriends() {
@@ -466,7 +486,8 @@ const ApoScreen = () => {
               </View>
                 <View style={styles.likeedit} >
                   <TouchableOpacity style={styles.item}>
-                    <Ionicons name="close" size={30} color="black" />
+                    {/* 星枠のアイコン */}
+                    <Ionicons name="star" size={30} color="black" />
                     <Text style={styles.label}>お気に入り</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
@@ -474,7 +495,8 @@ const ApoScreen = () => {
                     <Text style={styles.label}>約束している人</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
-                    <Ionicons name="close" size={30} color="black" />
+                    {/* 招待のアイコン */}
+                    <Ionicons name="md-person-add" size={30} color="black" />
                     <Text style={styles.label}>招待</Text>
                   </TouchableOpacity>
                 </View>
@@ -488,18 +510,17 @@ const ApoScreen = () => {
                 </TouchableOpacity>
               </View>
                 <Text style={ styles.headtitle }>約束名</Text>
-                <Text>{showTitle}</Text>
+                <Text style={styles.detail}>{showTitle}</Text>
                 <Text style={ styles.headtitle }>日付</Text>
-                <Text>{showApoDate}</Text>
+                <Text style={styles.detail}>{showApoDate}</Text>
                 <Text style={ styles.headtitle }>詳細</Text>
-                <Text>{showContent}</Text>
+                <Text style={styles.detail}>{showContent}</Text>
                 <Text style={ styles.headtitle }>場所</Text>
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>約束名</Text>
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.name}>{inviter.name}</Text>
                 ))}</Text>
-                <Text>トークルームID:{showTalkroomid}</Text>
                 <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
             </View>
           </ScrollView>
@@ -543,6 +564,14 @@ const ApoScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
+          </Modal>
+          <Modal
+            transparent={true}
+            visible={showMap}
+            onRequestClose={() => {
+              setShowMap(false);
+            }}>
+              <MapScreen onLocationSelect={(location) => setLocation(location)} onselect={(bool) => setShowMap(bool)} />
           </Modal>
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
@@ -599,15 +628,15 @@ const ApoScreen = () => {
                 <View>
                   <View style={[styles.likeedit,{ paddingTop:'5%' }]} >
                     <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
-                      <Ionicons name="close" size={30} color="black" />
+                      <Ionicons name="md-person-add" size={30} color="black" />
                       <Text style={styles.label}>招待</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.item}>
-                      <Ionicons name="close" size={30} color="black" />
+                    <TouchableOpacity style={styles.item} onPress={() => setShowMap(true)}>
+                      <Ionicons name="location-sharp" size={30} color="black" />
                       <Text style={styles.label}>場所</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
-                      <Ionicons name="close" size={30} color="black" />
+                      <Ionicons name="camera" size={30} color="black" />
                       <Text style={styles.label}>画像</Text>
                     </TouchableOpacity>
                   </View>
@@ -619,6 +648,12 @@ const ApoScreen = () => {
                             <Text>{friend.name}</Text>
                           </View>
                         ))}
+                      </View>
+                    )}
+                    {location && (
+                      <View>
+                        <Text>選択された場所</Text>
+                        <Text>{location.latitude}</Text>
                       </View>
                     )}
                     <TextInput
@@ -670,6 +705,12 @@ const ApoScreen = () => {
           <TouchableOpacity style={styles.ApoIconContainer} onPress={() => Apoinviter()}>
             <Ionicons name="md-add-circle" size={20} color="black" />
           </TouchableOpacity>
+          {/* inniconsの右上にLineの通知のように数を表示する                                            */}
+          {promises.length >= 1 && (
+            <View style={styles.notificationIconContainer}>
+              <Text style={styles.notificationBadgeText}>{promises.length}</Text>
+            </View>
+          )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
         {!searchText && filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
