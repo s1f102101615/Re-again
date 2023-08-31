@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, addDoc, onSnapshot, where } from 'firebase/firestore';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -9,6 +9,7 @@ import { Calendar, DateData } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import * as ExpoCalendar from 'expo-calendar';
 import styles from './css/AppoScreen';
+import { list } from 'firebase/storage';
 
 
 const ApoScreen = () => {
@@ -42,6 +43,7 @@ const ApoScreen = () => {
   const [talkid, setTalkid] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
   const [apoAddVisible, setApoAddVisible] = useState(false);
+  const [promises, setPromises] = useState([]);
 
   //ヘッダー消去
   useEffect(() => {
@@ -137,6 +139,20 @@ const ApoScreen = () => {
     navigation.navigate('招待' as never);
   }
 
+  useEffect(() => {
+    const user = auth.currentUser;
+    const q = query(collection(firestore, `newAppo`), where('inviter', 'array-contains', {name: user.displayName}));
+    const listpromise = onSnapshot(q, (querySnapshot) => {
+      const promises = [];
+      querySnapshot.forEach((doc) => {
+        promises.push({ ...doc.data(), id: doc.id });
+      });
+      console.log('通知数',promises.length)
+      setPromises(promises); // 新しい配列を作成して、それをpromisesに設定する
+    });
+    return () => listpromise();
+  }
+  , [setPromises]);
 
   // 招待する友達を選択する処理
   function inviteSelectedFriends() {
@@ -670,6 +686,12 @@ const ApoScreen = () => {
           <TouchableOpacity style={styles.ApoIconContainer} onPress={() => Apoinviter()}>
             <Ionicons name="md-add-circle" size={20} color="black" />
           </TouchableOpacity>
+          {/* inniconsの右上にLineの通知のように数を表示する                                            */}
+          {promises.length >= 1 && (
+            <View style={styles.notificationIconContainer}>
+              <Text style={styles.notificationBadgeText}>{promises.length}</Text>
+            </View>
+          )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
         {!searchText && filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (

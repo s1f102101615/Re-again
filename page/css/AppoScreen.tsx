@@ -281,7 +281,21 @@ const styles = StyleSheet.create({
       right: -5,
       padding: 10,
     },
-    
+    notificationIconContainer: {
+      position: 'absolute',
+      top: 5,
+      right: 8,
+      backgroundColor: 'red',
+      borderRadius: 50,
+      width: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    notificationBadgeText: {
+      color: '#fff',
+      fontWeight: 'bold',
+    },
   });
 
   export default styles;
