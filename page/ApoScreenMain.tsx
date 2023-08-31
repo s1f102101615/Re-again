@@ -147,7 +147,6 @@ const ApoScreen = () => {
       querySnapshot.forEach((doc) => {
         promises.push({ ...doc.data(), id: doc.id });
       });
-      console.log('通知数',promises.length)
       setPromises(promises); // 新しい配列を作成して、それをpromisesに設定する
     });
     return () => listpromise();
@@ -482,7 +481,8 @@ const ApoScreen = () => {
               </View>
                 <View style={styles.likeedit} >
                   <TouchableOpacity style={styles.item}>
-                    <Ionicons name="close" size={30} color="black" />
+                    {/* 星枠のアイコン */}
+                    <Ionicons name="star" size={30} color="black" />
                     <Text style={styles.label}>お気に入り</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
@@ -490,7 +490,8 @@ const ApoScreen = () => {
                     <Text style={styles.label}>約束している人</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
-                    <Ionicons name="close" size={30} color="black" />
+                    {/* 招待のアイコン */}
+                    <Ionicons name="md-person-add" size={30} color="black" />
                     <Text style={styles.label}>招待</Text>
                   </TouchableOpacity>
                 </View>
@@ -504,18 +505,17 @@ const ApoScreen = () => {
                 </TouchableOpacity>
               </View>
                 <Text style={ styles.headtitle }>約束名</Text>
-                <Text>{showTitle}</Text>
+                <Text style={styles.detail}>{showTitle}</Text>
                 <Text style={ styles.headtitle }>日付</Text>
-                <Text>{showApoDate}</Text>
+                <Text style={styles.detail}>{showApoDate}</Text>
                 <Text style={ styles.headtitle }>詳細</Text>
-                <Text>{showContent}</Text>
+                <Text style={styles.detail}>{showContent}</Text>
                 <Text style={ styles.headtitle }>場所</Text>
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>約束名</Text>
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.name}>{inviter.name}</Text>
                 ))}</Text>
-                <Text>トークルームID:{showTalkroomid}</Text>
                 <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
             </View>
           </ScrollView>
@@ -615,15 +615,15 @@ const ApoScreen = () => {
                 <View>
                   <View style={[styles.likeedit,{ paddingTop:'5%' }]} >
                     <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
-                      <Ionicons name="close" size={30} color="black" />
+                      <Ionicons name="md-person-add" size={30} color="black" />
                       <Text style={styles.label}>招待</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
-                      <Ionicons name="close" size={30} color="black" />
+                      <Ionicons name="location-sharp" size={30} color="black" />
                       <Text style={styles.label}>場所</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
-                      <Ionicons name="close" size={30} color="black" />
+                      <Ionicons name="camera" size={30} color="black" />
                       <Text style={styles.label}>画像</Text>
                     </TouchableOpacity>
                   </View>

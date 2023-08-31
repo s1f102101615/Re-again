@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
       paddingHorizontal: '12%', // 左右のパディング
       alignItems: 'center', // 縦方向に中央揃え
       marginTop: '3%',
-      marginRight: '4%',
     },
     item: {
       alignItems: 'center',
@@ -211,12 +210,18 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: 'bold',
       marginTop: '5%',
-      marginLeft: '5%',
+      marginLeft: '3%',
+    },
+    detail: {
+      fontSize: 16,
+      marginTop: '3%',
+      marginLeft: '3%',
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: 'bold',
       marginBottom: 20,
+      marginTop: '50%',
     },
     friendRow: {
       flexDirection: 'row',
