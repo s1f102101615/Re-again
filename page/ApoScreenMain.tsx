@@ -713,7 +713,7 @@ const ApoScreen = () => {
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {!searchText ? filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        {(!searchText && filteredAppointments.length > 0) ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -742,7 +742,7 @@ const ApoScreen = () => {
             </View>
             </View>
           </TouchableOpacity>
-        )) : (
+        ))) : (
           // 今月の約束はありません
           <View style={styles.noAppointmentContainer}>
             <Text style={styles.noAppointmentText}>
@@ -750,7 +750,7 @@ const ApoScreen = () => {
             月の約束はありません</Text>
           </View>
         )}
-        {searchText ? serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        {(searchText && serchAppointments.length > 0) ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -779,7 +779,7 @@ const ApoScreen = () => {
             </View>
             </View>
           </TouchableOpacity>
-        )) : (
+        ))) : (
           // 今月の約束はありません
           <View style={styles.noAppointmentContainer}>
             <Text style={styles.noAppointmentText}>

@@ -13,7 +13,7 @@ const App = () => {
   
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" headerShown="false">
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" options={{ title: 'ログイン' }} component={LoginScreen} />
         <Stack.Screen name="Register" options={{ title: '新規登録' }} component={RegisterScreen}  />
         <Stack.Screen options={{ gestureEnabled:false, title: 'ユーザーネーム設定' }} name="Setname" component={SetnameScreen}  />
