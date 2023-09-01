@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, firestore } from '../../firebase';
-import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Image } from 'react-native';
 import styles from './css/TalkRoom';
@@ -30,6 +30,20 @@ const TalkRoom = () => {
     const message = { id: String(messages.length + 1), text: inputText, name: displayName, uid, createdAt, icon: photoURL };
     setMessages([...messages, message]);
     setInputText('');
+    // firestoreのnewAppoにlastmessageを追加
+    // newAppo中のtalkroomidと一致するものを探す
+    const AppoRef = collection(firestore, 'newAppo');
+    const aaa = await getDocs(query(AppoRef, where('talkroomid', '==', talkroomId)));
+    // あったら更新無かったら作成する
+    if (!aaa.empty) {
+      const appoDoc = aaa.docs[0];
+      await updateDoc(doc(collection(firestore, 'newAppo'), appoDoc.id), { newtalk: message.text });
+    } else {
+      await setDoc(doc(collection(firestore, 'newAppo')), { newtalk: message.text, talkroomid: talkroomId });
+    }
+
+
+
     const talkroomRef = doc(firestore, 'talkroom', talkroomId);
     // docがあるならupdateDoc、ないならsetDoc
     const talkroomDoc = await getDoc(doc(collection(firestore, 'talkroom'), talkroomId));

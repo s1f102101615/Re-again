@@ -32,10 +32,17 @@ const styles = StyleSheet.create({
       marginHorizontal: 16,
     },
     title: {
-      fontSize: 22,
+      fontSize: 24,
       fontWeight: 'bold',
+      marginBottom: 1,
+      marginLeft: 25,
+    },
+    newtalk: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: '#969696',
       marginBottom: 5,
-      marginLeft: 20,
+      marginLeft: 47,
     },
     circle: {
       backgroundColor: '#00FF7F',
