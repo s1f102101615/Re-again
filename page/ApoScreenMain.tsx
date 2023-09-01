@@ -713,7 +713,7 @@ const ApoScreen = () => {
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {(!searchText && filteredAppointments.length > 0) ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -749,8 +749,8 @@ const ApoScreen = () => {
               {selectedMonth.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric' })}
             月の約束はありません</Text>
           </View>
-        )}
-        {(searchText && serchAppointments.length > 0) ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        )))}
+        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -786,7 +786,7 @@ const ApoScreen = () => {
               {selectedMonth.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric' })}
             月の約束はありません</Text>
           </View>
-        )}
+        )))}
 
         </ScrollView>
       <View style={styles.circleContainer} >
