@@ -51,11 +51,17 @@ const TalkList = () => {
   
   return (
     <ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
-      {appointments.map((appointment) => (
-        <TouchableOpacity style={styles.contain}key={appointment.id} onPress={() => handleTalkPress(appointment.talkroomid)}>
-          <Text style={styles.title}>{appointment.title}</Text>
-        </TouchableOpacity>
-      ))}
+      {appointments.length > 0 ? (
+        appointments.map((appointment) => (
+          <TouchableOpacity style={styles.contain} key={appointment.id} onPress={() => handleTalkPress(appointment.talkroomid)}>
+            <Text style={styles.title}>{appointment.title}</Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <View style={styles.noAppointmentContainer}>
+          <Text style={styles.noAppointmentText}>トークルームはありません</Text>
+        </View>
+      )}
     </ScrollView>
   );
 };

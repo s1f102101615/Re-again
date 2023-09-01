@@ -301,6 +301,17 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontWeight: 'bold',
     },
+    noAppointmentContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 100,
+    },
+    noAppointmentText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 10,
+    },
   });
 
   export default styles;

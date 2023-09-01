@@ -54,6 +54,17 @@ const styles = StyleSheet.create({
     content: {
       fontSize: 16,
     },
+    noAppointmentContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: '90%',
+    },
+    noAppointmentText: { 
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 10,
+    },
   });
 
   export default styles;
