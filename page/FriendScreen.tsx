@@ -6,6 +6,7 @@ import { doc, deleteDoc, collection, addDoc, getDocs, query, where, onSnapshot, 
 import { Ionicons } from '@expo/vector-icons';
 import FriendList from './FriendList';
 import styles from './css/FriendScreen';
+import FriendModal from './FriendDetail';
 
 
 const FriendScreen = () => {
@@ -15,6 +16,7 @@ const FriendScreen = () => {
   const [friends, setFriends] = useState<{ id:string; }[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
+  const [selectedFriend, setSelectedFriend] = useState(null);
   
 
   useEffect(() => {
@@ -194,6 +196,12 @@ const handleSave = async () => {
     }
   };
   };
+
+  // request,request['gotRequest'],request['photoURL']でfriendを作ってください
+  const friend = (request) => {
+    const friendd = { request, friend: request['gotRequest'], photoURL: request['photoURL'] };
+    return friendd;
+  };
   
 
   return (
@@ -226,8 +234,9 @@ const handleSave = async () => {
       {/* フレンドリクエスト欄 */}
       {activeTab === 'requests' && (
       <>
+        <FriendModal selectedFriend={selectedFriend} onClose={() => setSelectedFriend(null)} />
         {friendRequests.map((request) => (
-          <View key={request.id} style={styles.request}>
+          <TouchableOpacity key={request.id} style={styles.request} onPress={() => setSelectedFriend(friend(request))}>
             {request['photoURL'] ? (
                 <Image source={{ uri: request['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }} />
               ) : (
@@ -242,7 +251,7 @@ const handleSave = async () => {
                 <Ionicons name="close-circle-outline" size={40} color={'red'} />
               </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
         {friendRequests.length === 0 && (
           <Text style={{ color: 'gray', marginTop:'80%'}}>リクエストはありません</Text>

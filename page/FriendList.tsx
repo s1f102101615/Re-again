@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Text, TouchableOpacity, Image, StyleSheet, TextInput, View } from 'react-native';
+import { Text, TouchableOpacity, Image, StyleSheet, TextInput, View, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import FriendModal from './FriendDetail';
 
 function FriendList(props) {
   const { friends } = props;
   const [searchText, setSearchText] = useState('');
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
   const filteredFriends = friends.filter((friend) => friend.friend.includes(searchText));
 
@@ -20,7 +22,7 @@ function FriendList(props) {
         />
       </View>
       {filteredFriends.map((friend) => (
-          <TouchableOpacity key={friend.id} style={styles.request}>
+          <TouchableOpacity key={friend.id} style={styles.request} onPress={() => setSelectedFriend(friend)}>
             {friend['photoURL'] ? (
                 <Image source={{ uri: friend['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }}/>
               ) : (
@@ -32,6 +34,7 @@ function FriendList(props) {
         {filteredFriends.length === 0 && (
           <Text style={{ color: 'gray', marginTop:'80%'}}>フレンドはまだいません</Text>
         )}
+        <FriendModal selectedFriend={selectedFriend} onClose={() => setSelectedFriend(null)} />
     </>
   );
 }

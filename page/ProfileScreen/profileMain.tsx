@@ -10,7 +10,15 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref , getDownloadURL,  uploadBytesResumable} from 'firebase/storage';
 import styles from './css/profileMain';
 
-const ProfileScreen = () => {
+interface ProfileMainProps {
+  route: {
+    params: {
+      handleLogout: () => void;
+    };
+  };
+}
+
+const ProfileScreen = (props: ProfileMainProps) => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [userPhotoURL, setUserPhotoURL] = useState<string | null>(null);
@@ -51,18 +59,6 @@ const ProfileScreen = () => {
         setUserPhotoURL(userData.photoURL);
       }
     }
-  };
- 
-  
-  // ログアウト処理
-  const handleLogout = () => {
-    auth.signOut()
-      .then(() => {
-        navigation.navigate('Login' as never);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
   };
 
   // 設定画面に遷移
@@ -173,7 +169,7 @@ const ProfileScreen = () => {
             <Icon name="cog" size={35} color="black" />
             <Text style={styles.label}>設定</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.settingitem} onPress={handleLogout}>
+          <TouchableOpacity style={styles.settingitem} onPress={props.route.params.handleLogout}>
             <Icon name="sign-out" size={35} color="black" />
             <Text style={styles.label}>ログアウト</Text>
           </TouchableOpacity>

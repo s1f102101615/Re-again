@@ -706,14 +706,14 @@ const ApoScreen = () => {
             <Ionicons name="md-add-circle" size={20} color="black" />
           </TouchableOpacity>
           {/* inniconsの右上にLineの通知のように数を表示する                                            */}
-          {promises.length >= 1 && (
+          {promises.length >= 1 && !searchVisible && (
             <View style={styles.notificationIconContainer}>
               <Text style={styles.notificationBadgeText}>{promises.length}</Text>
             </View>
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {!searchText && filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -742,8 +742,15 @@ const ApoScreen = () => {
             </View>
             </View>
           </TouchableOpacity>
-        ))}
-        {searchText && serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
+        ))) : (
+          // 今月の約束はありません
+          <View style={styles.noAppointmentContainer}>
+            <Text style={styles.noAppointmentText}>
+              {selectedMonth.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric' })}
+            月の約束はありません</Text>
+          </View>
+        )))}
+        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
             <Text style={styles.contenttime}>{
@@ -772,7 +779,14 @@ const ApoScreen = () => {
             </View>
             </View>
           </TouchableOpacity>
-        ))}
+        ))) : (
+          // 今月の約束はありません
+          <View style={styles.noAppointmentContainer}>
+            <Text style={styles.noAppointmentText}>
+              {selectedMonth.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric' })}
+            月の約束はありません</Text>
+          </View>
+        )))}
 
         </ScrollView>
       <View style={styles.circleContainer} >
