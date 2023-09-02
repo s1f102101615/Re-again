@@ -91,7 +91,7 @@ const InvFriend = () => {
               <Text style={styles.content}>開始:{new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
               {promise.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(promise.appointmentDateEnd['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
               </View>
-              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:40 }}>
+              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:27 }}>
                 <Ionicons name="md-pin" size={18} color="#900" />
                 <Text>{promise.location ? promise.location.slice(0,3)+ '...' : '未設定   '}</Text>
               </View>

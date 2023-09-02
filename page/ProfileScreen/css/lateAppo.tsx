@@ -3,7 +3,9 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      padding: 10,
+      paddingLeft: 10,
+      paddingRight: 10,
+      textAlign: 'center',
     },
     promise: {
       backgroundColor: '#fff',
@@ -83,6 +85,52 @@ const styles = StyleSheet.create({
     },
     content: {
       fontSize: 16,
+    },
+    searchBoxContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 10,
+      alignContent: 'flex-start',
+      width: '80%',
+      marginTop: 5,
+    },
+    searchBox: {
+      width: '100%',
+      height: 40,
+      padding: 8,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      paddingHorizontal: 10,
+      marginLeft: 5,
+      borderRadius: 5,
+      backgroundColor: '#fff',
+    },
+    searchIconContainer: {
+      padding: 1,
+      marginLeft: 10,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 10,
+      marginVertical: 2,
+      width: '100%',
+    },
+    noAppointmentContainer: {
+      flex: 1,
+      alignItems: 'center',
+      top: 310,
+      marginBottom: 100,
+    },
+    noAppointmentText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: '#3d3d3d',
+    },
+    highlight: {
+      backgroundColor: 'yellow',
     },
   });
 
