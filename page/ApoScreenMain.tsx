@@ -60,7 +60,7 @@ const ApoScreen = () => {
 
   const Locationer = async (location) => {
     const baseURL = 'https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder?output=json&';
-    const APP_ID = 'dj00aiZpPXBYa09RR3JCZ3FjNCZzPWNvbnN1bWVyc2VjcmV0Jng9NDM-';
+    const APP_ID = process.env.YAHOO_API_KEY;
     const lat = location['latitude'];
     const lon = location['longitude'];
     const URL = `${baseURL}lat=${lat}&lon=${lon}&appid=${APP_ID}`;
