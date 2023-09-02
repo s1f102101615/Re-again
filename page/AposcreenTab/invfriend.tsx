@@ -16,10 +16,22 @@ const InvFriend = () => {
     const q = query(collection(firestore, `newAppo`), where('inviter', 'array-contains', {name: user.displayName}));
     const listpromise = onSnapshot(q, (querySnapshot) => {
       const promises = [];
+      // 時間がマイナスになるものは除く
       querySnapshot.forEach((doc) => {
-        promises.push({ ...doc.data(), id: doc.id });
+        const data = doc.data();
+        if (new Date(Number(data.appointmentDate['seconds']) * 1000 + Number(data.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime() > 0) {
+          promises.push({
+            id: doc.id,
+            title: data.title,
+            content: data.content,
+            appointmentDate: data.appointmentDate,
+            appointmentDateEnd: data.appointmentDateEnd,
+            location: data.location,
+            inviter: data.inviter,
+            appointer: data.appointer,
+          });
+        }
       });
-      console.log(promises)
       setPromises(promises); // 新しい配列を作成して、それをpromisesに設定する
     });
     return () => listpromise();
@@ -64,25 +76,29 @@ const InvFriend = () => {
       {promises.map((promise) => (
         <TouchableOpacity style={styles.contain} key={promise.id} onPress={() => {setSelectedPromise(promise);setModalVisible(true);}} >
         <View style={{ flexDirection: 'row',height:'100%' }}>
-        <Text style={styles.contenttime}>{
-        Math.floor((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
-        }時間{
-          Math.floor(((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
-        }分</Text>
-        <View style={styles.ibar}></View>
-        <View>
-          <Text style={styles.title}>{promise.title}</Text>
-          <View style={{ marginTop:11, marginLeft:3 }}>
-          <Text style={styles.content}>開始:{new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
-          {promise.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(promise.appointmentDateEnd['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+          <View>
+            <Text style={styles.contenttime}>{
+            Math.floor((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))
+            }時間{
+              Math.floor(((new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)
+            }分</Text>
+          </View>
+          <View style={styles.ibar}></View>
+          <View>
+          <Text style={styles.title}>{promise.title.length > 14 ? promise.title.slice(0,14)+ '...' : promise.title}</Text>
+            <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent:'flex-start' }}>
+              <View style={{ marginLeft:3, width:160 }}>
+              <Text style={styles.content}>開始:{new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+              {promise.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(promise.appointmentDateEnd['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              </View>
+              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:10 }}>
+                <Ionicons name="md-pin" size={18} color="#900" />
+                <Text>{promise.location ? promise.location.slice(0,3)+ '...' : '未設定   '}</Text>
+              </View>
+            </View>
           </View>
         </View>
-        <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
-          <Ionicons name="md-pin" size={18} color="#900" />
-          <Text>場所</Text>
-        </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
       ))}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modal}>

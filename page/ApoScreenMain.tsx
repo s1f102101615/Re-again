@@ -60,7 +60,7 @@ const ApoScreen = () => {
 
   const Locationer = async (location) => {
     const baseURL = 'https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder?output=json&';
-    const APP_ID = 'dj00aiZpPU1rZ0Z0Z0Z0Z0Z0ZyZzPWNvbnN1bWVyc2VjcmV0Jng9ZjE-';
+    const APP_ID = 'dj00aiZpPXBYa09RR3JCZ3FjNCZzPWNvbnN1bWVyc2VjcmV0Jng9NDM-';
     const lat = location['latitude'];
     const lon = location['longitude'];
     const URL = `${baseURL}lat=${lat}&lon=${lon}&appid=${APP_ID}`;
@@ -175,7 +175,19 @@ const ApoScreen = () => {
     const listpromise = onSnapshot(q, (querySnapshot) => {
       const promises = [];
       querySnapshot.forEach((doc) => {
-        promises.push({ ...doc.data(), id: doc.id });
+        const data = doc.data();
+        if (new Date(Number(data.appointmentDate['seconds']) * 1000 + Number(data.appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime() > 0) {
+          promises.push({
+            id: doc.id,
+            title: data.title,
+            content: data.content,
+            appointmentDate: data.appointmentDate,
+            appointmentDateEnd: data.appointmentDateEnd,
+            location: data.location,
+            inviter: data.inviter,
+            appointer: data.appointer,
+          });
+        }
       });
       setPromises(promises); // 新しい配列を作成して、それをpromisesに設定する
     });
