@@ -78,22 +78,26 @@ const HomeScreen = () => {
         <TouchableOpacity style={styles.contain} key={lateappo.id} onPress={() => { setSelectedLateappo(lateappo); setModalVisible(true); } }>
           <View style={{ flexDirection: 'row', height: '100%' }}>
             {/* 〇月〇日のように表示してほしい */}
-            <Text style={styles.contenttime}>
-              <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { month: 'numeric' })}</Text>
-              <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { day: 'numeric' })}</Text>
-              <Text>終了</Text>
-            </Text>
+            <View>
+              <Text style={styles.contenttime}>
+                <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { month: 'numeric' })}</Text>
+                <Text>{new Date(lateappo.appointmentDate.seconds * 1000).toLocaleString('ja-JP', { day: 'numeric' })}</Text>
+                <Text>終了</Text>
+              </Text>
+            </View>
             <View style={styles.ibar}></View>
             <View>
-              <Text style={styles.title}>{lateappo.title}</Text>
-              <View style={{ marginTop: 11, marginLeft: 3 }}>
-                <Text style={styles.content}>開始:{new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
-                {lateappo.appointmentDateEnd && <Text style={styles.content}>終了:{new Date(Number(lateappo.appointmentDateEnd['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              <Text style={styles.title}>{lateappo.title.length > 14 ? lateappo.title.slice(0,14)+ '...' : lateappo.title}</Text>
+              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent:'flex-start' }}>
+                <View style={{ marginLeft:3, width:160 }}>
+                  <Text style={styles.content}>開始:{new Date(Number(lateappo.appointmentDate['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
+                  {lateappo.appointmentDateEnd && <Text style={styles.content}>終了:{new Date(Number(lateappo.appointmentDateEnd['seconds']) * 1000 + Number(lateappo.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+                </View>
+                <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:27 }}>
+                  <Ionicons name="md-pin" size={18} color="#900" />
+                  <Text>{lateappo.location ? lateappo.location.slice(0,3)+ '...' : '未設定   '}</Text>
+                </View>
               </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', width: '30%' }}>
-              <Ionicons name="md-pin" size={18} color="#900" />
-              <Text>場所</Text>
             </View>
           </View>
         </TouchableOpacity>

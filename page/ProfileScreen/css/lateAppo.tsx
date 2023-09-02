@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     contenttime: {
       fontSize: 16,
       height: '100%',
-      width: '27%',
+      width: 100,
       textAlign: 'center',
       paddingTop: '7%',
     },
@@ -77,8 +77,9 @@ const styles = StyleSheet.create({
     title: {
       fontSize: 20,
       fontWeight: 'bold',
-      marginBottom: 5,
       marginLeft: 3,
+      marginBottom: 14,
+      marginTop:2
     },
     content: {
       fontSize: 16,
