@@ -11,13 +11,14 @@ import * as ExpoCalendar from 'expo-calendar';
 import styles from './css/AppoScreen';
 import { list } from 'firebase/storage';
 import MapScreen from './MapScreen';
+import axios from 'axios';
 
 
 const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateEnd, setSelectedDateEnd] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -38,7 +39,7 @@ const ApoScreen = () => {
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
-  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[]>([]);
+  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
   const [selectnowFriends, setSelectnowFriends] = useState<{ name: string }[]>([]);
   const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string }[]>([]);
   const [talkid, setTalkid] = useState('');
@@ -47,6 +48,8 @@ const ApoScreen = () => {
   const [promises, setPromises] = useState([]);
   const [showMap, setShowMap] = useState(false);
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 }); // 緯度経度
+  const [locationname, setLocationname] = useState(''); // 住所
+  const [showlocation, setShowlocation] = useState(''); // 住所
 
   //ヘッダー消去
   useEffect(() => {
@@ -54,6 +57,28 @@ const ApoScreen = () => {
       headerLeft: () => null,
     });
   }, []);
+
+  const Locationer = async (location) => {
+    const baseURL = 'https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder?output=json&';
+    const APP_ID = 'dj00aiZpPU1rZ0Z0Z0Z0Z0Z0ZyZzPWNvbnN1bWVyc2VjcmV0Jng9ZjE-';
+    const lat = location['latitude'];
+    const lon = location['longitude'];
+    const URL = `${baseURL}lat=${lat}&lon=${lon}&appid=${APP_ID}`;
+    try {
+      const response = await axios.get(URL);
+      const jsonData = response.data;
+      if (jsonData['ResultInfo']['Count'] == 0) {
+        alert('データを取得できませんでした。');
+      } else {
+        const adrs = jsonData['Feature'][0]['Property']['Address'];
+        setLocationname(adrs);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+  };
+
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
   const handleDayPress = (day: DateData) => {
@@ -326,6 +351,7 @@ const ApoScreen = () => {
         title: title,
         content: content,
         talkroomid: randamid,
+        location: locationname,
         appointmentDate: selectedDate,
         appointmentDateEnd: selectedDateEnd,
         createdAt: new Date(),
@@ -342,7 +368,7 @@ const ApoScreen = () => {
         startDate: selectedDate,
         endDate: selectedDateEnd,
         timeZone: 'Asia/Tokyo', // タイムゾーン
-        location: 'オフィス', // 場所
+        location: locationname, // 場所
         notes: content, // メモ
       };
       try {
@@ -368,7 +394,7 @@ const ApoScreen = () => {
   };
 
   // 約束を選択したときの処理
-  const setSelectedApo = (id: string, title: string, appointmentDate: string,appointmentDateEnd:string, content: string, inviter: [], talkroomid:string, createAt:DateData) => {
+  const setSelectedApo = (id: string, title: string, appointmentDate: string,appointmentDateEnd:string, content: string, inviter: [], location:string, talkroomid:string, createAt:DateData) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
     );
@@ -399,6 +425,7 @@ const ApoScreen = () => {
     setShowContent(content);
     setShowInviter(inviter);
     setShowTalkroomid(talkroomid);
+    setShowlocation(location);
     setShowCreateAt(formattedCreateAtDate);
     setShowApoModalVisible(true);
     setTalkid(talkidnow)
@@ -413,7 +440,7 @@ const ApoScreen = () => {
   }
     const q2 = query(collection(firestore, 'newAppo'));
     const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; talkroomid:string;createAt:DateData}[] = [];
+      const appointments: { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string;talkroomid:string;createAt:DateData}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -426,6 +453,7 @@ const ApoScreen = () => {
                 appointmentDate: data.appointmentDate,
                 appointmentDateEnd: data.appointmentDateEnd,
                 inviter: data.inviter,
+                location: data.location,
                 talkroomid: data.talkroomid,
                 createAt: data.createdAt,
               });
@@ -571,7 +599,7 @@ const ApoScreen = () => {
             onRequestClose={() => {
               setShowMap(false);
             }}>
-              <MapScreen onLocationSelect={(location) => setLocation(location)} onselect={(bool) => setShowMap(bool)} />
+              <MapScreen onLocationSelect={(location) => Locationer(location)} onselect={(bool) => setShowMap(bool)} />
           </Modal>
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
@@ -653,7 +681,7 @@ const ApoScreen = () => {
                     {location && (
                       <View>
                         <Text>選択された場所</Text>
-                        <Text>{location.latitude}</Text>
+                        <Text>{locationname}</Text>
                       </View>
                     )}
                     <TextInput
@@ -713,33 +741,38 @@ const ApoScreen = () => {
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
+        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, location , talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
-            <Text style={styles.contenttime}>{
-              // 時間がマイナスなら赤色にする
-              Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
-              <Text style={{ color:'red' }}>
-              現在約束中
-              </Text>
-              :
-              <Text>
-              {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
-              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
-              </Text>
-            }</Text>
-            <View style={styles.ibar}></View>
-            <View>
-              <Text style={styles.title}>{title}</Text>
-              <View style={{ marginTop:11, marginLeft:3 }}>
-              <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
-              {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+              <View>
+                <Text style={styles.contenttime}>{
+                  // 時間がマイナスなら赤色にする
+                  Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
+                  <Text style={{ color:'red' }}>
+                  現在約束中
+                  </Text>
+                  :
+                  <Text>
+                  {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
+                  Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
+                  </Text>
+                }</Text>
               </View>
-            </View>
-            <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
-              <Ionicons name="md-pin" size={18} color="#900" />
-              <Text>場所</Text>
-            </View>
+              <View style={styles.ibar}></View>
+              <View>
+                <Text style={styles.title}>{title.length > 14 ? title.slice(0,14)+ '...' : title}</Text>
+                <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent:'flex-start' }}>
+                  <View style={{ marginLeft:3, width:160 }}>
+                    <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+                    {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+                  </View>
+                  <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:40 }}>
+                    <Ionicons name="md-pin" size={18} color="#900" />
+                    {/* locationの頭三文字を表示 */}
+                    <Text>{location ? location.slice(0,3)+ '...' : '未設定   '}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
         ))) : (
@@ -750,33 +783,38 @@ const ApoScreen = () => {
             月の約束はありません</Text>
           </View>
         )))}
-        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, talkroomid, createAt)} >
-            <View style={{ flexDirection: 'row',height:'100%' }}>
-            <Text style={styles.contenttime}>{
-              // 時間がマイナスなら赤色にする
-              Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
-              <Text style={{ color:'red' }}>
-              現在約束中
-              </Text>
-              :
-              <Text>
-              {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
-              Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
-              </Text>
-            }</Text>
-            <View style={styles.ibar}></View>
-            <View>
-              <Text style={styles.title}>{highlightText(title, searchText)}</Text>
-              <View style={{ marginTop:11, marginLeft:3 }}>
-              <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
-              {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter,location, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, location,talkroomid, createAt)} >
+            <View style={{ flexDirection: 'row', height:'100%' }}>
+              <View>
+                <Text style={styles.contenttime}>{
+                  // 時間がマイナスなら赤色にする
+                  Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
+                  <Text style={{ color:'red' }}>
+                  現在約束中
+                  </Text>
+                  :
+                  <Text>
+                  {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
+                  Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
+                  </Text>
+                }</Text>
               </View>
-            </View>
-            <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%' }}>
-              <Ionicons name="md-pin" size={18} color="#900" />
-              <Text>場所</Text>
-            </View>
+              <View style={styles.ibar}></View>
+              <View>
+                {/* 現在は１４文字以降は検索に引っかからない */}
+                <Text style={styles.title}>{title.length > 14 ? highlightText(title.slice(0,14) + '...',searchText) : highlightText(title, searchText)}</Text>
+                <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent:'flex-start' }}>
+                  <View style={{ marginLeft:3, width:160}}>
+                    <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
+                    {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+                  </View>
+                  <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end',width:'30%', marginLeft:40}}>
+                    <Ionicons name="md-pin" size={18} color="#900" />
+                    <Text>{location ? location.slice(0,3)+ '...' : '未設定   '}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
         ))) : (
