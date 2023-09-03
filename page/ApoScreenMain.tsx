@@ -33,6 +33,7 @@ const ApoScreen = () => {
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRefs = useRef<ScrollView>(null);
   const [showApoModalVisible, setShowApoModalVisible] = useState(false);
   const [showTitle, setShowTitle] = useState('');
   const [showContent, setShowContent] = useState('');
@@ -52,6 +53,8 @@ const ApoScreen = () => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 }); // 緯度経度
   const [locationname, setLocationname] = useState(''); // 住所
   const [showlocation, setShowlocation] = useState(''); // 住所
+  const [showApopromiseModalVisible, setShowApopromiseModalVisible] = useState(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   //ヘッダー消去
   useEffect(() => {
@@ -59,6 +62,7 @@ const ApoScreen = () => {
       headerLeft: () => null,
     });
   }, []);
+
 
   // 緯度経度から住所を取得する処理
   const Locationer = async (location) => {
@@ -108,7 +112,6 @@ const ApoScreen = () => {
       scrollViewRef.current.scrollTo({ x: 0, y: (days * yOffset), animated: true });
     }
   };
-
 
   
   useEffect(() => {
@@ -322,6 +325,7 @@ const ApoScreen = () => {
   //記事をスクロールで下げれる 離したときに下がりきるようにしたい
   const handleScrollEnd = (event) => {
     const offsetY = event.nativeEvent.contentOffset.y;
+    setScrollEnabled(true);
     if (offsetY < -120) {
       setShowApoModalVisible(false);;
     }
@@ -454,7 +458,20 @@ const ApoScreen = () => {
     const hours = date.getUTCHours();
     const minutes = date.getUTCMinutes();
     const seconds = date.getUTCSeconds();
-    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day} ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    //appointmentDateEndのDateDataを解析してstringにする
+    const dateEnd = new Date(
+      Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDateEnd['nanoseconds']) / 1000000
+    );
+    const yearEnd = dateEnd.getUTCFullYear();
+    const monthEnd = dateEnd.getUTCMonth() + 1; // 0から始まるため +1
+    const dayEnd = dateEnd.getUTCDate();
+    const hoursEnd = dateEnd.getUTCHours();
+    const minutesEnd = dateEnd.getUTCMinutes();
+    const secondsEnd = dateEnd.getUTCSeconds();
+    const formattedDateEnd = `${yearEnd}-${monthEnd < 10 ? '0' : ''}${monthEnd}-${dayEnd < 10 ? '0' : ''}${dayEnd} ${hoursEnd < 10 ? '0' : ''}${hoursEnd}:${minutesEnd < 10 ? '0' : ''}${minutesEnd}`;
+    //appointmentDateのDateDataを解析してstringにする
+
+    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day} ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes} ~~ ${formattedDateEnd}`;
     //CreatAtのDateDataを解析してstringにする
     const createAtDate = new Date(
       Number(createAt['seconds']) * 1000 + Number(createAt['nanoseconds']) / 1000000
@@ -467,8 +484,11 @@ const ApoScreen = () => {
     const createAtminutes = createAtDate.getUTCMinutes();
     const createAtseconds = createAtDate.getUTCSeconds();
     const formattedCreateAtDate = `${createAtyear}-${createAtmonth < 10 ? '0' : ''}${createAtmonth}-${createAtday < 10 ? '0' : ''}${createAtday} ${createAthours < 10 ? '0' : ''}${createAthours}:${createAtminutes < 10 ? '0' : ''}${createAtminutes}:${createAtseconds < 10 ? '0' : ''}${createAtseconds}`;
-
     const talkidnow = talkroomid
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+
     //これらのデータをuseStateに入れる
     setShowApoDate(formattedDate);
     setShowTitle(title);
@@ -518,7 +538,6 @@ const ApoScreen = () => {
     };
   },[]);
 
-
   return (
     <View style={styles.container}>
       {/* カレンダー */}
@@ -552,8 +571,14 @@ const ApoScreen = () => {
           }}
           
         >
-          <ScrollView style={styles.centeredView} scrollEventThrottle={100} contentContainerStyle={styles.contentContainer} onScrollEndDrag={handleScrollEnd}>
-            <View style={styles.modalView}>
+          <ScrollView style={styles.centeredView} showsVerticalScrollIndicator={false} scrollEventThrottle={0.1} onScroll={(event) => {
+            const y = event.nativeEvent.contentOffset.y;
+            if (y > 0) {
+              // 下方向へのスクロールがある場合、スクロール位置を0に戻す
+              scrollViewRefs.current.scrollTo({ x: 0, y: 0, animated: false });
+            }
+            }} ref={scrollViewRefs} onScrollEndDrag={handleScrollEnd} >
+              <View style={styles.modalView}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalHeaderText}>約束の詳細</Text>
                 <TouchableOpacity style={styles.closeButtonX} onPress={() => {
@@ -569,7 +594,9 @@ const ApoScreen = () => {
                     <Text style={styles.label}>お気に入り</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
-                  <Ionicons name="close" size={30} color="black" />
+                  <Ionicons name="people" size={30} color="black" onPress={() => {
+                  setShowApopromiseModalVisible(true);
+                }}/>
                     <Text style={styles.label}>約束している人</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
@@ -598,12 +625,25 @@ const ApoScreen = () => {
                 <TouchableOpacity onPress={() => showMapIos(showlocation[1])}><Text style={{ color:'blue', marginLeft:14 }}>マップで確認する</Text></TouchableOpacity>
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
-                  <Text key={inviter.name}>{inviter.name}</Text>
+                  <Text key={inviter.name}>{inviter.name} </Text>
                 ))}</Text>
                 <Text style={ styles.headtitle }>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
-            </View>
+              </View>
           </ScrollView>
         </Modal>
+        {/* 約束している人 */}
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={showApopromiseModalVisible}
+          onRequestClose={() => {
+            setShowApopromiseModalVisible(false);
+          }}
+          
+        >
+          
+        </Modal>
+
       
         {/* 約束追加 */}
         <Modal
@@ -654,8 +694,11 @@ const ApoScreen = () => {
           </Modal>
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
-              <View style={{ width: '100%', marginTop:'7%' }}>
+              <View style={{ width: '100%', marginTop:'7%', flexDirection:'row', justifyContent:'space-between' }}>
                 <Text style={{ fontSize:27, fontWeight: 'bold', textAlign:'left', paddingLeft:'5%' }}>約束の作成</Text>
+                <TouchableOpacity onPress={handleSave}>
+                  <Text style={{ fontSize:25,fontWeight:'bold', color: '#0030ce', marginRight: 15 }}>作成</Text>
+                  </TouchableOpacity>
               </View>
             <DateTimePickerModal
               isVisible={showDatePicker}
@@ -772,16 +815,17 @@ const ApoScreen = () => {
                       placeholder="詳細を入力してください"
                       numberOfLines={4}
                       />
-                      <Button title="Save" onPress={handleSave} />
-                    <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-                      <Text style={styles.closeButtonText}>閉じる</Text>
-                    </TouchableOpacity>
+                    <View style={styles.buttonfield}>
+                      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+                        <Text style={styles.closeButtonText}>閉じる</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
             </View>
             </View>
           </View>
         </Modal>
-        <ScrollView contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '92%'}} ref={scrollViewRef}>
+        <ScrollView bounces={false} contentContainerStyle={styles.scrollContainer} style={{height: calendarVisible ? '54%' : '92%'}} ref={scrollViewRef}>
         {/* 約束表示 */}
         {/* {appointments.map((appointment) => (
           <View style={styles.contain}>

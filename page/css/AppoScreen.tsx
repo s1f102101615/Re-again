@@ -6,17 +6,35 @@ const styles = StyleSheet.create({
       height: 'auto',
     },
     closeButton: {
+      backgroundColor: '#1f1f1f',
       borderRadius: 5,
-      padding: 10,
+      width: 180,
+      height: 45,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    closeButtonText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#ffffff',
+    },
+    buttonfield: {
+      width: '100%',
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 10,
     },
     closeButtonX:{
       paddingTop:10,
       paddingRight:20,
-    },
-    closeButtonText: {
-      color: 'black',
-      fontWeight: 'bold',
-      textAlign: 'center',
     },
     circle: {
       backgroundColor: '#00FF7F',
@@ -53,10 +71,10 @@ const styles = StyleSheet.create({
     },
     modalView: {
       backgroundColor: '#fff',
-      marginTop: '100%',
+      marginTop: '42%',
       borderRadius: 5,
       width: '100%',
-      height: '125%',
+      height: '130%',
       padding: 0,
       shadowColor: '#000',
       shadowOffset: {
@@ -66,7 +84,7 @@ const styles = StyleSheet.create({
       shadowOpacity: 1,
       shadowRadius: 10,
       elevation: 5,
-      justifyContent: 'flex-start',
+      top: -120,
     },
     modalViewNewApo: {
       backgroundColor: '#fff',
@@ -142,6 +160,7 @@ const styles = StyleSheet.create({
       width: '100%',
       alignItems: 'center',
       backgroundColor: '#fff',
+      paddingBottom: 20,
     },
     calendarline: {
       justifyContent: 'space-between',
