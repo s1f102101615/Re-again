@@ -94,7 +94,6 @@ const ApoScreen = () => {
       const destination = `${latitude},${longitude}`;
       Linking.openURL(`http://maps.apple.com/?daddr=${destination}`);
     };
-    console.log(locate['latitude'], locate['longitude'])
     openAppleMapsDirections(locate['latitude'], locate['longitude']);
   }
 
@@ -125,16 +124,13 @@ const ApoScreen = () => {
       const friends: { name: string, id:string, photoURL:string }[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach(async (docs) => {
-          console.log(docs.get('frienduid'))
           const querySnapshot = doc(firestore, 'users', docs.get('frienduid'));
           const userSnap = await getDoc(querySnapshot);
           const userData = userSnap.data();
-          console.log(userData?.photoURL)
           const photoURL = userData?.photoURL;
           friends.push({ name: docs.get('friend'), id: docs.id, photoURL: photoURL } as { name: string, id:string, photoURL:string })
         });
       }
-      console.log('aaaaあああああああああああああ',friends)
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
     });
     return () => {
@@ -223,7 +219,6 @@ const ApoScreen = () => {
 
   // 招待する友達を選択する処理
   function inviteSelectedFriends() {
-    console.log(selectedFriends)
     const notedSelectedFriends = friends.filter((friend) => {
       return !selectedFriends.some((selectedFriend) => selectedFriend.name === friend.name);
     });
@@ -326,7 +321,6 @@ const ApoScreen = () => {
 
   //記事をスクロールで下げれる 離したときに下がりきるようにしたい
   const handleScrollEnd = (event) => {
-    console.log(event.nativeEvent.contentOffset.y)
     const offsetY = event.nativeEvent.contentOffset.y;
     if (offsetY < -120) {
       setShowApoModalVisible(false);;
@@ -433,8 +427,6 @@ const ApoScreen = () => {
       } catch (error) {
         console.error('Error adding event:', error);
       }
-
-      console.log("Document written with ID: ", talkroomdocRef.id);
       setTitle(''); // タイトルをクリアする
       setContent(''); // コンテンツをクリアする
       setSelectedDate(new Date()); // 日付を初期化する
