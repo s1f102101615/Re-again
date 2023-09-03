@@ -145,7 +145,7 @@ const HomeScreen = () => {
                   </View>
                   <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:27 }}>
                     <Ionicons name="md-pin" size={18} color="#900" />
-                    <Text>{lateappo.location ? lateappo.location.slice(0,3)+ '...' : '未設定   '}</Text>
+                    <Text>{lateappo.location[0] ? lateappo.location[0].slice(0,3)+ '...' : '未設定   '}</Text>
                   </View>
                 </View>
               </View>
@@ -177,7 +177,7 @@ const HomeScreen = () => {
                   </View>
                   <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:27 }}>
                     <Ionicons name="md-pin" size={18} color="#900" />
-                    <Text>{lateappo.location ? lateappo.location.slice(0,3)+ '...' : '未設定   '}</Text>
+                    <Text>{lateappo.location[0] ? lateappo.location[0].slice(0,3)+ '...' : '未設定   '}</Text>
                   </View>
                 </View>
               </View>

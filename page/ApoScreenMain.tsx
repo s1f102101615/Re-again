@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { collection, query, addDoc, onSnapshot, where } from 'firebase/firestore';
 import { Modal } from 'react-native';
@@ -58,6 +58,7 @@ const ApoScreen = () => {
     });
   }, []);
 
+  // 緯度経度から住所を取得する処理
   const Locationer = async (location) => {
     const baseURL = 'https://map.yahooapis.jp/geoapi/V1/reverseGeoCoder?output=json&';
     const APP_ID = process.env.YAHOO_API_KEY;
@@ -72,12 +73,22 @@ const ApoScreen = () => {
       } else {
         const adrs = jsonData['Feature'][0]['Property']['Address'];
         setLocationname(adrs);
+        setLocation(location);
       }
     } catch (error) {
       console.error(error);
     }
 
   };
+
+  const showMapIos = (locate) => {
+    const openAppleMapsDirections = (latitude, longitude) => {
+      const destination = `${latitude},${longitude}`;
+      Linking.openURL(`http://maps.apple.com/?daddr=${destination}`);
+    };
+    console.log(locate['latitude'], locate['longitude'])
+    openAppleMapsDirections(locate['latitude'], locate['longitude']);
+  }
 
 
   //カレンダーの日を選択したときの処理(ここで調整する*今はdays-1 * 115)
@@ -363,7 +374,7 @@ const ApoScreen = () => {
         title: title,
         content: content,
         talkroomid: randamid,
-        location: locationname,
+        location: [locationname,location],
         appointmentDate: selectedDate,
         appointmentDateEnd: selectedDateEnd,
         createdAt: new Date(),
@@ -554,14 +565,15 @@ const ApoScreen = () => {
                 <Text style={ styles.headtitle }>日付</Text>
                 <Text style={styles.detail}>{showApoDate}</Text>
                 <Text style={ styles.headtitle }>詳細</Text>
-                <Text style={styles.detail}>{showContent}</Text>
+                <Text style={styles.detail}>{showContent || '未設定'}</Text>
                 <Text style={ styles.headtitle }>場所</Text>
+                <Text style={styles.detail}>{showlocation[0]}</Text>
+                <TouchableOpacity onPress={() => showMapIos(showlocation[1])}><Text style={{ color:'blue', marginLeft:14 }}>マップで確認する</Text></TouchableOpacity>
                 {/* <Text>{showContent}</Text> まだ */}
-                <Text style={ styles.headtitle }>約束名</Text>
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.name}>{inviter.name}</Text>
                 ))}</Text>
-                <Text>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
+                <Text style={ styles.headtitle }>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
             </View>
           </ScrollView>
         </Modal>
@@ -781,7 +793,7 @@ const ApoScreen = () => {
                   <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:40 }}>
                     <Ionicons name="md-pin" size={18} color="#900" />
                     {/* locationの頭三文字を表示 */}
-                    <Text>{location ? location.slice(0,3)+ '...' : '未設定   '}</Text>
+                    <Text>{location[0] ? location[0].slice(0,3)+ '...' : '未設定   '}</Text>
                   </View>
                 </View>
               </View>
@@ -823,7 +835,7 @@ const ApoScreen = () => {
                   </View>
                   <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end',width:'30%', marginLeft:40}}>
                     <Ionicons name="md-pin" size={18} color="#900" />
-                    <Text>{location ? location.slice(0,3)+ '...' : '未設定   '}</Text>
+                    <Text>{location[0] ? location[0].slice(0,3)+ '...' : '未設定   '}</Text>
                   </View>
                 </View>
               </View>

@@ -56,7 +56,7 @@ const TalkList = () => {
       {appointments.length > 0 ? (
         appointments.map((appointment) => (
           <TouchableOpacity style={styles.contain} key={appointment.id} onPress={() => handleTalkPress(appointment.talkroomid)}>
-            <Text style={styles.title}>{appointment.title}</Text>
+            <Text style={styles.title}>{appointment.title.length > 13 ? appointment.title.slice(0,13)+ '...' : appointment.title}</Text>
             <Text style={styles.newtalk}>{appointment.newtalk}</Text>
           </TouchableOpacity>
         ))
