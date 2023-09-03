@@ -14,9 +14,10 @@ const styles = StyleSheet.create({
     },
     input1: {
       borderWidth: 1,
-      padding: 5,
+      padding: 10,
       marginVertical: 10,
-      width: 230,
+      fontSize: 20,
+      width: 300,
     },
     request: {
       flexDirection: 'row',
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
     modalView: {
       backgroundColor: '#fff',
       borderRadius: 5,
+      width: '90%',
       padding: 45,
       alignItems: 'center',
       shadowColor: '#000',
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
       marginBottom: 10,
       textAlign: 'center',
       fontWeight: 'bold',
-      fontSize: 18,
+      fontSize: 22,
     },
     activeTab: {
       borderBottomWidth: 2,

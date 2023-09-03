@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, addDoc, onSnapshot, where } from 'firebase/firestore';
+import { collection, query, addDoc, onSnapshot, where, getDocs, getDoc, doc } from 'firebase/firestore';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -12,6 +12,8 @@ import styles from './css/AppoScreen';
 import { list } from 'firebase/storage';
 import MapScreen from './MapScreen';
 import axios from 'axios';
+import { Image } from 'react-native';
+import { set } from 'date-fns';
 
 
 const ApoScreen = () => {
@@ -25,8 +27,8 @@ const ApoScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePickerEnd, setShowDatePickerEnd] = useState(false);
   const [showTimePickerEnd, setShowTimePickerEnd] = useState(false);
-  const [selectedFriends, setSelectedFriends] = useState<{ name: string }[]>([]);
-  const [friends, setFriends] = useState<{ name: string }[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<{ name: string, photoURL:string }[]>([]);
+  const [friends, setFriends] = useState<{ name: string, photoURL:string }[]>([]);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -40,8 +42,8 @@ const ApoScreen = () => {
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
   const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
-  const [selectnowFriends, setSelectnowFriends] = useState<{ name: string }[]>([]);
-  const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string }[]>([]);
+  const [selectnowFriends, setSelectnowFriends] = useState<{ name: string, photoURL:string}[]>([]);
+  const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string, photoURL:string }[]>([]);
   const [talkid, setTalkid] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
   const [apoAddVisible, setApoAddVisible] = useState(false);
@@ -81,6 +83,12 @@ const ApoScreen = () => {
 
   };
 
+  const FriendModalVisible = () => {
+    setFriendModalVisible(false)
+    setSelectnowFriends([])
+  };
+
+
   const showMapIos = (locate) => {
     const openAppleMapsDirections = (latitude, longitude) => {
       const destination = `${latitude},${longitude}`;
@@ -114,12 +122,19 @@ const ApoScreen = () => {
     const f = query(collection(firestore, `users/${user.uid}/friends`));
     const listfriend = onSnapshot(f, (querySnapshot) => {
       //frinedsの中身にuserのfriendを入れる
-      const friends: { name: string, id:string }[] = [];
+      const friends: { name: string, id:string, photoURL:string }[] = [];
       if (!querySnapshot.empty) {
-        querySnapshot.forEach((doc) => {
-          return friends.push({ name: doc.get('friend'), id: doc.id } as { name: string, id:string });
+        querySnapshot.forEach(async (docs) => {
+          console.log(docs.get('frienduid'))
+          const querySnapshot = doc(firestore, 'users', docs.get('frienduid'));
+          const userSnap = await getDoc(querySnapshot);
+          const userData = userSnap.data();
+          console.log(userData?.photoURL)
+          const photoURL = userData?.photoURL;
+          friends.push({ name: docs.get('friend'), id: docs.id, photoURL: photoURL } as { name: string, id:string, photoURL:string })
         });
       }
+      console.log('aaaaあああああああああああああ',friends)
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
     });
     return () => {
@@ -208,6 +223,7 @@ const ApoScreen = () => {
 
   // 招待する友達を選択する処理
   function inviteSelectedFriends() {
+    console.log(selectedFriends)
     const notedSelectedFriends = friends.filter((friend) => {
       return !selectedFriends.some((selectedFriend) => selectedFriend.name === friend.name);
     });
@@ -215,14 +231,23 @@ const ApoScreen = () => {
     // 招待する処理     
     };
 
-  // friendを複数選択して招待する処理
-  const toggleFriendSelection = (friend) => {
-    if (selectnowFriends.includes(friend)) {
-      setSelectnowFriends(selectnowFriends.filter((selectedFriend) => selectedFriend !== friend));
-    } else {
-      setSelectnowFriends([...selectnowFriends, friend]);
-    }
+    // 選択されたフレンドをsekectedFriendsから削除する処理
+  function notinviteSelectedFriends(friend) {
+    const notedSelectedFriends = selectedFriends.filter((selectedFriend) => {
+      return selectedFriend.name !== friend.name;
+    });
+    setSelectedFriends(notedSelectedFriends);
+    // 招待を取り消す処理
   };
+
+ // friendを複数選択して招待する処理
+ const toggleFriendSelection = (friend) => {
+  if (selectnowFriends.includes(friend)) {
+    setSelectnowFriends(selectnowFriends.filter((selectedFriend) => selectedFriend !== friend));
+  } else {
+    setSelectnowFriends([...selectnowFriends, friend]);
+  }
+};
 
   // ここで選択された友達を招待する処理を実装する
   const inviteAllFriends = () => {
@@ -331,6 +356,10 @@ const ApoScreen = () => {
     setSelectnowFriends([]);
     setSelectedDate(new Date());
     setModalVisible(false);
+    setFriendModalVisible(false);
+    setLocation({ latitude: 0, longitude: 0 })
+    setLocationname('')
+    setSelectedFriends([]);
   };
 
   const markedDates = {};
@@ -410,6 +439,12 @@ const ApoScreen = () => {
       setContent(''); // コンテンツをクリアする
       setSelectedDate(new Date()); // 日付を初期化する
       setModalVisible(false); // モーダルを閉じる
+      setSelectedFriends([]);
+      setSelectnowFriends([]);
+      setFriendModalVisible(false);
+      setLocation({ latitude: 0, longitude: 0 })
+      setLocationname('')
+      setSelectedFriends([]);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
@@ -595,15 +630,15 @@ const ApoScreen = () => {
           >
             <View style={styles.centeredViewNewApo}>
               <View style={styles.modalViewNewApo}>
-                <Text style={styles.modalTitle} >招待する友達を選択してください</Text>
+                <Text style={styles.modalTitle}>招待する友達を選択してください</Text>
                 {notSelectedFriends.map((friend) => (
                   <TouchableOpacity key={friend.name} onPress={() => toggleFriendSelection(friend)}>
                     <View style={styles.friendRow}>
                       <Text style={styles.friendName}>{friend.name}</Text>
                       <Ionicons
-                        name={selectnowFriends.includes(friend) ? 'checkbox' : 'checkbox-outline'}
+                        name={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'checkbox' : 'checkbox-outline'}
                         size={25}
-                        color={selectnowFriends.includes(friend) ? 'black' : 'gray'}
+                        color={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'black' : 'gray'}
                       />
                     </View>
                   </TouchableOpacity>
@@ -611,7 +646,7 @@ const ApoScreen = () => {
                 <TouchableOpacity style={styles.inviteButton} onPress={inviteAllFriends}>
                   <Text style={styles.inviteButtonText}>全員を招待する</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setFriendModalVisible(false)}>
+                <TouchableOpacity style={styles.closeButton} onPress={() => FriendModalVisible()}>
                   <Text style={styles.closeButtonText}>閉じる</Text>
                 </TouchableOpacity>
               </View>
@@ -677,7 +712,6 @@ const ApoScreen = () => {
                     <Text style={{ fontWeight:'bold', fontSize:20  }}  onPress={handlePressTimeEnd}> {selectedDateEnd.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
                 </View>
-                <View>
                   <View style={[styles.likeedit,{ paddingTop:'5%' }]} >
                     <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
                       <Ionicons name="md-person-add" size={30} color="black" />
@@ -692,35 +726,65 @@ const ApoScreen = () => {
                       <Text style={styles.label}>画像</Text>
                     </TouchableOpacity>
                   </View>
-                    {selectedFriends.length > 0 && (
-                      <View>
-                        <Text>選択されたフレンド:</Text>
-                        {selectedFriends.map((friend) => (
-                          <View key={friend.name}>
-                            <Text>{friend.name}</Text>
+                  <View style={{ width: '100%' }}>
+                    <Text style={styles.selectFriend}>選択されたフレンド</Text>
+                      <View style={styles.friendinv}>
+                        {/* 右にスクロール */}
+                        <ScrollView 
+                        style={styles.iconbox} 
+                        horizontal={true} 
+                        showsHorizontalScrollIndicator={true} 
+                        scrollIndicatorInsets={{ top: 1 }}
+                        >
+                        {/* +のアイコンを表示するアイコンの周りは丸で囲む*/}
+                        <View style={styles.iconname}>
+                          <TouchableOpacity style={styles.icon} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
+                            {/* ただの＋でいい */}
+                            <Ionicons name="add" size={45} color="black" />
+                          </TouchableOpacity>
+                          <Text style={{ textAlign:'center' }}>追加</Text>
+                        </View>
+                            {selectedFriends.map((friend) => (
+                              <View style={styles.iconname} key={friend.name}>
+                                <TouchableOpacity style={styles.icon} onPress={() => { notinviteSelectedFriends(friend) }}>
+                                  {/* ユーザーアイコンを表示する無ければデフォルトアイコンを表示する */}
+                                  {friend.photoURL ? (
+                                    <Image source={{ uri: friend.photoURL }} style={styles.friendIcon} />
+                                  ) : (
+                                    <Ionicons name="person" size={45} color="black" />
+                                  )}
+                                  {/* 右上に丸い罰ボタンを追加する */}
+                                  <View style={styles.closeIcon}>
+                                    <Ionicons name="close" size={15} color="#3f3f3f" />
+                                  </View>
+                                </TouchableOpacity>
+                                {/* friend.nameは4文字で改行して２行目の３文字まで表示して...を付け加える */}
+                                <Text style={{ textAlign:'center' }}>{friend.name.length > 7 ? friend.name.slice(0,7)+ '...' : friend.name}</Text>
+                              </View>
+                            ))}
+                        </ScrollView>
+                      </View>
+                      {location && (
+                        <View>
+                          <Text style={styles.selectLocate}>選択された場所</Text>
+                          <View style={{ height: 30, marginBottom:5 }}>
+                            <Text style={styles.unknowntext}>{locationname || '未設定'}</Text>
                           </View>
-                        ))}
-                      </View>
-                    )}
-                    {location && (
-                      <View>
-                        <Text>選択された場所</Text>
-                        <Text>{locationname}</Text>
-                      </View>
-                    )}
-                    <TextInput
-                    style={styles.input2}
-                    onChangeText={setContent}
-                    value={content}
-                    multiline={true}
-                    placeholder="詳細を入力してください"
-                    numberOfLines={4}
-                    />
-                    <Button title="Save" onPress={handleSave} />
-                  <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-                    <Text style={styles.closeButtonText}>閉じる</Text>
-                  </TouchableOpacity>
-                </View>
+                        </View>
+                      )}
+                      <TextInput
+                      style={styles.input2}
+                      onChangeText={setContent}
+                      value={content}
+                      multiline={true}
+                      placeholder="詳細を入力してください"
+                      numberOfLines={4}
+                      />
+                      <Button title="Save" onPress={handleSave} />
+                    <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+                      <Text style={styles.closeButtonText}>閉じる</Text>
+                    </TouchableOpacity>
+                  </View>
             </View>
             </View>
           </View>
