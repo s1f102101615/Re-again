@@ -91,9 +91,9 @@ const InvFriend = () => {
               <Text style={styles.content}>開始:{new Date(Number(promise.appointmentDate['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
               {promise.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(promise.appointmentDateEnd['seconds']) * 1000 + Number(promise.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
               </View>
-              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:40 }}>
+              <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:27 }}>
                 <Ionicons name="md-pin" size={18} color="#900" />
-                <Text>{promise.location ? promise.location.slice(0,3)+ '...' : '未設定   '}</Text>
+                <Text>{promise.location[0] ? promise.location[0].slice(0,3)+ '...' : '未設定   '}</Text>
               </View>
             </View>
           </View>
@@ -106,7 +106,7 @@ const InvFriend = () => {
           <Text style={styles.modalDescription}>{selectedPromise?.content}</Text>
           <Text style={styles.content}>開始:{new Date(Number(selectedPromise?.appointmentDate['seconds']) * 1000 + Number(selectedPromise?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
           {selectedPromise?.appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(selectedPromise?.appointmentDateEnd['seconds']) * 1000 + Number(selectedPromise?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
-          <Text style={styles.modalDescription}>場所: {selectedPromise?.location}</Text>
+          <Text style={styles.modalDescription}>場所: {selectedPromise?.location[0]}</Text>
           <TouchableOpacity onPress={handleAccept} style={styles.modalButton}>
             <Text style={styles.modalButtonText}>承諾</Text>
           </TouchableOpacity>
