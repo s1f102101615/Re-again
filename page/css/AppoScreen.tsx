@@ -21,8 +21,30 @@ const styles = StyleSheet.create({
       shadowRadius: 3.84,
       elevation: 5,
     },
+    closeButtons: {
+      marginTop: 10,
+      backgroundColor: '#1f1f1f',
+      borderRadius: 5,
+      width: 120,
+      height: 45,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
     closeButtonText: {
       fontSize: 24,
+      fontWeight: 'bold',
+      color: '#ffffff',
+    },
+    closeButtonTexts: {
+      fontSize: 18,
       fontWeight: 'bold',
       color: '#ffffff',
     },
@@ -33,7 +55,11 @@ const styles = StyleSheet.create({
       marginTop: 10,
     },
     closeButtonX:{
-      paddingTop:10,
+      paddingTop:55,
+      paddingRight:20,
+    },
+    closeButtonXs:{
+      paddingTop:13,
       paddingRight:20,
     },
     circle: {
@@ -193,17 +219,41 @@ const styles = StyleSheet.create({
       width: '100%',
       marginBottom: 20,
     },
+    apoinvHeader: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      width: '100%',
+      marginBottom: 20,
+    },
+    apoinvView:{
+      height: '100%',
+      width: '100%',
+      backgroundColor: '#ffffff',
+    },
     modalHeaderText: {
       fontSize: 20,
       fontWeight: 'bold',
       marginRight: '26%',
       marginTop: '2%',
     },
+    invHeaderText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginRight: '21%',
+      marginTop: '14%',
+    },
+    invnowText: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginLeft: '5%',
+    },
     likeedit: {
       flexDirection: 'row', // 要素を横に並べる
       justifyContent: 'space-between', // 要素間のスペースを均等に分配
       paddingHorizontal: '12%', // 左右のパディング
       alignItems: 'center', // 縦方向に中央揃え
+      marginRight:'6%',
       marginTop: '3%',
     },
     item: {
@@ -254,12 +304,16 @@ const styles = StyleSheet.create({
     inviteButton: {
       backgroundColor: 'blue',
       borderRadius: 10,
-      padding: 10,
+      width: 160,
+      height: 50,
       marginTop: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     inviteButtonText: {
       color: 'white',
-      fontSize: 16,
+      fontSize: 22,
+      fontWeight: 'bold',
     },
     talkroomRef: {
       width: '100%',

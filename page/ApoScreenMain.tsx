@@ -20,7 +20,7 @@ const ApoScreen = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [appointments, setAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
+  const [appointments, setAppointments] = useState<{ id: string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateEnd, setSelectedDateEnd] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -42,7 +42,7 @@ const ApoScreen = () => {
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
-  const [serchAppointments, setSerchAppointments] = useState<{ id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
+  const [serchAppointments, setSerchAppointments] = useState<{ id: string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
   const [selectnowFriends, setSelectnowFriends] = useState<{ name: string, photoURL:string}[]>([]);
   const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string, photoURL:string }[]>([]);
   const [talkid, setTalkid] = useState('');
@@ -53,8 +53,10 @@ const ApoScreen = () => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 }); // 緯度経度
   const [locationname, setLocationname] = useState(''); // 住所
   const [showlocation, setShowlocation] = useState(''); // 住所
+  const [showappointer, setShowappointer] = useState([]); // 住所
   const [showApopromiseModalVisible, setShowApopromiseModalVisible] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [appointer, setAppointer] = useState([]);
 
   //ヘッダー消去
   useEffect(() => {
@@ -448,7 +450,7 @@ const ApoScreen = () => {
   };
 
   // 約束を選択したときの処理
-  const setSelectedApo = (id: string, title: string, appointmentDate: string,appointmentDateEnd:string, content: string, inviter: [], location:string, talkroomid:string, createAt:DateData) => {
+  const setSelectedApo = (id: string, apointer:[], title: string, appointmentDate: string,appointmentDateEnd:string, content: string, inviter: [], location:string, talkroomid:string, createAt:DateData) => {
     const date = new Date(
       Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
     );
@@ -471,7 +473,7 @@ const ApoScreen = () => {
     const formattedDateEnd = `${yearEnd}-${monthEnd < 10 ? '0' : ''}${monthEnd}-${dayEnd < 10 ? '0' : ''}${dayEnd} ${hoursEnd < 10 ? '0' : ''}${hoursEnd}:${minutesEnd < 10 ? '0' : ''}${minutesEnd}`;
     //appointmentDateのDateDataを解析してstringにする
 
-    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day} ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes} ~~ ${formattedDateEnd}`;
+    const formattedDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day} ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes} ~ ${formattedDateEnd}`;
     //CreatAtのDateDataを解析してstringにする
     const createAtDate = new Date(
       Number(createAt['seconds']) * 1000 + Number(createAt['nanoseconds']) / 1000000
@@ -492,10 +494,12 @@ const ApoScreen = () => {
     //これらのデータをuseStateに入れる
     setShowApoDate(formattedDate);
     setShowTitle(title);
+    setAppointer(apointer);
     setShowContent(content);
     setShowInviter(inviter);
     setShowTalkroomid(talkroomid);
     setShowlocation(location);
+    setShowappointer(apointer);
     setShowCreateAt(formattedCreateAtDate);
     setShowApoModalVisible(true);
     setTalkid(talkidnow)
@@ -510,7 +514,7 @@ const ApoScreen = () => {
   }
     const q2 = query(collection(firestore, 'newAppo'));
     const unsubscribe2 = onSnapshot(q2, (querySnapshot) => {
-      const appointments: { id: string; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string;talkroomid:string;createAt:DateData}[] = [];
+      const appointments: { id: string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string;talkroomid:string;createAt:DateData}[] = [];
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -518,6 +522,7 @@ const ApoScreen = () => {
           if ((data.hostname === user.uid || (data.appointer && data.appointer.some((inviterObj) => inviterObj.name === user.displayName))) && (new Date(Number(data.appointmentDateEnd['seconds']) * 1000 + Number(data.appointmentDateEnd['nanoseconds']) / 1000000).getTime() > new Date().getTime())) {
               appointments.push({
                 id: doc.id,
+                appointer: data.appointer,
                 title: data.title,
                 content: data.content,
                 appointmentDate: data.appointmentDate,
@@ -571,6 +576,54 @@ const ApoScreen = () => {
           }}
           
         >
+                <Modal
+                transparent={true}
+                visible={showApopromiseModalVisible}
+                animationType='slide'
+                onRequestClose={() => {
+                  setShowApopromiseModalVisible(false);
+                }}
+                
+                >
+                <View style={styles.apoinvView}>
+                  <View style={styles.apoinvHeader}>
+                    <Text style={styles.invHeaderText}>約束している人</Text>
+                    <TouchableOpacity style={styles.closeButtonX} onPress={() => {
+                      setShowApopromiseModalVisible(false);
+                    }}>
+                      <Ionicons name="close" size={30} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                    {/* appointerを約束している人 inviterが現在招待する人で同時に表示する */}
+                  <View style={{ height: 370 }}>
+                    <ScrollView>
+                      {showappointer.map((friend) => (
+                        <TouchableOpacity key={friend.id} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
+                          <Ionicons name="person-circle-outline" style={{ left: '3%' }} size={65} color={'gray'} />
+                          <Text style={{ marginLeft: '4%', fontWeight: 'bold', fontSize: 20 }}>{friend.name}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                  <Text style={styles.invnowText}>現在招待中の人</Text>
+                  <View style={{ height: 370  }}>
+                    <ScrollView>
+                      {showInviter.map((friend) => (
+                          <TouchableOpacity key={friend.id} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
+                            <Ionicons name="person-circle-outline" style={{ left: '3%' }} size={65} color={'gray'} />
+                            <Text style={{ marginLeft: '4%', fontWeight: 'bold', fontSize: 20 }}>{friend.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                        {showappointer.length === 0 && (
+                          <Text style={{ color: 'gray', marginTop:'80%'}}>約束している人はいません</Text>
+                        )}
+                    </ScrollView>
+                  </View>
+
+
+                </View>
+
+              </Modal>
           <ScrollView style={styles.centeredView} showsVerticalScrollIndicator={false} scrollEventThrottle={0.1} onScroll={(event) => {
             const y = event.nativeEvent.contentOffset.y;
             if (y > 0) {
@@ -581,7 +634,7 @@ const ApoScreen = () => {
               <View style={styles.modalView}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalHeaderText}>約束の詳細</Text>
-                <TouchableOpacity style={styles.closeButtonX} onPress={() => {
+                <TouchableOpacity style={styles.closeButtonXs} onPress={() => {
                   setShowApoModalVisible(false);
                 }}>
                   <Ionicons name="close" size={30} color="black" />
@@ -593,10 +646,10 @@ const ApoScreen = () => {
                     <Ionicons name="star" size={30} color="black" />
                     <Text style={styles.label}>お気に入り</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.item}>
-                  <Ionicons name="people" size={30} color="black" onPress={() => {
+                  <TouchableOpacity style={styles.item} onPress={() => {
                   setShowApopromiseModalVisible(true);
-                }}/>
+                }}>
+                  <Ionicons name="person" size={30} color="black" />
                     <Text style={styles.label}>約束している人</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item}>
@@ -621,8 +674,10 @@ const ApoScreen = () => {
                 <Text style={ styles.headtitle }>詳細</Text>
                 <Text style={styles.detail}>{showContent || '未設定'}</Text>
                 <Text style={ styles.headtitle }>場所</Text>
-                <Text style={styles.detail}>{showlocation[0]}</Text>
-                <TouchableOpacity onPress={() => showMapIos(showlocation[1])}><Text style={{ color:'blue', marginLeft:14 }}>マップで確認する</Text></TouchableOpacity>
+                <Text style={styles.detail}>{showlocation[0] || '未設定'}</Text>
+                { showlocation[0] &&
+                  <TouchableOpacity onPress={() => showMapIos(showlocation[1])}><Text style={{ color:'blue', marginLeft:14 }}>マップで確認する</Text></TouchableOpacity>
+                }
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
                   <Text key={inviter.name}>{inviter.name} </Text>
@@ -630,18 +685,6 @@ const ApoScreen = () => {
                 <Text style={ styles.headtitle }>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
               </View>
           </ScrollView>
-        </Modal>
-        {/* 約束している人 */}
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={showApopromiseModalVisible}
-          onRequestClose={() => {
-            setShowApopromiseModalVisible(false);
-          }}
-          
-        >
-          
         </Modal>
 
       
@@ -676,10 +719,10 @@ const ApoScreen = () => {
                   </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={styles.inviteButton} onPress={inviteAllFriends}>
-                  <Text style={styles.inviteButtonText}>全員を招待する</Text>
+                  <Text style={styles.inviteButtonText}>招待する</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.closeButton} onPress={() => FriendModalVisible()}>
-                  <Text style={styles.closeButtonText}>閉じる</Text>
+                <TouchableOpacity style={styles.closeButtons} onPress={() => FriendModalVisible()}>
+                  <Text style={styles.closeButtonTexts}>閉じる</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -865,8 +908,8 @@ const ApoScreen = () => {
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, location , talkroomid, createAt)} >
+        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, appointer,title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, appointer,title, appointmentDate,appointmentDateEnd, content , inviter, location , talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
               <View>
                 <Text style={styles.contenttime}>{
@@ -907,8 +950,8 @@ const ApoScreen = () => {
             月の約束はありません</Text>
           </View>
         )))}
-        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, title, appointmentDate, appointmentDateEnd, content , inviter,location, talkroomid, createAt}) => (
-          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, title, appointmentDate,appointmentDateEnd, content , inviter, location,talkroomid, createAt)} >
+        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, appointer,title, appointmentDate, appointmentDateEnd, content , inviter,location, talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id,appointer, title, appointmentDate,appointmentDateEnd, content , inviter, location,talkroomid, createAt)} >
             <View style={{ flexDirection: 'row', height:'100%' }}>
               <View>
                 <Text style={styles.contenttime}>{
