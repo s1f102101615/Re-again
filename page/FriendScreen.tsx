@@ -175,7 +175,7 @@ const handleSave = async () => {
     const sentRequestsQuery = query(sentRequestsRef, where('sendRequest', '==', name));
     const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
     if (sentRequestsSnapshot.size > 0) {
-      setMessage(`すでに ${name} にフレンド申請を送っています。`);
+      setMessage(`すでに ${name} \nにフレンド申請を送っています。`);
     } else {
       try {
         const docRef = await addDoc(collection(firestore, `users/${user.uid}/sentRequests`), {
@@ -186,7 +186,7 @@ const handleSave = async () => {
           gotRequestuid: user.uid,
           getRequesticon: user.photoURL
         });
-        setMessage(`${name} にフレンド申請を送りました!`);
+        setMessage(`${name} \nにフレンド申請を送りました!`);
       } catch (e) {
         setMessage('フレンド申請に失敗しました。');
       }
@@ -240,9 +240,9 @@ const handleSave = async () => {
             {request['photoURL'] ? (
                 <Image source={{ uri: request['photoURL'] }} style={{ left: '9%', width: 55, height: 55, borderRadius: 40 }} />
               ) : (
-                <Ionicons name="person-circle-outline" style={{ left: '9%' }} size={65} color={'gray'} />
+                <Ionicons name="person-circle-outline" style={{ left: '3%' }} size={65} color={'gray'} />
               )}
-            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest']}</Text>
+            <Text style={{ marginLeft: '4%',fontWeight: 'bold', fontSize: 20 }}>{request['gotRequest'].length > 13 ? request['gotRequest'].slice(0,11)+ '...' : request['gotRequest']}</Text>
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity onPress={() => handleAccept(request)}>
                 <Ionicons name="checkmark-circle-outline" size={40} color={'green'} style={{ marginRight: '1%' }} />

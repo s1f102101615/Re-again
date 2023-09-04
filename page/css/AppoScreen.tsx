@@ -6,17 +6,62 @@ const styles = StyleSheet.create({
       height: 'auto',
     },
     closeButton: {
+      backgroundColor: '#1f1f1f',
       borderRadius: 5,
-      padding: 10,
+      width: 180,
+      height: 45,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
-    closeButtonX:{
-      paddingTop:10,
-      paddingRight:20,
+    closeButtons: {
+      marginTop: 10,
+      backgroundColor: '#1f1f1f',
+      borderRadius: 5,
+      width: 120,
+      height: 45,
+      marginBottom: 13,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
     closeButtonText: {
-      color: 'black',
+      fontSize: 24,
       fontWeight: 'bold',
-      textAlign: 'center',
+      color: '#ffffff',
+    },
+    closeButtonTexts: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#ffffff',
+    },
+    buttonfield: {
+      width: '100%',
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 10,
+    },
+    closeButtonX:{
+      paddingTop:55,
+      paddingRight:20,
+    },
+    closeButtonXs:{
+      paddingTop:13,
+      paddingRight:20,
     },
     circle: {
       backgroundColor: '#00FF7F',
@@ -53,10 +98,10 @@ const styles = StyleSheet.create({
     },
     modalView: {
       backgroundColor: '#fff',
-      marginTop: '100%',
+      marginTop: '42%',
       borderRadius: 5,
       width: '100%',
-      height: '125%',
+      height: '130%',
       padding: 0,
       shadowColor: '#000',
       shadowOffset: {
@@ -66,13 +111,13 @@ const styles = StyleSheet.create({
       shadowOpacity: 1,
       shadowRadius: 10,
       elevation: 5,
-      justifyContent: 'flex-start',
+      top: -120,
     },
     modalViewNewApo: {
       backgroundColor: '#fff',
       borderRadius: 5,
-      width: '90%',
-      height: '70%',
+      width: '98%',
+      height: '80%',
       alignItems: 'center',
       shadowColor: '#000',
       shadowOffset: {
@@ -94,10 +139,10 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       padding: 15,
       width: '90%',
-      height: '30%',
+      height: 100,
       marginLeft: '5%',
+      marginTop: 5,
       textAlign: 'left',
-      marginTop: '7%',
     },
     title: {
       fontSize: 20,
@@ -119,7 +164,6 @@ const styles = StyleSheet.create({
       width: 100,
       textAlign: 'center',
       paddingTop: '7%',
-    
     },
     contain: {
       backgroundColor: '#f7feff',
@@ -143,6 +187,7 @@ const styles = StyleSheet.create({
       width: '100%',
       alignItems: 'center',
       backgroundColor: '#fff',
+      paddingBottom: 20,
     },
     calendarline: {
       justifyContent: 'space-between',
@@ -175,13 +220,44 @@ const styles = StyleSheet.create({
       width: '100%',
       marginBottom: 20,
     },
+    apoinvHeader: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      width: '100%',
+      marginBottom: 20,
+    },
+    apoinvView:{
+      height: '100%',
+      width: '100%',
+      backgroundColor: '#ffffff',
+    },
     modalHeaderText: {
       fontSize: 20,
       fontWeight: 'bold',
       marginRight: '26%',
       marginTop: '2%',
     },
+    invHeaderText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginRight: '21%',
+      marginTop: '14%',
+    },
+    invnowText: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginLeft: '5%',
+    },
     likeedit: {
+      flexDirection: 'row', // 要素を横に並べる
+      justifyContent: 'space-between', // 要素間のスペースを均等に分配
+      paddingHorizontal: '12%', // 左右のパディング
+      alignItems: 'center', // 縦方向に中央揃え
+      marginRight:'6%',
+      marginTop: '3%',
+    },
+    likeedits: {
       flexDirection: 'row', // 要素を横に並べる
       justifyContent: 'space-between', // 要素間のスペースを均等に分配
       paddingHorizontal: '12%', // 左右のパディング
@@ -219,15 +295,33 @@ const styles = StyleSheet.create({
       marginLeft: '3%',
     },
     modalTitle: {
-      fontSize: 20,
+      fontSize: 24,
       fontWeight: 'bold',
-      marginBottom: 20,
-      marginTop: '50%',
+      marginBottom: 30,
+      marginTop: 50,
     },
     friendRow: {
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 10,
+      width: 230,
+      marginLeft: 27,
+      height: 62,
+    },
+    friendImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 55,
+      marginRight: 10,
+    },
+    Imagedef:{
+      height: 70,
+      width: 70,
+      top: -4,
+      left: -6,
+    },
+    friendscroll:{
+      width: '95%',
     },
     friendName: {
       fontSize: 20,
@@ -236,12 +330,16 @@ const styles = StyleSheet.create({
     inviteButton: {
       backgroundColor: 'blue',
       borderRadius: 10,
-      padding: 10,
+      width: 160,
+      height: 50,
       marginTop: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     inviteButtonText: {
       color: 'white',
-      fontSize: 16,
+      fontSize: 22,
+      fontWeight: 'bold',
     },
     talkroomRef: {
       width: '100%',
@@ -312,6 +410,70 @@ const styles = StyleSheet.create({
       fontSize: 20,
       fontWeight: 'bold',
       marginBottom: 10,
+    },
+    friendinv: {
+      height: 103,
+      width: '90%',
+      backgroundColor: '#f7feff',
+      marginLeft: 20,
+    },
+    selectFriend: {
+      marginLeft: 20,
+      marginTop: 15,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    selectLocate: {
+      marginLeft: 20,
+      marginTop: 5,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    unknowntext: {
+      marginLeft: 40,
+      fontSize: 18,
+      fontWeight: '500',
+      marginTop: 5,
+      color: '#808080',
+    },
+    iconbox: {
+      flexDirection: 'row',
+    },
+    icon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      marginTop:5,
+    },
+    friendIcon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#ccc',
+    },
+    closeIcon: {
+      position: 'absolute',
+      top: -1,
+      right: -3,
+      borderRadius: 500,
+      backgroundColor: '#fff',
+      borderWidth:0.5,
+      borderColor:'#ccc',
+    },
+    iconname: {
+      width: 60,
+      marginLeft:10,
+      height: '100%',
+      textAlign: 'center',
     },
   });
 
