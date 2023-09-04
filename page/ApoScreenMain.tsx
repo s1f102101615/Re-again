@@ -690,6 +690,10 @@ const ApoScreen = () => {
                         </View>
                       </TouchableOpacity>
                     ))}
+                    {/* notSelectedFriendedが空だったら表示する */}
+                    {notSelectedFriended.length === 0 && (
+                      <Text style={{ color: 'gray', marginTop:'60%', textAlign:'center', fontSize:20}}>招待出来る友達がいません</Text>
+                    )}
                     </ScrollView>
                     <TouchableOpacity style={styles.inviteButton} onPress={inviteFriend}>
                       <Text style={styles.inviteButtonText}>招待する</Text>
