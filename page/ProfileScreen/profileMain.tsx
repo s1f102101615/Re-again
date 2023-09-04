@@ -81,24 +81,21 @@ const ProfileScreen = (props: ProfileMainProps) => {
   
     if (!result.canceled) {
       console.log(result.assets[0].uri);
-  
       // 画像をFirebase Storageにアップロード
       const imageRef = ref(storage, `userImages/${user.uid}`);
-      
   
       try {
         const response = await fetch(result.assets[0].uri);
         const blob = await response.blob();
-  
         const metadata = {
           contentType: 'image/jpeg', // 画像の種類に合わせて調整
         };
-  
+
         await uploadBytesResumable(imageRef, blob, metadata);
-  
+
+       
         // Firestoreに画像URLを保存
         const downloadURL = await getDownloadURL(imageRef);
-        console.log(user.uid);
         const userRef = doc(firestore, 'users', user.uid);
         const docSnapshot = await getDoc(userRef);
         if (docSnapshot.exists()) {
