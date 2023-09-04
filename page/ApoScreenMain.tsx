@@ -598,7 +598,7 @@ const ApoScreen = () => {
                   <View style={{ height: 370 }}>
                     <ScrollView>
                       {showappointer.map((friend) => (
-                        <TouchableOpacity key={friend.id} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
+                        <TouchableOpacity key={friend.name} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
                           <Ionicons name="person-circle-outline" style={{ left: '3%' }} size={65} color={'gray'} />
                           <Text style={{ marginLeft: '4%', fontWeight: 'bold', fontSize: 20 }}>{friend.name}</Text>
                         </TouchableOpacity>
@@ -609,7 +609,7 @@ const ApoScreen = () => {
                   <View style={{ height: 370  }}>
                     <ScrollView>
                       {showInviter.map((friend) => (
-                          <TouchableOpacity key={friend.id} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
+                          <TouchableOpacity key={friend.name} style={{ marginLeft:30,  flexDirection:'row', alignItems:'center'}}>
                             <Ionicons name="person-circle-outline" style={{ left: '3%' }} size={65} color={'gray'} />
                             <Text style={{ marginLeft: '4%', fontWeight: 'bold', fontSize: 20 }}>{friend.name}</Text>
                           </TouchableOpacity>
@@ -706,18 +706,29 @@ const ApoScreen = () => {
             <View style={styles.centeredViewNewApo}>
               <View style={styles.modalViewNewApo}>
                 <Text style={styles.modalTitle}>招待する友達を選択してください</Text>
-                {notSelectedFriends.map((friend) => (
-                  <TouchableOpacity key={friend.name} onPress={() => toggleFriendSelection(friend)}>
+                <ScrollView style={styles.friendscroll}>
+                {notSelectedFriends.map((friend, index) => (
+                  <TouchableOpacity key={index} onPress={() => toggleFriendSelection(friend)}>
+                    <View style={{ flexDirection: 'row',  justifyContent:'space-between', alignItems:'center' }}>
                     <View style={styles.friendRow}>
-                      <Text style={styles.friendName}>{friend.name}</Text>
-                      <Ionicons
-                        name={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'checkbox' : 'checkbox-outline'}
-                        size={25}
-                        color={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'black' : 'gray'}
-                      />
+                      {/* アイコン表示無かったらデフォルトアイコン */}
+                      {friend.photoURL ? (
+                        <Image source={{ uri: friend.photoURL }} style={styles.friendImage} />
+                      ) : (
+                          <Ionicons name="person-circle-outline" size={74} style={styles.Imagedef} color={'gray'} />
+                      )}
+                      <Text style={styles.friendName}>{friend.name.length > 10 ? friend.name.slice(0, 10) + '...' : friend.name}</Text>
+                    </View>
+                    <Ionicons
+                          name={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'checkbox' : 'checkbox-outline'}
+                          size={25}
+                          style={{ marginRight :35, marginBottom:7 }}
+                          color={selectnowFriends.some((friendObject) => friendObject.name === friend.name) ? 'black' : 'gray'}
+                        />
                     </View>
                   </TouchableOpacity>
                 ))}
+                </ScrollView>
                 <TouchableOpacity style={styles.inviteButton} onPress={inviteAllFriends}>
                   <Text style={styles.inviteButtonText}>招待する</Text>
                 </TouchableOpacity>
@@ -790,7 +801,7 @@ const ApoScreen = () => {
                     <Text style={{ fontWeight:'bold', fontSize:20  }}  onPress={handlePressTimeEnd}> {selectedDateEnd.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
                 </View>
-                  <View style={[styles.likeedit,{ paddingTop:'5%' }]} >
+                  <View style={[styles.likeedits,{ paddingTop:'5%' }]} >
                     <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
                       <Ionicons name="md-person-add" size={30} color="black" />
                       <Text style={styles.label}>招待</Text>

@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       width: 120,
       height: 45,
+      marginBottom: 13,
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: '#000',
@@ -256,6 +257,13 @@ const styles = StyleSheet.create({
       marginRight:'6%',
       marginTop: '3%',
     },
+    likeedits: {
+      flexDirection: 'row', // 要素を横に並べる
+      justifyContent: 'space-between', // 要素間のスペースを均等に分配
+      paddingHorizontal: '12%', // 左右のパディング
+      alignItems: 'center', // 縦方向に中央揃え
+      marginTop: '3%',
+    },
     item: {
       alignItems: 'center',
     },
@@ -287,15 +295,33 @@ const styles = StyleSheet.create({
       marginLeft: '3%',
     },
     modalTitle: {
-      fontSize: 20,
+      fontSize: 24,
       fontWeight: 'bold',
-      marginBottom: 20,
-      marginTop: '50%',
+      marginBottom: 30,
+      marginTop: 50,
     },
     friendRow: {
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 10,
+      width: 230,
+      marginLeft: 27,
+      height: 62,
+    },
+    friendImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 55,
+      marginRight: 10,
+    },
+    Imagedef:{
+      height: 70,
+      width: 70,
+      top: -4,
+      left: -6,
+    },
+    friendscroll:{
+      width: '95%',
     },
     friendName: {
       fontSize: 20,
@@ -422,7 +448,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderWidth: 1,
       borderColor: '#ccc',
-      elevation: 5,
       marginTop:5,
     },
     friendIcon: {
@@ -434,7 +459,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderWidth: 1,
       borderColor: '#ccc',
-      elevation: 5,
     },
     closeIcon: {
       position: 'absolute',
