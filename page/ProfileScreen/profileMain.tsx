@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, TextInput } from 'react-native';
 import { auth, storage , firestore } from '../../firebase';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -9,6 +9,9 @@ import 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref , getDownloadURL,  uploadBytesResumable} from 'firebase/storage';
 import styles from './css/profileMain';
+import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+
 
 interface ProfileMainProps {
   route: {
@@ -22,6 +25,12 @@ const ProfileScreen = (props: ProfileMainProps) => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [userPhotoURL, setUserPhotoURL] = useState<string | null>(null);
+  const [stateView, setStateView] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('ふつう');
+  const [messageView, setMessageView] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState('');
+  const [status, setStatus] = useState('ふつう');
+  const [message, setMessage] = useState('');
 
   // 過去の約束に遷移
     const gotolate = () => {
@@ -35,6 +44,41 @@ const ProfileScreen = (props: ProfileMainProps) => {
     });
   }, []);
 
+  const stateset = async (status:string) => {
+    setStateView(!stateView);
+    // statusをfirestoreに保存
+    const userRef = doc(firestore, 'users', user.uid);
+    const docSnapshot = await getDoc(userRef);
+    if (docSnapshot.exists()) {
+      updateDoc(userRef, {
+        status: status,
+      });
+    } else {
+      setDoc(userRef, {
+        status: status,
+      });
+    }    
+    setStatus(status);
+  };
+
+  const messageset = async (message:string) => {
+    setMessageView(!messageView);
+    // statusをfirestoreに保存
+    const userRef = doc(firestore, 'users', user.uid);
+    const docSnapshot = await getDoc(userRef);
+    if (docSnapshot.exists()) {
+      updateDoc(userRef, {
+        message: message,
+      });
+    } else {
+      setDoc(userRef, {
+        message: message,
+      });
+    }
+    setSelectedMessage('');
+    setMessage(message);
+  };
+
   // ログイン状態の監視
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -46,7 +90,7 @@ const ProfileScreen = (props: ProfileMainProps) => {
       }
     });
     return () => unsubscribe();
-  }, [firestore,userPhotoURL]);
+  }, [firestore,userPhotoURL,status,message]);
 
   // ユーザーのプロフィール画像を取得
   const fetchUserPhotoURL = async ( uid :string ) => {
@@ -57,6 +101,12 @@ const ProfileScreen = (props: ProfileMainProps) => {
       const userData = userSnapshot.data();
       if (userData && userData.photoURL) {
         setUserPhotoURL(userData.photoURL);
+      }
+      if (userData && userData.status) {
+        setStatus(userData.status);
+      }
+      if (userData && userData.message) {
+        setMessage(userData.message);
       }
     }
   };
@@ -81,24 +131,21 @@ const ProfileScreen = (props: ProfileMainProps) => {
   
     if (!result.canceled) {
       console.log(result.assets[0].uri);
-  
       // 画像をFirebase Storageにアップロード
       const imageRef = ref(storage, `userImages/${user.uid}`);
-      
   
       try {
         const response = await fetch(result.assets[0].uri);
         const blob = await response.blob();
-  
         const metadata = {
           contentType: 'image/jpeg', // 画像の種類に合わせて調整
         };
-  
+
         await uploadBytesResumable(imageRef, blob, metadata);
-  
+
+       
         // Firestoreに画像URLを保存
         const downloadURL = await getDownloadURL(imageRef);
-        console.log(user.uid);
         const userRef = doc(firestore, 'users', user.uid);
         const docSnapshot = await getDoc(userRef);
         if (docSnapshot.exists()) {
@@ -121,6 +168,77 @@ const ProfileScreen = (props: ProfileMainProps) => {
   const displayName = user ? user.displayName : '未定義';
   return (
     <View style={styles.container}>
+      {/* stateViewがtrueになったらmodalを作成する */}
+      <Modal
+          transparent={true}
+          visible={stateView}
+          onRequestClose={() => {
+            setStateView(false);
+          }}
+        >
+        <View style={styles.modal}>
+          <View style={styles.modalcontent}>
+            <Text style={styles.modaltext}>忙しさを変更しますか？</Text>
+            {/* selectでステータスを選択する */}
+            <Picker
+              selectedValue={selectedStatus}
+              style={{ top:-50,height: 120, width: 150 }}
+              onValueChange={(itemValue) => setSelectedStatus(itemValue)}
+            >
+              <Picker.Item label="とても" value="とても" />
+              <Picker.Item label="まあまあ" value="まあまあ" />
+              <Picker.Item label="ふつう" value="ふつう" />
+              <Picker.Item label="ちょっと" value="ちょっと" />
+              <Picker.Item label="ぜんぜん" value="ぜんぜん" />
+            </Picker>
+            {/* ボタンを押したらステータスを変更する */}
+            <View style={styles.modalbutton}>
+              <TouchableOpacity style={styles.modalbutton2} onPress={()=> { stateset(selectedStatus) }} >
+                <Text style={styles.modalbuttontext}>変更</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalbutton1} onPress={()=> { setStateView(false)}} >
+                <Text style={styles.modalbuttontext}>キャンセル</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* メッセージ変更 */}
+
+      <Modal
+          transparent={true}
+          visible={messageView}
+          onRequestClose={() => {
+            setMessageView(false);
+          }}
+        >
+        <View style={styles.modal}>
+          <View style={styles.modalcontent}>
+            <Text style={styles.modaltext}>ステータスメッセージを変更しますか？</Text>
+            {/* ゆーざーがメッセージを入力できるようにする */}
+            <TextInput
+              style={styles.input}
+              placeholder="ステータスメッセージを入力してください"
+              onChangeText={(value) => setSelectedMessage(value)}
+              value={selectedMessage}
+            />
+
+            {/* ボタンを押したらステータスを変更する */}
+            <View style={styles.modalbutton}>
+              <TouchableOpacity style={styles.modalbutton2} onPress={()=> { messageset(selectedMessage) }} >
+                <Text style={styles.modalbuttontext}>変更</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalbutton1} onPress={()=> { setMessageView(false)}} >
+                <Text style={styles.modalbuttontext}>キャンセル</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      
+
       <View>
         <View style={{ alignItems: 'center', marginTop:'10%', marginBottom:'6%' }}>
           {userPhotoURL ? (
@@ -131,19 +249,27 @@ const ProfileScreen = (props: ProfileMainProps) => {
         </View>
         <View style={{ alignItems: 'center' }}>
           <Text style={{ fontSize: 20 }}>{displayName}</Text>
-        </View>
+          <Text style={ styles.statusMessage }>{message}</Text>
+          <View style={styles.availability}>
+            {/* statusの忙しさによって色を変えたい */}
+            <Ionicons name='time-outline' size={20} color={status === 'ぜんぜん' ? 'green' : status === 'ちょっと' ? '#b8d200' :
+          status === 'ふつう' ? 'yellow' : status === 'まあまあ' ? 'orange' : status === 'とても' && 'red' } style={styles.availabilityIcon} />
+            <Text style={styles.availabilityText}>{status}</Text>
+          </View>
+        </View> 
         <View style={styles.profileedit} >
           <TouchableOpacity style={styles.item} onPress={pickImage}>
             <Icon name="id-badge" size={35} color="black" />
             <Text style={styles.label}>アイコン変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
-            <Icon name="handshake-o" size={35} color="black" />
-            <Text style={styles.label}>友達一覧</Text>
+            <Icon name="handshake-o" size={35} color="black" onPress={()=> { setMessageView(!messageView); }} />
+            <Text style={styles.label}>メッセージ変更</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.item}>
-            <Icon name="google-plus-official" size={35} color="black" />
-            <Text style={styles.label}>Googleさん</Text>
+          <TouchableOpacity style={styles.item} onPress={()=> { setStateView(!stateView); }}>
+            {/* ステータスっぽいアイコン */}
+            <Ionicons name="man" size={35} color="green" />
+            <Text style={styles.label}>ステータス</Text>
           </TouchableOpacity>
         </View>
 
