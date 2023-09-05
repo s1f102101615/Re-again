@@ -506,6 +506,7 @@ const ApoScreen = () => {
       Alert.alert('エラー', '開始日時が終了日時よりも前になっています');
       return;
     }
+    setModalVisible(false); 
     try {
       const randamid = Math.random().toString(32).substring(2);
       const inviterList = selectedFriends.map((friend) => ({ name: friend.name }));
@@ -560,7 +561,6 @@ const ApoScreen = () => {
     } catch (e) {
       console.error('Error adding document: ', e);
     }
-    setModalVisible(false); 
   };
 
   // 約束を選択したときの処理

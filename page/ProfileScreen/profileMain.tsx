@@ -9,6 +9,7 @@ import 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref , getDownloadURL,  uploadBytesResumable} from 'firebase/storage';
 import styles from './css/profileMain';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ProfileMainProps {
   route: {
@@ -136,11 +137,12 @@ const ProfileScreen = (props: ProfileMainProps) => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
             <Icon name="handshake-o" size={35} color="black" />
-            <Text style={styles.label}>友達一覧</Text>
+            <Text style={styles.label}>メッセージ変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
-            <Icon name="google-plus-official" size={35} color="black" />
-            <Text style={styles.label}>Googleさん</Text>
+            {/* ステータスっぽいアイコン */}
+            <Ionicons name="man" size={30} color="green" />
+            <Text style={styles.label}>ステータス</Text>
           </TouchableOpacity>
         </View>
 
