@@ -12,8 +12,8 @@ import FriendModal from './FriendDetail';
 const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [friendRequests, setFriendRequests] = React.useState<{ id:string; }[]>([]);
-  const [friends, setFriends] = useState<{ id:string; }[]>([]);
+  const [friendRequests, setFriendRequests] = React.useState<{ id:string; photoURL: string ;status:string; message:string}[]>([]);
+  const [friends, setFriends] = useState<{ id:string;photoURL: string ;status:string; message:string }[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -27,14 +27,16 @@ const FriendScreen = () => {
     }
     const q = query(collection(firestore, `users/${user.uid}/gotRequests`));
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const requests:{ id:string , photoURL: string}[] = [];
+      const requests:{ id:string , photoURL: string, status:string , message:string}[] = [];
       for (const doco of querySnapshot.docs) {
         const requestData = doco.data();
         const requestUid = requestData.gotRequestuid;
         const userRef = doc(firestore, 'users', requestUid);
         const userDoc = await getDoc(userRef);
         const photoURL = userDoc.get('photoURL');
-        requests.push({ ...requestData, id: doco.id, photoURL });
+        const status = userDoc.get('status');
+        const message = userDoc.get('message');
+        requests.push({ ...requestData, id: doco.id, photoURL, status, message });
       }
       setFriendRequests(requests); // 新しい配列を作成して、それをfriendRequestsに設定する
       console.log(requests)
@@ -52,14 +54,16 @@ const FriendScreen = () => {
     const f = query(collection(firestore, `users/${user.uid}/friends`));
 
     const listfriend = onSnapshot(f, async (querySnapshot) => {
-      const friends:{ id:string, photoURL: string }[] = [];
+      const friends:{ id:string, photoURL: string,status:string , message:string }[] = [];
       for (const doco of querySnapshot.docs) {
         const friendData = doco.data();
         const friendUid = friendData.frienduid;
         const userRef = doc(firestore, 'users', friendUid);
         const userDoc = await getDoc(userRef);
         const photoURL = userDoc.get('photoURL');
-        friends.push({ ...friendData, id: doco.id, photoURL });
+        const status = userDoc.get('status');
+        const message = userDoc.get('message');
+        friends.push({ ...friendData, id: doco.id, photoURL, status, message });
       }
       setFriends(friends); // 新しい配列を作成して、それをfriendsに設定する
     });
@@ -199,7 +203,7 @@ const handleSave = async () => {
 
   // request,request['gotRequest'],request['photoURL']でfriendを作ってください
   const friend = (request) => {
-    const friendd = { request, friend: request['gotRequest'], photoURL: request['photoURL'] };
+    const friendd = { request, friend: request['gotRequest'], photoURL: request['photoURL'], status:request['status'], message:request['message'] };
     return friendd;
   };
   
