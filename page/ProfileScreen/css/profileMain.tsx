@@ -62,6 +62,77 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
     },
+    modal: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalcontent: {
+      backgroundColor: 'white',
+      borderRadius: 5,
+      padding: 20,
+      alignItems: 'center',
+    },
+    modaltext: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 20,
+    },
+    modalbutton: {
+      flexDirection: 'row',
+    },
+    modalbutton1: {
+      backgroundColor: 'gray',
+      borderRadius: 5,
+      padding: 10,
+    },
+    modalbutton2: {
+      backgroundColor: 'green',
+      borderRadius: 5,
+      padding: 10,
+      marginRight: 10,
+    },
+    modalbuttontext: {
+      color: 'white',
+      fontWeight: 'bold',
+    },
+    picker: {
+      height: 50,
+      width: '100%',
+      backgroundColor: '#fff',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 5,
+      marginBottom: 10,
+      paddingHorizontal: 10,
+    },
+    input: {
+      height: 50,
+      width: 300,
+      backgroundColor: '#fff',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 5,
+      marginBottom: 10,
+      paddingHorizontal: 10,
+    },
+    statusMessage: {
+      color: 'gray',
+      marginBottom: 5,
+      marginTop: 5,
+    },
+    availability: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    availabilityIcon: {
+      marginRight: 5,
+    },
+    availabilityText: {
+      marginLeft: 5,
+    },
   });  
   
   export default styles;

@@ -12,6 +12,7 @@
     "@react-native-community/datetimepicker": "7.2.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-firebase/firestore": "^18.3.0",
+    "@react-native-picker/picker": "^2.5.0",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/stack": "^6.3.17",
