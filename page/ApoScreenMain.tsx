@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
 import { auth, firestore } from '../firebase';
-import { collection, query, addDoc, onSnapshot, where, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, addDoc, onSnapshot, where, getDocs, getDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -43,7 +43,9 @@ const ApoScreen = () => {
   const [showTalkroomid, setShowTalkroomid] = useState('');
   const [showCreateAt, setShowCreateAt] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [star,setStar] = useState(false);
   const [serchAppointments, setSerchAppointments] = useState<{ id: string; hostname:string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
+  const [likeAppointments, setLikeAppointments] = useState<{ id: string; hostname:string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
   const [selectnowFriends, setSelectnowFriends] = useState<{ name: string, photoURL:string}[]>([]);
   const [notSelectedFriends, setNotSelectedFriends] = useState<{ name: string, photoURL:string }[]>([]);
   const [notSelectedFriended, setNotSelectedFriended] = useState<{ name: string, photoURL:string }[]>([]);
@@ -60,6 +62,8 @@ const ApoScreen = () => {
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [appointer, setAppointer] = useState([]);
   const [showhostname, setShowhostname] = useState('');
+  const [like,setLike] = useState([]);
+  const [showStar, setShowStar] = useState(true);
 
   //ヘッダー消去
   useEffect(() => {
@@ -197,6 +201,82 @@ const ApoScreen = () => {
     setSerchAppointments(serchAppointmets);
   }
   , [searchText]);
+
+  // likeに保存されているidだけでリストを作るなおかつ時間が過ぎている物を除く　時間の昇順で並び替え appointmentsをfilterする
+  useEffect(() => {
+    const serch = appointments.filter(({ id }) => {
+      return like.includes(id);
+    });
+    const likeAppointmets = serch
+    .filter(({ appointmentDate }) => {
+      const date = new Date(
+        Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000
+      );
+      return date.getTime() - new Date().getTime() > 0;
+    })
+    .sort((a, b) => {
+      const dateA = Number(a.appointmentDate['seconds']) * 1000 + Number(a.appointmentDate['nanoseconds']) / 1000000;
+      const dateB = Number(b.appointmentDate['seconds']) * 1000 + Number(b.appointmentDate['nanoseconds']) / 1000000;
+      return dateA - dateB;
+    });
+
+    setLikeAppointments(likeAppointmets);
+  }, [like]);
+
+  // お気に入りの処理
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error('User is not logged in.');
+      return;
+    }
+    const listpromise = async () =>
+    {const userRef = doc(firestore, 'users', user.uid);
+        const docSnapshot = await getDoc(userRef);
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          if (userData && userData.Like) {
+            setLike(userData.Like);
+          }
+        } else {
+          setLike([]);
+        }}
+    listpromise();
+  }
+  , [setLike]);
+
+  //お気に入りに追加
+  const toggleLike = async (id: string) => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error('User is not logged in.');
+      return;
+    }
+    const userRef = doc(firestore, 'users', user.uid);
+    const docSnapshot = await getDoc(userRef);
+    if (docSnapshot.exists()) {
+      const userData = docSnapshot.data();
+      if (userData && userData.Like) {
+        const newLike = userData.Like.includes(id)
+          ? userData.Like.filter((like) => like !== id)
+          : [...userData.Like, id];
+        await updateDoc(userRef, {
+          Like: newLike,
+        });
+        setLike(newLike);
+      } else {
+        await updateDoc(userRef, {
+          Like: [id],
+        });
+        setLike([id]);
+      }
+    } else {
+        await setDoc(userRef, {
+          Like: [id],
+        });
+        setLike([id]);
+      }
+  };
 
   //マッチした文字に色を付ける
   const highlightText = (text, highlight) => {
@@ -721,9 +801,19 @@ const ApoScreen = () => {
                 </TouchableOpacity>
               </View>
                 <View style={styles.likeedit} >
-                  <TouchableOpacity style={styles.item}>
+                  <TouchableOpacity style={styles.item} onPress={() => {
+                  toggleLike(showhostname);
+                }}>
                     {/* 星枠のアイコン */}
-                    <Ionicons name="star" size={30} color="black" />
+                    {like.some((like) => like === showhostname) ? (
+                      <View>
+                        <Ionicons name="star" size={30} color="yellow" />
+                        <Ionicons style={{ position:'absolute' }} name="star-outline" size={31} color="black" />
+                      </View>  
+                    ) : (
+                        <Ionicons name="star-outline" size={30} color="black" />
+                    )}  
+                    
                     <Text style={styles.label}>お気に入り</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.item} onPress={() => {
@@ -764,7 +854,8 @@ const ApoScreen = () => {
                 }
                 {/* <Text>{showContent}</Text> まだ */}
                 <Text style={ styles.headtitle }>招待者:{showInviter.map((inviter) => (
-                  <Text key={inviter.name}>{inviter.name} </Text>
+                  // 13文字以降...
+                  <Text key={inviter.name}>{inviter.name.length > 13 ? inviter.name.slice(0, 13) + '... ' : inviter.name + ' '}</Text>
                 ))}</Text>
                 <Text style={ styles.headtitle }>作成日:{showCreateAt ? showCreateAt.toLocaleString() : '日付不明'}</Text>
               </View>
@@ -972,9 +1063,25 @@ const ApoScreen = () => {
         </View>
         ))} */}
         <View style={styles.searchContainer}>
-          <TouchableOpacity style={styles.searchIconContainer} onPress={() => setSearchVisible(true)}>
+          <TouchableOpacity style={styles.searchIconContainer} onPress={() => {setSearchVisible(true),setShowStar(false)}}>
             <Ionicons name="search" size={20} color="black" />
           </TouchableOpacity>
+          
+            {/* trueだったら黒枠にする */}
+            {showStar ? star ? (
+              <TouchableOpacity style={styles.searchIconContainer} onPress={() => setStar(!star)}>
+              <View>
+                <Ionicons name="star" size={20} color="yellow" />
+                <Ionicons style={{ position: 'absolute', top: 0, left: 0 }} name="star-outline" size={20} color="black" />
+              </View>  
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.searchIconContainer} onPress={() => setStar(!star)}>
+                <Ionicons name="star-outline" size={20} color="black" />
+              </TouchableOpacity>
+            ) : null}
+            
+
           {searchVisible && (
             <View style={styles.searchBoxContainer}>
             <TextInput
@@ -987,6 +1094,7 @@ const ApoScreen = () => {
             <TouchableOpacity style={styles.closeIconContainer} onPress={() => {
                 setSearchText('');
                 setSearchVisible(false)
+                setShowStar(true)
               }}>
               <Ionicons name="close-circle" size={24} color="black" />
             </TouchableOpacity>
@@ -1003,7 +1111,7 @@ const ApoScreen = () => {
           )}
         </View>
         {/* // filteredAppointmentsからすべてまとめたfilteredAppointment */}
-        {(!searchText && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, hostname,appointer,title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
+        {((!searchText && !star) && (filteredAppointments.length > 0 ? (filteredAppointments.map(({ id, hostname,appointer,title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, hostname,appointer,title, appointmentDate,appointmentDateEnd, content , inviter, location , talkroomid, createAt)} >
             <View style={{ flexDirection: 'row',height:'100%' }}>
               <View>
@@ -1045,7 +1153,7 @@ const ApoScreen = () => {
             月の約束はありません</Text>
           </View>
         )))}
-        {(searchText && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, hostname,appointer,title, appointmentDate, appointmentDateEnd, content , inviter,location, talkroomid, createAt}) => (
+        {((searchText && star) && (serchAppointments.length > 0 ? (serchAppointments.map(({ id, hostname,appointer,title, appointmentDate, appointmentDateEnd, content , inviter,location, talkroomid, createAt}) => (
           <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, hostname, appointer, title, appointmentDate,appointmentDateEnd, content , inviter, location,talkroomid, createAt)} >
             <View style={{ flexDirection: 'row', height:'100%' }}>
               <View>
@@ -1087,6 +1195,52 @@ const ApoScreen = () => {
             月の約束はありません</Text>
           </View>
         )))}
+
+        {/* starがオンだったらlikeAppointmentsを表示 */}
+        {((!searchText && star) && (likeAppointments.length > 0 ? (likeAppointments.map(({ id, hostname,appointer,title, appointmentDate, appointmentDateEnd, content , inviter, location , talkroomid, createAt}) => (
+          <TouchableOpacity style={styles.contain} key={id} onPress={() => setSelectedApo(id, hostname,appointer,title, appointmentDate,appointmentDateEnd, content , inviter, location , talkroomid, createAt)} >
+            <View style={{ flexDirection: 'row',height:'100%' }}>
+              <View>
+                <Text style={styles.contenttime}>{
+                  // 時間がマイナスなら赤色にする
+                  Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60)) < 0 ?
+                  <Text style={{ color:'red' }}>
+                  現在約束中
+                  </Text>
+                  :
+                  <Text>
+                  {Math.floor((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60 * 60))}時間{
+                  Math.floor(((new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).getTime() - new Date().getTime()) / (1000 * 60)) % 60)}分
+                  </Text>
+                }</Text>
+              </View>
+              <View style={styles.ibar}></View>
+              <View>
+                <Text style={styles.title}>{title.length > 14 ? title.slice(0,14)+ '...' : title}</Text>
+                <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent:'flex-start' }}>
+                  <View style={{ marginLeft:3, width:160 }}>
+                    <Text style={styles.content}>開始:{new Date(Number(appointmentDate['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'  })}</Text>
+                    {appointmentDateEnd && <Text style={ styles.content }>終了:{new Date(Number(appointmentDateEnd['seconds']) * 1000 + Number(appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
+                  </View>
+                  <View style={{ flexDirection:'row', alignItems:'flex-end', justifyContent: 'flex-end', width:'30%', marginLeft:40 }}>
+                    <Ionicons name="md-pin" size={18} color="#900" />
+                    {/* locationの頭三文字を表示 */}
+                    <Text>{location[0] ? location[0].slice(0,3)+ '...' : '未設定   '}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))) : (
+          // 今月の約束はありません
+          <View style={styles.noAppointmentContainer}>
+            <Text style={styles.noAppointmentText}>
+            お気に入りはありません</Text>
+          </View>
+        )))}
+        
+        
+
 
         </ScrollView>
       <View style={styles.circleContainer} >

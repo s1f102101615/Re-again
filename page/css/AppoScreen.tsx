@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
       marginVertical: 5,
       alignContent: 'flex-start',
       width: '100%',
-      left: '76%',
+      left: '64%',
     },
     searchBoxContainer: {
       flexDirection: 'row',
