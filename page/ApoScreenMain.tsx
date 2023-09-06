@@ -14,6 +14,8 @@ import MapScreen from './MapScreen';
 import axios from 'axios';
 import { Image } from 'react-native';
 import { set } from 'date-fns';
+import { Select } from 'native-base';
+import { Picker } from '@react-native-picker/picker';
 
 
 const ApoScreen = () => {
@@ -21,6 +23,7 @@ const ApoScreen = () => {
   const [content, setContent] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [appointments, setAppointments] = useState<{ id: string; hostname:string; appointer:[]; title: string; content: string; appointmentDate: string; appointmentDateEnd:string; inviter:[]; location:string; talkroomid:string;createAt:DateData}[]>([]);
+  const [alarmtime, setAlarmtime] = useState(-1);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateEnd, setSelectedDateEnd] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -64,6 +67,7 @@ const ApoScreen = () => {
   const [showhostname, setShowhostname] = useState('');
   const [like,setLike] = useState([]);
   const [showStar, setShowStar] = useState(true);
+  const [alarmModalVisible , setAlarmModalVisible] = useState(false);
 
   //ヘッダー消去
   useEffect(() => {
@@ -474,6 +478,7 @@ const ApoScreen = () => {
     setLocation({ latitude: 0, longitude: 0 })
     setLocationname('')
     setSelectedFriends([]);
+    setAlarmtime(-1);
   };
 
   const markedDates = {};
@@ -537,6 +542,8 @@ const ApoScreen = () => {
         timeZone: 'Asia/Tokyo', // タイムゾーン
         location: locationname, // 場所
         notes: content, // メモ
+        // -1だったら通知しない
+        alarms: alarmtime === -1 ? [] : [{ relativeOffset: alarmtime }], // 通知
       };
       try {
         const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
@@ -558,6 +565,7 @@ const ApoScreen = () => {
       setLocation({ latitude: 0, longitude: 0 })
       setLocationname('')
       setSelectedFriends([]);
+      setAlarmtime(-1);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
@@ -921,6 +929,41 @@ const ApoScreen = () => {
             }}>
               <MapScreen onLocationSelect={(location) => Locationer(location)} onselect={(bool) => setShowMap(bool)} />
           </Modal>
+
+          <Modal
+            transparent={true}
+            visible={alarmModalVisible}
+            onRequestClose={() => {
+              setAlarmModalVisible(false);
+            }}
+          >
+            <View style={styles.centeredViewNewApo}>
+              <View style={styles.modalViewalarm}>
+                <Text style={styles.modalTitle}>アラームの設定</Text>
+                <Picker
+                  selectedValue={alarmtime}
+                  onValueChange={(itemValue) => setAlarmtime(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="無し" value={-1} />
+                  <Picker.Item label="イベント直前" value={0} />
+                  <Picker.Item label="5分前" value={-5} />
+                  <Picker.Item label="10分前" value={-10} />
+                  <Picker.Item label="15分前" value={-15} />
+                  <Picker.Item label="30分前" value={-30} />
+                  <Picker.Item label="1時間前" value={-60} />
+                  <Picker.Item label="2時間前" value={-120} />
+                  <Picker.Item label="1日前" value={-1440} />
+                  <Picker.Item label="2日前" value={-2880} />
+                  <Picker.Item label="1週間前" value={-10080} />
+                </Picker>
+                <TouchableOpacity style={styles.closeButtonalarm} onPress={() => setAlarmModalVisible(false)}>
+                  <Text style={styles.closeButtonTexts}>閉じる</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
           <View style={styles.centeredViewNewApo}>
             <View style={styles.modalViewNewApo}>
               <View style={{ width: '100%', marginTop:'7%', flexDirection:'row', justifyContent:'space-between' }}>
@@ -977,9 +1020,10 @@ const ApoScreen = () => {
                   </View>
                 </View>
                   <View style={[styles.likeedits,{ paddingTop:'5%' }]} >
-                    <TouchableOpacity style={styles.item} onPress={() => {setFriendModalVisible(true); inviteSelectedFriends() }}>
-                      <Ionicons name="md-person-add" size={30} color="black" />
-                      <Text style={styles.label}>招待</Text>
+                    <TouchableOpacity style={styles.item} onPress={() => {setAlarmModalVisible(true);}}>
+                      {/* アラームのアイコン */}
+                      <Ionicons name="alarm" size={30} color="black" />
+                      <Text style={styles.label}>アラーム</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item} onPress={() => setShowMap(true)}>
                       <Ionicons name="location-sharp" size={30} color="black" />
@@ -991,7 +1035,7 @@ const ApoScreen = () => {
                     </TouchableOpacity>
                   </View>
                   <View style={{ width: '100%' }}>
-                    <Text style={styles.selectFriend}>選択されたフレンド</Text>
+                    <Text style={styles.selectFriend}>招待したフレンド</Text>
                       <View style={styles.friendinv}>
                         {/* 右にスクロール */}
                         <ScrollView 
@@ -1036,6 +1080,26 @@ const ApoScreen = () => {
                           </View>
                         </View>
                       )}
+                      <View>
+                        <Text style={styles.selectLocate}>アラーム</Text>
+                        <View style={{ height: 30, marginBottom:5 }}>
+                          <Text style={styles.unknowntext}>{
+                          // alarmtimeによって表示を変える
+                          alarmtime === -1 ? '無し' :
+                          alarmtime === 0 ? 'イベント直前' :
+                          alarmtime === -5 ? '5分前' :
+                          alarmtime === -10 ? '10分前' :
+                          alarmtime === -15 ? '15分前' :
+                          alarmtime === -30 ? '30分前' :
+                          alarmtime === -60 ? '1時間前' :
+                          alarmtime === -120 ? '2時間前' :
+                          alarmtime === -1440 ? '1日前' :
+                          alarmtime === -2880 ? '2日前' :
+                          alarmtime === -10080 ? '1週間前' :
+                          '不明'
+                          }</Text>
+                        </View>
+                      </View>
                       <TextInput
                       style={styles.input2}
                       onChangeText={setContent}
