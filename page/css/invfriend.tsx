@@ -28,6 +28,12 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 10,
     },
+    modalTitleAlarm: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      marginTop: 50,
+    },
     modalDescription: {
       fontSize: 16,
       marginBottom: 10,
@@ -82,6 +88,58 @@ const styles = StyleSheet.create({
     },
     content: {
       fontSize: 16,
+    },
+    centeredViewNewApo: {
+      flex: 1,
+      backgroundColor: '#000000aa',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalViewalarm: {
+      backgroundColor: '#fff',
+      borderRadius: 5,
+      width: '60%',
+      height: '40%',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    picker: {
+      height: 100,
+      width: 200,
+      top: -25,
+    },
+    item : {
+      color: 'blue',
+    },
+    closeButtonalarm: {
+      marginTop: 80,
+      backgroundColor: '#1f1f1f',
+      borderRadius: 5,
+      width: 120,
+      height: 45,
+      marginBottom: 13,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    closeButtonTexts: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#ffffff',
     },
   });
 

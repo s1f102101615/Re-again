@@ -39,6 +39,24 @@ const styles = StyleSheet.create({
       shadowRadius: 3.84,
       elevation: 5,
     },
+    closeButtonalarm: {
+      marginTop: 70,
+      backgroundColor: '#1f1f1f',
+      borderRadius: 5,
+      width: 120,
+      height: 45,
+      marginBottom: 13,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
     closeButtonText: {
       fontSize: 24,
       fontWeight: 'bold',
@@ -117,7 +135,22 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       borderRadius: 5,
       width: '98%',
-      height: '80%',
+      height: '88%',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    modalViewalarm: {
+      backgroundColor: '#fff',
+      borderRadius: 5,
+      width: '60%',
+      height: '40%',
       alignItems: 'center',
       shadowColor: '#000',
       shadowOffset: {
@@ -475,6 +508,25 @@ const styles = StyleSheet.create({
       height: '100%',
       textAlign: 'center',
     },
+    alarmtext: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginTop: 20,
+      marginLeft: 20,
+    },
+    alarmitem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+      width: 230,
+      marginLeft: 27,
+      height: 62,
+    },
+    picker: {
+      height: 100,
+      width: 200,
+      top: -37,
+    }
   });
 
   export default styles;

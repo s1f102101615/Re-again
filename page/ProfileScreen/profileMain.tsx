@@ -263,11 +263,10 @@ const ProfileScreen = (props: ProfileMainProps) => {
             <Text style={styles.label}>アイコン変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
-            <Icon name="handshake-o" size={35} color="black" onPress={()=> { setMessageView(!messageView); }} />
+            <Ionicons name="chatbox-outline" size={35} color="black" />
             <Text style={styles.label}>メッセージ変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item} onPress={()=> { setStateView(!stateView); }}>
-            {/* ステータスっぽいアイコン */}
             <Ionicons name="man" size={35} color="green" />
             <Text style={styles.label}>ステータス</Text>
           </TouchableOpacity>
