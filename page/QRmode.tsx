@@ -1,47 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
-// import { PERMISSIONS, request } from '@react-native-community/permissions';
-import QRCodeScanner from 'react-native-qrcode-scanner';
-import { RNCamera } from 'react-native-camera';
+import { Button, Modal, StyleSheet, Text, View } from 'react-native';
+import { Camera } from 'expo-camera';
+import { PermissionStatus, requestCameraPermissionsAsync } from 'expo-camera';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraType } from 'expo-camera/build/Camera.types';
 
 export default function QRmode() {
   const [scanned, setScanned] = useState(false);
+  const [friendsearchmodal, setFriendSearchModal] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const handleScan = (e: any) => {
     console.log(e.data);
+    setFriendSearchModal(true);
     setScanned(true);
   };
   
-//   useEffect(() => {
-//     request(PERMISSIONS.IOS.CAMERA).then((result) => {
-//       console.log('Camera permission:', result);
-//     });
-//   }, []);
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestCameraPermissionsAsync();
+      setHasPermission(status === PermissionStatus.GRANTED);
+    })();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      {/* <QRCodeScanner onRead={handleScan} /> */}
-      <RNCamera
-        style={styles.preview}
-        type={RNCamera.Constants.Type.back}
-        onBarCodeRead={handleScan}
-        captureAudio={false}
-        flashMode={RNCamera.Constants.FlashMode.off}
-        androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-        }}
-        androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-        }}
-        />
-      {scanned && <Text style={styles.text}>QRコードをスキャンしました！</Text>}
-    </View>
+    <><View style={styles.container}>
+          {hasPermission === null ? (
+              <Text>カメラの許可をリクエストしています...</Text>
+          ) : hasPermission === false ? (
+              <Text>カメラの許可がありません</Text>
+          ) : (
+              <Camera
+                  style={styles.preview}
+                  type={CameraType.back}
+                  onBarCodeScanned={handleScan}
+                  barCodeScannerSettings={{
+                      barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
+                  }} />
+          )}
+      </View>
+      <Modal
+          transparent={true}
+          visible={friendsearchmodal}
+          onRequestClose={() => {
+              setFriendSearchModal(false);
+          } }
+      >
+            <View style={styles.containerfriend}>
+                <Text style={styles.textfriend}>QRコードをスキャンしました！</Text>
+            </View>
+            <Button
+              title="ああああああああああああああ"
+              onPress={() => {
+                setFriendSearchModal(false);
+              }}
+            ></Button>
+            
+
+
+        </Modal>
+    </>
   );
 }
 
@@ -50,15 +68,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  } as ViewStyle,
+    width:'100%',
+    height:'100%',
+  },
+  containerfriend: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width:'100%',
+    height:'100%',
+    backgroundColor: 'white',
+  },
   text: {
+    flex: 1,
     marginTop: 20,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  textfriend: {
+    flex: 1,
+    marginTop: 350,
     fontSize: 16,
     fontWeight: 'bold',
   },
   preview: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
 });

@@ -309,14 +309,14 @@ const handleSave = async () => {
           setQrModalVisible(false);
         }}
         >
-        <View>
-          <QRmode value={user.uid} size={200} />
-          <View>
+        <View style={{ width:'100%', height:'100%' }}>
+          <QRmode />
+          <View style={{ width: '100%', height: '20%', backgroundColor:'white'}}>
             <Text>QRコードをスキャンしてください</Text>
-          </View>
-          <TouchableOpacity style={styles.closeButtonQr} onPress={() => setQrModalVisible(false)}>
+            <TouchableOpacity style={styles.closeButtonQr} onPress={() => setQrModalVisible(false)}>
               <Text style={styles.closeButtonText}>閉じる</Text>
             </TouchableOpacity>
+          </View>
         </View>
 
 
