@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FriendList from './FriendList';
 import styles from './css/FriendScreen';
 import FriendModal from './FriendDetail';
-import QRCode from 'react-native-qrcode-svg';
+import QRmode from './QRmode';
 
 
 
@@ -284,9 +284,6 @@ const handleSave = async () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View>
-              <QRCode value={user.uid} size={200} />
-            </View>
             <Text style={styles.modalText}>フレンドリクエスト送信</Text>
             <TouchableOpacity onPress={() => setQrModalVisible(true)}><Text>QRcodeでフレンド交換</Text></TouchableOpacity>
             <TextInput
@@ -307,14 +304,23 @@ const handleSave = async () => {
 
         <Modal
         transparent={true}
-        visible={modalVisible}
+        visible={qrModalVisible}
         onRequestClose={() => {
           setQrModalVisible(false);
         }}
-      >
+        >
+        <View>
+          <QRmode value={user.uid} size={200} />
+          <View>
+            <Text>QRコードをスキャンしてください</Text>
+          </View>
+          <TouchableOpacity style={styles.closeButtonQr} onPress={() => setQrModalVisible(false)}>
+              <Text style={styles.closeButtonText}>閉じる</Text>
+            </TouchableOpacity>
+        </View>
 
 
-      </Modal>
+        </Modal>
 
       </Modal>
       <View>

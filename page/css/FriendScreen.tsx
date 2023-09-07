@@ -54,6 +54,13 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       marginTop: 10,
     },
+    closeButtonQr: {
+      backgroundColor: '#ccc',
+      padding: 10,
+      borderRadius: 5,
+      position: 'absolute',
+      top: 20,
+    },
     closeButtonText: {
       color: '#fff',
       textAlign: 'center',
