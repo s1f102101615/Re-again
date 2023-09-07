@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { Image } from 'react-native';
@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import FriendList from './FriendList';
 import styles from './css/FriendScreen';
 import FriendModal from './FriendDetail';
+import QRCode from 'react-native-qrcode-svg';
+
 
 
 const FriendScreen = () => {
@@ -17,7 +19,9 @@ const FriendScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
   
+  const user = auth.currentUser;
 
   useEffect(() => {
     // フレンド申請を受け取る処理 
@@ -280,7 +284,11 @@ const handleSave = async () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <View>
+              <QRCode value={user.uid} size={200} />
+            </View>
             <Text style={styles.modalText}>フレンドリクエスト送信</Text>
+            <TouchableOpacity onPress={() => setQrModalVisible(true)}><Text>QRcodeでフレンド交換</Text></TouchableOpacity>
             <TextInput
               style={styles.input1}
               onChangeText={setName}
@@ -295,6 +303,19 @@ const handleSave = async () => {
             </TouchableOpacity>
           </View>
         </View>
+
+
+        <Modal
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setQrModalVisible(false);
+        }}
+      >
+
+
+      </Modal>
+
       </Modal>
       <View>
       </View>
