@@ -8,6 +8,7 @@ import FriendList from './FriendList';
 import styles from './css/FriendScreen';
 import FriendModal from './FriendDetail';
 import QRmode from './QRmode';
+import QRCode from 'react-native-qrcode-svg';
 
 
 
@@ -20,6 +21,8 @@ const FriendScreen = () => {
   const [activeTab, setActiveTab] = useState('friends');
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [showQrModalVisible, setShowQrModalVisible] = useState(false);
+  const [qrstatus, setQrstatus] = useState<string>('');
   
   const user = auth.currentUser;
 
@@ -47,6 +50,15 @@ const FriendScreen = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const qrstatusfc = async () => {
+    const user = auth.currentUser;
+    const qrname = user.displayName;
+    const qrdata = 're-again'
+    const qrstatus = { qrname, qrdata };
+    const qrCodeValue = JSON.stringify(qrstatus);
+    setQrstatus(qrCodeValue);
+    };
 
   
   useEffect(() => {
@@ -285,7 +297,7 @@ const handleSave = async () => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>フレンドリクエスト送信</Text>
-            <TouchableOpacity onPress={() => setQrModalVisible(true)}><Text>QRcodeでフレンド交換</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setQrModalVisible(true)}><Text style={styles.modalTextqr}>QRcodeでフレンド交換{'>'}</Text></TouchableOpacity>
             <TextInput
               style={styles.input1}
               onChangeText={setName}
@@ -311,13 +323,43 @@ const handleSave = async () => {
         >
         <View style={{ width:'100%', height:'100%' }}>
           <QRmode />
-          <View style={{ width: '100%', height: '20%', backgroundColor:'white'}}>
-            <Text>QRコードをスキャンしてください</Text>
+          <View style={{ width: '100%', height: '20%', backgroundColor:'white', justifyContent:'flex-start', alignItems:'center'}}>
+            <Text style={styles.qrscantext}>QRコードをスキャンしてください</Text>
+            {/* 自分のQRを表示するボタン */}
+            <TouchableOpacity onPress={() => {setShowQrModalVisible(true), qrstatusfc()}}>
+              {/* qrコードのアイコンを置く */}
+              <Text style={styles.myqrcode}><Ionicons name="qr-code" size={10} color={'black'} />マイQRコード</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.closeButtonQr} onPress={() => setQrModalVisible(false)}>
               <Text style={styles.closeButtonText}>閉じる</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+            <Modal
+            transparent={true}
+            animationType='slide'
+            visible={showQrModalVisible}
+            onRequestClose={() => {
+              setShowQrModalVisible(false);
+            }}
+            >
+            <View style={{ justifyContent: 'flex-end', width:'100%', height:'100%' }}>
+              <View style={styles.modalQr}>
+                {/* Xアイコンで閉じるようにする */}
+                <TouchableOpacity style={{ flexDirection:'row', justifyContent:'flex-end' , padding:7 ,width:'100%' }} onPress={() => setShowQrModalVisible(false)}>
+                  <Ionicons name="close" size={40} color={'black'} />
+                </TouchableOpacity>
+                {/* QRコードの作成 */}
+                <View style={{ marginTop:20, marginBottom:65 }}>
+                  <QRCode value={qrstatus} size={200} />
+                </View>
+                <Text>QRコードを使って、友達追加をしましょう。</Text>
+
+              </View>
+            </View>
+            </Modal>
+
 
 
         </Modal>
