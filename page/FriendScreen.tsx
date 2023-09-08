@@ -307,7 +307,7 @@ const handleSave = async () => {
             <TouchableOpacity style={styles.button} onPress={handleSave}>
               <Text style={styles.buttonText}>送信</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => {setModalVisible(false),setMessage('')}}>
               <Text style={styles.closeButtonText}>閉じる</Text>
             </TouchableOpacity>
           </View>
