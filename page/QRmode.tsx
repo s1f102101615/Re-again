@@ -7,6 +7,7 @@ import { CameraType } from 'expo-camera/build/Camera.types';
 import { addDoc, collection, collectionGroup, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { firestore, auth } from '../firebase';
 import { Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function QRmode() {
   const [scanned, setScanned] = useState(false);
@@ -88,6 +89,10 @@ export default function QRmode() {
     if  (!user){
       return;
     }
+    if (name === user.displayName) {
+      setMessage('自分にフレンド申請はできません。');
+      return;
+    }
     if (await alreadyFriend(name)) {
       setMessage('すでにフレンドです。');
     } else {
@@ -152,7 +157,11 @@ export default function QRmode() {
                 {qrtrue ? (
                   <>
                     <Text style={styles.textfriend}>フレンド申請を送りますか？</Text>
-                    <Image source={{ uri: icon }} style={{ width: 80, height: 80, borderRadius: 40 }} />
+                    {icon ? (<Image source={{ uri: icon }} style={{ width: 80, height: 80, borderRadius: 40 }} />
+                    ) : (
+                    <Ionicons name='ios-person' size={80} color='black' /> 
+                    )}
+                    
                     <Text style={styles.textname}>{name}</Text>
                     {/* message */}
                     <Text style={styles.message}>{message}</Text>

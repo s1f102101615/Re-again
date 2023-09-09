@@ -67,8 +67,6 @@ const InvFriend = () => {
     const date = new Date(Number(selectedPromise.appointmentDate['seconds']) * 1000 + Number(selectedPromise.appointmentDate['nanoseconds']) / 1000000);
     // selectedPromise.appointmentDateEndをDate型に変換
     const dateEnd = new Date(Number(selectedPromise.appointmentDateEnd['seconds']) * 1000 + Number(selectedPromise.appointmentDateEnd['nanoseconds']) / 1000000);
-    console.log('date');
-
     // 手元のカレンダーに追加
     const eventDetails = {
       title: selectedPromise.title, // 予定のタイトル
@@ -80,7 +78,6 @@ const InvFriend = () => {
       // -1だったら通知しない
       alarms: alarmtime === -1 ? [] : [{ relativeOffset: alarmtime }], // 通知
     };
-    console.log(eventDetails);
     try {
       const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
       if (status === 'granted') {
