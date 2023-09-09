@@ -58,8 +58,19 @@ const styles = StyleSheet.create({
       backgroundColor: '#ccc',
       padding: 10,
       borderRadius: 5,
-      position: 'absolute',
       top: 20,
+    },
+    qrscantext: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#4d4d4d',
+      marginTop: 15,
+    },
+    myqrcode: {
+      padding:10,
+      marginTop: 20,
+      borderWidth: 1,
+      borderRadius: 20,
     },
     closeButtonText: {
       color: '#fff',
@@ -91,6 +102,13 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: 22,
+    },
+    modalTextqr: {
+      marginBottom: 10,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 18,
+      color: '#001aff',
     },
     activeTab: {
       borderBottomWidth: 2,
@@ -132,6 +150,12 @@ const styles = StyleSheet.create({
       height: 65,
       borderRadius: 20,
       marginRight: 10,
+    },
+    modalQr: {
+      backgroundColor: '#fff',
+      width: '100%',
+      height: '50%',
+      alignItems: 'center',
     },
   });
 
