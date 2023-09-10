@@ -1,3 +1,4 @@
+import { Skeleton } from 'native-base';
 import { Modal, Text, TouchableOpacity, View, Image, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -16,14 +17,14 @@ function FriendModal({ selectedFriend, onClose }: FriendModalProps) {
           <Ionicons name="person-circle-outline" size={100} color={'gray'} style={styles.image} />
         )}
         <Text style={styles.title}>{selectedFriend?.friend}</Text>
-        <Text style={styles.statusMessage}>{selectedFriend?.message === null ? selectedFriend?.message : '未設定'}</Text>
+        <Text style={styles.statusMessage}>{selectedFriend?.message !== null ? selectedFriend?.message : '未設定'}</Text>
         
 
         <View style={styles.availability}>
             {/* statusの忙しさによって色を変えたい */}
             <Ionicons name='time-outline' size={20} color={selectedFriend?.status === 'ぜんぜん' ? 'green' : selectedFriend?.status === 'ちょっと' ? '#b8d200' :
           selectedFriend?.status === 'ふつう' ? 'yellow' : selectedFriend?.status === 'まあまあ' ? 'orange' : selectedFriend?.status === 'とても' && 'red' } style={styles.availabilityIcon} />
-            <Text style={styles.availabilityText}>{selectedFriend?.status === null ? selectedFriend?.status : '未設定'}</Text>
+            <Text style={styles.availabilityText}>{selectedFriend?.status !== null ? selectedFriend?.status : '未設定'}</Text>
           </View>
 
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
