@@ -1302,10 +1302,6 @@ const ApoScreen = () => {
             お気に入りはありません</Text>
           </View>
         )))}
-        
-        
-
-
         </ScrollView>
       <View style={styles.circleContainer} >
       <TouchableOpacity onPress={() => setModalVisible(true)}>

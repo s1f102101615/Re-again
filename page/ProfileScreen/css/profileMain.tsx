@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: '1%', // 左右のパディング
       alignItems: 'center', // 縦方向に中央揃え
       flexWrap: 'wrap', // 要素数が超えると改行
-      marginTop: '3%',
+      marginTop: '5%',
     },
     item: {
       alignItems: 'center',
@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       width: '25%',
       height: '52%',
+      marginBottom: '4%',
     },
     label: {
       fontSize: 12,

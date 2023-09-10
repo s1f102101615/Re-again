@@ -11,7 +11,6 @@ import QRmode from './QRmode';
 import QRCode from 'react-native-qrcode-svg';
 
 
-
 const FriendScreen = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
@@ -363,11 +362,7 @@ const handleSave = async () => {
               </View>
             </View>
             </Modal>
-
-
-
         </Modal>
-
       </Modal>
       <View>
       </View>

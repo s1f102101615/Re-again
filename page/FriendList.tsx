@@ -7,7 +7,6 @@ function FriendList(props) {
   const { friends } = props;
   const [searchText, setSearchText] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
-
   const filteredFriends = friends.filter((friend) => friend.friend.includes(searchText));
 
   return (
