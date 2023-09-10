@@ -199,6 +199,7 @@ const HomeScreen = () => {
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>{selectedLateappo?.title}</Text>
           <Text style={styles.modalDescription}>{selectedLateappo?.content}</Text>
+          <Text style={styles.modalDescription}>場所:{selectedLateappo?.location[0] ? selectedLateappo?.location[0] : '未設定'}</Text>
           <Text style={styles.modalDescription}>開始:{new Date(Number(selectedLateappo?.appointmentDate['seconds']) * 1000 + Number(selectedLateappo?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>
           {selectedLateappo?.appointmentDateEnd && <Text style={styles.modalDescription}>終了:{new Date(Number(selectedLateappo?.appointmentDateEnd['seconds']) * 1000 + Number(selectedLateappo?.appointmentDate['nanoseconds']) / 1000000).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</Text>}
           <TouchableOpacity

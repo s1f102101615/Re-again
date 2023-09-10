@@ -191,6 +191,10 @@ const handleSave = async () => {
     setMessage('自分自身にフレンド申請はできません。');
     return;
   } 
+  if (name === user.displayName) {
+    setMessage('自分自身にフレンド申請はできません。');
+    return;
+  } 
   if (await alreadyFriend(name)) {
     setMessage('すでにフレンドです。');
   } else {

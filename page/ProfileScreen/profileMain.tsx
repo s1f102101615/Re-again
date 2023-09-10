@@ -263,7 +263,7 @@ const ProfileScreen = (props: ProfileMainProps) => {
             <Text style={styles.label}>アイコン変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
-            <Ionicons name="chatbox-outline" size={35} color="black" />
+            <Ionicons name="chatbox-outline" size={35} color="black" onPress={()=> { setMessageView(true); }}/>
             <Text style={styles.label}>メッセージ変更</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item} onPress={()=> { setStateView(!stateView); }}>
@@ -297,22 +297,6 @@ const ProfileScreen = (props: ProfileMainProps) => {
           <TouchableOpacity style={styles.settingitem} onPress={props.route.params.handleLogout}>
             <Icon name="sign-out" size={35} color="black" />
             <Text style={styles.label}>ログアウト</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingitem}>
-            <Icon name="cog" size={35} color="black" />
-            <Text style={styles.label}>設定</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingitem}>
-            <Icon name="cog" size={35} color="black" />
-            <Text style={styles.label}>設定</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingitem}>
-            <Icon name="cog" size={35} color="black" />
-            <Text style={styles.label}>設定</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingitem}>
-            <Icon name="cog" size={35} color="black" />
-            <Text style={styles.label}>設定</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingitem}>
             <Icon name="cog" size={35} color="black" />

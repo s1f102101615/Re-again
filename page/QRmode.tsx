@@ -133,7 +133,7 @@ export default function QRmode() {
   return (
     <><View style={styles.container}>
           {hasPermission === null ? (
-              <Text>カメラの許可をリクエストしています...</Text>
+              <Text></Text>
           ) : hasPermission === false ? (
               <Text>カメラの許可がありません</Text>
           ) : (
