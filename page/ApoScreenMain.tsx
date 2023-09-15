@@ -16,6 +16,7 @@ import { Image } from 'react-native';
 import { set } from 'date-fns';
 import { Select } from 'native-base';
 import { Picker } from '@react-native-picker/picker';
+import { Platform } from 'react-native';
 
 
 const ApoScreen = () => {
@@ -534,7 +535,28 @@ const ApoScreen = () => {
         talktitle:title,
       });
 
-      // 手元のカレンダーに追加
+      // 手元のカレンダーに追加　iphoneのみ
+      // const eventDetails = {
+      //   title: title, // 予定のタイトル
+      //   startDate: selectedDate,
+      //   endDate: selectedDateEnd,
+      //   timeZone: 'Asia/Tokyo', // タイムゾーン
+      //   location: locationname, // 場所
+      //   notes: content, // メモ
+      //   // -1だったら通知しない
+      //   alarms: alarmtime === -1 ? [] : [{ relativeOffset: alarmtime }], // 通知
+      // };
+      // try {
+      //   const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
+      //   if (status === 'granted') {
+      //     const calendar = await ExpoCalendar.getDefaultCalendarAsync();
+      //     const eventId = await ExpoCalendar.createEventAsync(calendar.id, eventDetails);
+      //     console.log('Event added with ID:', eventId);
+      //   }
+      // } catch (error) {
+      //   console.error('Error adding event:', error);
+      // }
+      
       const eventDetails = {
         title: title, // 予定のタイトル
         startDate: selectedDate,
@@ -548,13 +570,24 @@ const ApoScreen = () => {
       try {
         const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
         if (status === 'granted') {
-          const calendar = await ExpoCalendar.getDefaultCalendarAsync();
+          let calendar;
+          if (Platform.OS === 'ios') {
+            calendar = await ExpoCalendar.getDefaultCalendarAsync();
+          } else if (Platform.OS === 'android') {
+            const calendars = await ExpoCalendar.getCalendarsAsync();
+            calendar = calendars.find((cal) => cal.isPrimary);
+            console.log('Calendar:', calendar);
+            if (calendar === undefined) {
+              calendar = calendars[0];
+            }
+          }
           const eventId = await ExpoCalendar.createEventAsync(calendar.id, eventDetails);
           console.log('Event added with ID:', eventId);
         }
       } catch (error) {
         console.error('Error adding event:', error);
       }
+
       setTitle(''); // タイトルをクリアする
       setContent(''); // コンテンツをクリアする
       setSelectedDate(new Date()); // 日付を初期化する
