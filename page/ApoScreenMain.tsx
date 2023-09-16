@@ -567,6 +567,7 @@ const ApoScreen = () => {
         // -1だったら通知しない
         alarms: alarmtime === -1 ? [] : [{ relativeOffset: alarmtime }], // 通知
       };
+      // test
       try {
         const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
         if (status === 'granted') {
@@ -576,7 +577,6 @@ const ApoScreen = () => {
           } else if (Platform.OS === 'android') {
             const calendars = await ExpoCalendar.getCalendarsAsync();
             calendar = calendars.find((cal) => cal.isPrimary);
-            console.log('Calendar:', calendar);
             if (calendar === undefined) {
               calendar = calendars[0];
             }
