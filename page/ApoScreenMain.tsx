@@ -567,7 +567,7 @@ const ApoScreen = () => {
         // -1だったら通知しない
         alarms: alarmtime === -1 ? [] : [{ relativeOffset: alarmtime }], // 通知
       };
-      //
+      // test
       try {
         const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
         if (status === 'granted') {
